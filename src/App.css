@@ -363,6 +363,42 @@ body::before {
   display: table-row;
 }
 
+.th-sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  background: transparent;
+  color: var(--text3);
+  font: inherit;
+  font-size: 9.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .15s, background .15s;
+}
+
+.th-sort:hover {
+  color: var(--accent);
+  background: rgba(31, 90, 255, .06);
+}
+
+.th-sort.active {
+  color: var(--accent);
+}
+
+.th-sort-icon {
+  font-size: 8px;
+  opacity: 0.55;
+  line-height: 1;
+}
+
+.th-sort.active .th-sort-icon {
+  opacity: 1;
+}
+
 .expand-btn:hover {
   color: var(--accent);
 }

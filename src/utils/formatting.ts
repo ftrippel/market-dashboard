@@ -60,3 +60,42 @@ export const colors = {
   text2: '#686d78',
   text3: '#9ba0a9',
 };
+
+const BERLIN_TZ = 'Europe/Berlin';
+
+export interface DataTimestampInfo {
+  badge: string;
+  statusLine: string;
+  ageLabel: string;
+}
+
+/** Format `generated_at` from data.json for display in the dashboard. */
+export function formatDataTimestamp(iso: string | null): DataTimestampInfo | null {
+  if (!iso) return null;
+
+  const dt = new Date(iso);
+  if (Number.isNaN(dt.getTime())) return null;
+
+  const formatted = new Intl.DateTimeFormat('en-GB', {
+    timeZone: BERLIN_TZ,
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZoneName: 'short',
+    hour12: false,
+  }).format(dt);
+
+  const ageMs = Date.now() - dt.getTime();
+  const ageHrs = Math.floor(ageMs / 3_600_000);
+  const ageMins = Math.floor(ageMs / 60_000);
+  const ageLabel =
+    ageMins < 1 ? 'just now' : ageHrs < 1 ? `${ageMins}m ago` : ageHrs === 1 ? '1h ago' : `${ageHrs}h ago`;
+
+  return {
+    badge: `DATA · ${formatted}`,
+    statusLine: `Generated ${formatted} · ${ageLabel}`,
+    ageLabel,
+  };
+}

@@ -6,6 +6,9 @@ import { Sparkline } from './Sparkline';
 import { BpsCell, PctCell } from './PctCell';
 import { SymbolLink } from './TradingViewModal';
 
+type SortKey = 'name' | 'price' | 'd1' | 'w1' | 'hi52' | 'ytd' | 'ema_uptrend';
+type SortOrder = 'asc' | 'desc';
+
 interface MarketTableProps extends MarketTableOptions {
   data: MarketData[];
   holdings?: Record<string, Holding[]>;
@@ -26,6 +29,70 @@ const tdStyle: React.CSSProperties = {
   padding: '6px 10px',
   fontSize: '12px',
 };
+
+function getDisplayName(item: MarketData): string {
+  const meta = getSymbolMeta(item.sym);
+  return item.name || meta.name;
+}
+
+function compareRows(a: MarketData, b: MarketData, key: SortKey, order: SortOrder): number {
+  let cmp = 0;
+
+  if (key === 'name') {
+    cmp = getDisplayName(a).localeCompare(getDisplayName(b));
+  } else if (key === 'ema_uptrend') {
+    const score = (v?: boolean) => (v === true ? 1 : v === false ? 0 : -1);
+    cmp = score(a.ema_uptrend) - score(b.ema_uptrend);
+  } else {
+    const aVal = Number((a as unknown as Record<string, unknown>)[key] ?? NaN);
+    const bVal = Number((b as unknown as Record<string, unknown>)[key] ?? NaN);
+    const aMissing = Number.isNaN(aVal);
+    const bMissing = Number.isNaN(bVal);
+    if (aMissing && bMissing) cmp = 0;
+    else if (aMissing) cmp = 1;
+    else if (bMissing) cmp = -1;
+    else cmp = aVal - bVal;
+  }
+
+  return order === 'asc' ? cmp : -cmp;
+}
+
+function SortableHeader({
+  label,
+  sortKey,
+  activeKey,
+  order,
+  align = 'right',
+  onSort,
+}: {
+  label: string;
+  sortKey: SortKey;
+  activeKey: SortKey;
+  order: SortOrder;
+  align?: 'left' | 'right' | 'center';
+  onSort: (key: SortKey) => void;
+}) {
+  const active = sortKey === activeKey;
+  const justify =
+    align === 'left' ? 'flex-start' : align === 'center' ? 'center' : 'flex-end';
+
+  return (
+    <th style={{ ...thStyle, textAlign: align, padding: 0 }}>
+      <button
+        type="button"
+        className={`th-sort${active ? ' active' : ''}`}
+        onClick={() => onSort(sortKey)}
+        aria-sort={active ? (order === 'asc' ? 'ascending' : 'descending') : 'none'}
+        style={{ justifyContent: justify }}
+      >
+        <span>{label}</span>
+        <span className="th-sort-icon" aria-hidden>
+          {active ? (order === 'asc' ? '▲' : '▼') : '↕'}
+        </span>
+      </button>
+    </th>
+  );
+}
 
 function RankBadge({ rank }: { rank: number }) {
   const top = rank <= 3;
@@ -172,15 +239,21 @@ export const MarketTable: React.FC<MarketTableProps> = ({
   priceLabel = 'Price',
 }) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [sort, setSort] = useState<{ key: SortKey; order: SortOrder }>({
+    key: (sortBy as SortKey) || 'w1',
+    order: sortOrder,
+  });
+
+  const handleSort = (key: SortKey) => {
+    setSort((prev) => ({
+      key,
+      order: prev.key === key && prev.order === 'desc' ? 'asc' : 'desc',
+    }));
+  };
 
   const sorted = useMemo(() => {
-    return [...data].sort((a, b) => {
-      const aVal = Number((a as unknown as Record<string, unknown>)[sortBy] ?? 0);
-      const bVal = Number((b as unknown as Record<string, unknown>)[sortBy] ?? 0);
-      const cmp = aVal - bVal;
-      return sortOrder === 'asc' ? cmp : -cmp;
-    });
-  }, [data, sortBy, sortOrder]);
+    return [...data].sort((a, b) => compareRows(a, b, sort.key, sort.order));
+  }, [data, sort]);
 
   const colCount =
     (rank ? 1 : 0) +
@@ -196,14 +269,62 @@ export const MarketTable: React.FC<MarketTableProps> = ({
       <thead>
         <tr>
           {rank && <th style={{ ...thStyle, textAlign: 'left' }}>#</th>}
-          <th style={{ ...thStyle, textAlign: 'left' }}>{nameLabel}</th>
-          {hasPrice && <th style={{ ...thStyle, textAlign: 'right' }}>{isYield ? 'Yield%' : priceLabel}</th>}
-          <th style={{ ...thStyle, textAlign: 'right' }}>{isYield ? '1D (bps)' : '1D%'}</th>
-          <th style={{ ...thStyle, textAlign: 'right' }}>1W%</th>
-          <th style={{ ...thStyle, textAlign: 'right' }}>52W Hi%</th>
-          <th style={{ ...thStyle, textAlign: 'right' }}>YTD%</th>
+          <SortableHeader
+            label={nameLabel}
+            sortKey="name"
+            activeKey={sort.key}
+            order={sort.order}
+            align="left"
+            onSort={handleSort}
+          />
+          {hasPrice && (
+            <SortableHeader
+              label={isYield ? 'Yield%' : priceLabel}
+              sortKey="price"
+              activeKey={sort.key}
+              order={sort.order}
+              onSort={handleSort}
+            />
+          )}
+          <SortableHeader
+            label={isYield ? '1D (bps)' : '1D%'}
+            sortKey="d1"
+            activeKey={sort.key}
+            order={sort.order}
+            onSort={handleSort}
+          />
+          <SortableHeader
+            label="1W%"
+            sortKey="w1"
+            activeKey={sort.key}
+            order={sort.order}
+            onSort={handleSort}
+          />
+          <SortableHeader
+            label="52W Hi%"
+            sortKey="hi52"
+            activeKey={sort.key}
+            order={sort.order}
+            onSort={handleSort}
+          />
+          <SortableHeader
+            label="YTD%"
+            sortKey="ytd"
+            activeKey={sort.key}
+            order={sort.order}
+            onSort={handleSort}
+          />
           {showSpark && <th style={{ ...thStyle, textAlign: 'center' }}>5D</th>}
-          {showTrend && <th style={{ ...thStyle, textAlign: 'center' }}>Trend</th>}
+          {showTrend && (
+            <SortableHeader
+              label="Trend"
+              sortKey="ema_uptrend"
+              activeKey={sort.key}
+              order={sort.order}
+              align="center"
+              onSort={handleSort}
+            />
+          )}
           {showHoldings && <th style={{ ...thStyle, textAlign: 'left' }}>Holdings</th>}
         </tr>
       </thead>

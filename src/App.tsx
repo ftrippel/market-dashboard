@@ -14,18 +14,8 @@ import {
   downloadDashboardSnapshot,
   shareDashboardToX,
 } from './services/share';
-import { colors } from './utils/formatting';
+import { colors, formatDataTimestamp } from './utils/formatting';
 import './App.css';
-
-function formatGeneratedAt(iso: string | null): string {
-  if (!iso) return 'LOADING DATA...';
-  const dt = new Date(iso);
-  const hkt = new Date(dt.toLocaleString('en-US', { timeZone: 'Asia/Hong_Kong' }));
-  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const label = `DATA: ${hkt.getDate()} ${months[hkt.getMonth()]} ${hkt.getFullYear()} · ${String(hkt.getHours()).padStart(2, '0')}:${String(hkt.getMinutes()).padStart(2, '0')} HKT`;
-  const ageHrs = Math.round((Date.now() - dt.getTime()) / 3_600_000);
-  return `${label} · Updated ${ageHrs}h ago`;
-}
 
 function DashboardContent() {
   const store = useMarketStore();
@@ -34,6 +24,7 @@ function DashboardContent() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastDuration, setToastDuration] = useState(3200);
   const [snapFlash, setSnapFlash] = useState(false);
+  const dataTimestamp = formatDataTimestamp(store.generatedAt);
 
   const showToast = useCallback((message: string, durationMs = 3200) => {
     setToastDuration(durationMs);
@@ -104,7 +95,7 @@ function DashboardContent() {
       <div className="wrap" ref={wrapRef}>
         <Header
           loading={store.loading}
-          badgeLabel={formatGeneratedAt(store.generatedAt)}
+          badgeLabel={dataTimestamp?.badge ?? 'LOADING DATA...'}
           badgeOk={dataReady}
           onSnap={handleSnap}
           onShareX={handleShareX}
@@ -122,7 +113,9 @@ function DashboardContent() {
           ⬤ &nbsp;
           <span style={{ color: dataReady ? colors.green : colors.text2 }}>{dataLabel}</span>
           <span style={{ color: colors.text3, fontSize: '9px', marginLeft: 'auto' }}>
-            Auto-refreshed daily 06:00 HKT via GitHub Actions · Yahoo Finance
+            {dataTimestamp
+              ? `${dataTimestamp.statusLine} · Yahoo Finance`
+              : 'Awaiting data.json · Yahoo Finance'}
           </span>
         </div>
 

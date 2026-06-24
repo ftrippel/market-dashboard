@@ -2,8 +2,8 @@ name: Fetch Market Data
 
 on:
   schedule:
-    # 22:00 UTC Mon–Fri ≈ 06:00 HKT next calendar day
-    - cron: '0 22 * * 1-5'
+    # 06:00 UTC Mon–Fri ≈ 07:00 CET / 08:00 CEST (one run per night)
+    - cron: '0 6 * * 1-5'
   workflow_dispatch:
 
 permissions:
@@ -25,7 +25,6 @@ jobs:
         run: pip install yfinance requests pandas beautifulsoup4 lxml
 
       - name: Run data fetcher
-        working-directory: ${{ github.workspace }}
         run: python scripts/fetch_data.py
         env:
           MASSIVE_API_KEY: ${{ secrets.MASSIVE_API_KEY }}
