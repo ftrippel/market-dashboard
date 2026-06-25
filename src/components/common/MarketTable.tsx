@@ -369,7 +369,7 @@ export const MarketTable: React.FC<MarketTableProps> = ({
                   {isYield ? <BpsCell value={item.d1} /> : <PctCell value={item.d1} />}
                 </td>
                 <td style={{ ...tdStyle, textAlign: 'right' }}>
-                  <PctCell value={item.w1} badge />
+                  <PctCell value={item.w1} />
                 </td>
                 <td style={{ ...tdStyle, textAlign: 'right' }}>
                   <PctCell value={item.hi52} maxPct={30} />
