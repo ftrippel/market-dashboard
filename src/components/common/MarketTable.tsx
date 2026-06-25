@@ -239,6 +239,7 @@ export const MarketTable: React.FC<MarketTableProps> = ({
   sortOrder = 'desc',
   nameLabel = 'Name',
   priceLabel = 'Price',
+  maxRows,
 }) => {
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [sort, setSort] = useState<{ key: SortKey; order: SortOrder }>({
@@ -256,6 +257,11 @@ export const MarketTable: React.FC<MarketTableProps> = ({
   const sorted = useMemo(() => {
     return [...data].sort((a, b) => compareRows(a, b, sort.key, sort.order));
   }, [data, sort]);
+
+  const visible = useMemo(() => {
+    if (maxRows == null) return sorted;
+    return sorted.slice(0, maxRows);
+  }, [sorted, maxRows]);
 
   const colCount =
     (rank ? 1 : 0) +
@@ -332,7 +338,7 @@ export const MarketTable: React.FC<MarketTableProps> = ({
         </tr>
       </thead>
       <tbody>
-        {sorted.map((item, idx) => {
+        {visible.map((item, idx) => {
           const meta = getSymbolMeta(item.sym);
           const displayName = resolveDisplayName(item);
           const flag = item.flag || meta.flag;

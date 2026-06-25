@@ -25,7 +25,6 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
 }) => {
   const [open, setOpen] = useState(false);
   const titleId = useId();
-  const previewData = data.slice(0, previewCount);
   const canExpand = data.length > previewCount;
 
   useEffect(() => {
@@ -65,7 +64,7 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
           ) : undefined
         }
       >
-        <MarketTable data={previewData} holdings={holdings} {...tableProps} />
+        <MarketTable data={data} holdings={holdings} maxRows={previewCount} {...tableProps} />
       </Card>
 
       {open && (

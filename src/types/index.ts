@@ -131,4 +131,6 @@ export interface MarketTableOptions {
   sortOrder?: 'asc' | 'desc';
   nameLabel?: string;
   priceLabel?: string;
+  /** Show only the first N rows after sorting (full dataset is still used for sort). */
+  maxRows?: number;
 }
