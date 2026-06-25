@@ -1,5 +1,6 @@
 /**
  * Display metadata for symbols — mirrors the original HTML META map.
+ * Hand-coded names take priority; otherwise use `name` from data.json (yfinance shortName).
  */
 
 export interface SymbolMeta {
@@ -208,4 +209,12 @@ export const SYMBOL_META: Record<string, SymbolMeta> = {
 
 export function getSymbolMeta(sym: string): SymbolMeta {
   return SYMBOL_META[sym] ?? { name: sym, sym };
+}
+
+/** Hand-coded label if present, else yfinance shortName from data.json, else symbol. */
+export function getDisplayName(sym: string, fetchedName?: string): string {
+  const meta = SYMBOL_META[sym];
+  if (meta) return meta.name;
+  const trimmed = fetchedName?.trim();
+  return trimmed || sym;
 }

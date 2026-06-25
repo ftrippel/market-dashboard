@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { getSymbolMeta } from '../../data/symbolMeta';
+import { getDisplayName, getSymbolMeta } from '../../data/symbolMeta';
 import { colors, formatPrice } from '../../utils/formatting';
 import type { Holding, MarketData, MarketTableOptions } from '../../types';
 import { Sparkline } from './Sparkline';
@@ -30,16 +30,15 @@ const tdStyle: React.CSSProperties = {
   fontSize: '12px',
 };
 
-function getDisplayName(item: MarketData): string {
-  const meta = getSymbolMeta(item.sym);
-  return item.name || meta.name;
+function resolveDisplayName(item: MarketData): string {
+  return getDisplayName(item.sym, item.name);
 }
 
 function compareRows(a: MarketData, b: MarketData, key: SortKey, order: SortOrder): number {
   let cmp = 0;
 
   if (key === 'name') {
-    cmp = getDisplayName(a).localeCompare(getDisplayName(b));
+    cmp = resolveDisplayName(a).localeCompare(resolveDisplayName(b));
   } else if (key === 'ema_uptrend') {
     const score = (v?: boolean) => (v === true ? 1 : v === false ? 0 : -1);
     cmp = score(a.ema_uptrend) - score(b.ema_uptrend);
@@ -175,8 +174,15 @@ function HoldingsButton({
   );
 }
 
-function HoldingsPanel({ sym, holdings }: { sym: string; holdings: Holding[] }) {
-  const meta = getSymbolMeta(sym);
+function HoldingsPanel({
+  sym,
+  displayName,
+  holdings,
+}: {
+  sym: string;
+  displayName: string;
+  holdings: Holding[];
+}) {
   return (
     <div className="holdings-inner" style={{ padding: '8px 11px 10px 28px', background: colors.bg4 }}>
       <div
@@ -189,7 +195,7 @@ function HoldingsPanel({ sym, holdings }: { sym: string; holdings: Holding[] }) 
           marginBottom: '6px',
         }}
       >
-        TOP 10 HOLDINGS BY WEIGHT — {meta.name}
+        TOP 10 HOLDINGS BY WEIGHT — {displayName}
       </div>
       <div className="h-list" style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
         {holdings.map((h) => (
@@ -331,7 +337,7 @@ export const MarketTable: React.FC<MarketTableProps> = ({
       <tbody>
         {sorted.map((item, idx) => {
           const meta = getSymbolMeta(item.sym);
-          const displayName = item.name || meta.name;
+          const displayName = resolveDisplayName(item);
           const flag = item.flag || meta.flag;
           const isBenchmark = benchmarkSym && item.sym === benchmarkSym;
           const symHoldings = holdings[item.sym];
@@ -405,7 +411,7 @@ export const MarketTable: React.FC<MarketTableProps> = ({
               {showHoldings && isExpanded && symHoldings?.length ? (
                 <tr className="holdings-row show">
                   <td colSpan={colCount} style={{ padding: 0 }}>
-                    <HoldingsPanel sym={item.sym} holdings={symHoldings} />
+                    <HoldingsPanel sym={item.sym} displayName={displayName} holdings={symHoldings} />
                   </td>
                 </tr>
               ) : null}

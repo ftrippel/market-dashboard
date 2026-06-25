@@ -24,6 +24,17 @@ except ImportError:
     import pandas as pd
 import requests
 
+# ── PATHS & YFINANCE THROTTLE (local networks) ──────────────────────────────────────────────────
+SCRIPTS_DIR = Path(__file__).resolve().parent
+REPO_ROOT = SCRIPTS_DIR.parent
+DATA_PATH = REPO_ROOT / 'public' / 'data.json'
+
+# Smaller batches + pauses avoid Yahoo rate limits on local networks (see ROBUST_FETCHING.md).
+YF_BATCH_SIZE = int(os.environ.get('YF_BATCH_SIZE', '25'))
+YF_BATCH_PAUSE = float(os.environ.get('YF_BATCH_PAUSE', '1.0'))
+YF_INFO_PAUSE = float(os.environ.get('YF_INFO_PAUSE', '0.3'))
+YF_HOLDINGS_PAUSE = float(os.environ.get('YF_HOLDINGS_PAUSE', '0.4'))
+
 # ── MASSIVE API CONFIG ─────────────────────────────────────────────────────────
 MASSIVE_API_KEY = os.environ.get('MASSIVE_API_KEY', '')
 MASSIVE_BASE    = 'https://api.massive.com'
@@ -69,7 +80,7 @@ DX_VIX     = ['DX-Y.NYB','^VIX']
 CRYPTO_YF  = ['BTC-USD','ETH-USD','SOL-USD','XRP-USD']
 
 # ── LOAD FROM tickers.json ──────────────────────────────────────────────────────────────────────
-config_path = Path(__file__).parent / 'tickers.json'
+config_path = SCRIPTS_DIR / 'tickers.json'
 if config_path.exists():
     with open(config_path) as f:
         CFG = json.load(f)
@@ -99,6 +110,77 @@ TICKER_REMAP = {
     'DX-Y.NYB':'DX-Y.NYB', '^VIX':'CBOE:VIX',
     'BTC-USD':'BTC','ETH-USD':'ETH','SOL-USD':'SOL','XRP-USD':'XRP',
 }
+
+PRICE_SECTIONS = [
+    'futures', 'dxvix', 'crypto', 'metals', 'commod', 'yields',
+    'global', 'etfmain', 'submarket', 'sector', 'sectorew', 'thematic', 'country',
+]
+
+# ── TICKER DISPLAY NAMES ───────────────────────────────────────────────────────────────────────────
+def fetch_ticker_short_names(tickers, existing=None):
+    """Map dashboard symbol -> yfinance shortName (fallback longName)."""
+    names = {}
+    preserved = set()
+    if existing:
+        for key in PRICE_SECTIONS:
+            for rec in existing.get(key, []):
+                sym = rec.get('sym')
+                if sym and rec.get('name'):
+                    preserved.add(sym)
+
+    pending = []
+    for yf_sym in tickers:
+        display_sym = TICKER_REMAP.get(yf_sym, yf_sym)
+        if display_sym in names or display_sym in preserved:
+            continue
+        pending.append(yf_sym)
+
+    if preserved:
+        print(f"  Reusing {len(preserved)} names from existing data.json")
+    if not pending:
+        print("  All ticker names already present — skipping yfinance lookup")
+        return names
+
+    total = len(pending)
+    for i, yf_sym in enumerate(pending):
+        display_sym = TICKER_REMAP.get(yf_sym, yf_sym)
+        print(f"  Names [{i+1}/{total}] {yf_sym}...", end=' ')
+        try:
+            info = yf.Ticker(yf_sym).info
+            name = (info.get('shortName') or info.get('longName') or '').strip()
+            if name:
+                names[display_sym] = name
+                label = name if len(name) <= 44 else name[:41] + '...'
+                print(f"\u2713 {label}")
+            else:
+                print("\u2014")
+        except Exception as e:
+            print(f"\u2717 {e}")
+        time.sleep(YF_INFO_PAUSE)
+
+    return names
+
+def apply_ticker_names(output, name_map, existing=None):
+    """Attach yfinance names to price records; skip rows that already have a name."""
+    preserved = {}
+    if existing:
+        for key in PRICE_SECTIONS:
+            for rec in existing.get(key, []):
+                sym = rec.get('sym')
+                if sym and rec.get('name'):
+                    preserved[sym] = rec['name']
+
+    for key in PRICE_SECTIONS:
+        for rec in output.get(key, []):
+            if rec.get('name'):
+                continue
+            sym = rec.get('sym')
+            if not sym:
+                continue
+            if sym in name_map:
+                rec['name'] = name_map[sym]
+            elif sym in preserved:
+                rec['name'] = preserved[sym]
 
 # ── MASSIVE API FETCH ─────────────────────────────────────────────────────────────────────────────────────
 def fetch_massive_bars(yf_sym, days=400):
@@ -355,7 +437,7 @@ def fetch_etf_holdings(tickers):
         except Exception as e:
             print(f"\u2717 {e}")
 
-        time.sleep(0.4)
+        time.sleep(YF_HOLDINGS_PAUSE)
 
     return holdings_map
 
@@ -393,23 +475,25 @@ def fetch_individual(tickers, retries=2):
         time.sleep(0.3)
     return results
 
-def fetch_batch(tickers, retries=3):
+def _fetch_batch_chunk(tickers, retries=3):
+    """Download one chunk of tickers (single-threaded, with retry/backoff)."""
     results = {}
+    if not tickers:
+        return results
+
+    data = None
     for attempt in range(retries):
         try:
-            # threads=False: Single-threaded is more reliable for local networks
-            # Reduces DNS resolution failures and rate limiting
             data = yf.download(tickers, period='1y', interval='1d',
                                group_by='ticker', auto_adjust=True,
                                progress=False, threads=False)
             break
         except Exception as e:
-            print(f"  Attempt {attempt+1} failed: {e}")
-            # Exponential backoff: 2s, 4s, 8s
+            print(f"attempt {attempt+1} failed: {e}", end=' ')
             wait_time = 2 ** (attempt + 1)
             time.sleep(wait_time)
     else:
-        print(f"  All retries failed for batch: {tickers[:3]}...")
+        print(f"failed after {retries} attempts")
         return results
 
     if len(tickers) == 1:
@@ -417,7 +501,7 @@ def fetch_batch(tickers, retries=3):
         try:
             results[sym] = extract_metrics(data, sym)
         except Exception as e:
-            print(f"  Error extracting {sym}: {e}")
+            print(f"extract {sym}: {e}", end=' ')
         return results
 
     for sym in tickers:
@@ -430,7 +514,23 @@ def fetch_batch(tickers, retries=3):
                 continue
             results[sym] = extract_metrics(df, sym)
         except Exception as e:
-            print(f"  Error extracting {sym}: {e}")
+            print(f"extract {sym}: {e}", end=' ')
+    return results
+
+def fetch_batch(tickers, retries=3):
+    """Fetch price metrics in small chunks to avoid Yahoo rate limits locally."""
+    if len(tickers) <= YF_BATCH_SIZE:
+        return _fetch_batch_chunk(tickers, retries)
+
+    results = {}
+    chunks = [tickers[i:i + YF_BATCH_SIZE] for i in range(0, len(tickers), YF_BATCH_SIZE)]
+    for idx, chunk in enumerate(chunks, 1):
+        print(f"  Chunk {idx}/{len(chunks)} ({len(chunk)} tickers)...", end=' ')
+        chunk_results = _fetch_batch_chunk(chunk, retries)
+        results.update(chunk_results)
+        print(f"\u2713 {len(chunk_results)}/{len(chunk)}")
+        if idx < len(chunks):
+            time.sleep(YF_BATCH_PAUSE)
     return results
 
 def extract_metrics(df, sym):
@@ -678,7 +778,7 @@ def fetch_breadth():
 def fetch_all(prices_only=False):
     # Always load existing data.json so we can fall back to it if the API fails
     existing = {}
-    out_path = Path('public/data.json')
+    out_path = DATA_PATH
     if out_path.exists():
         try:
             with open(out_path) as f:
@@ -777,6 +877,16 @@ def fetch_all(prices_only=False):
     for key in ('country', 'sector', 'sectorew', 'thematic', 'submarket'):
         output[key].sort(key=lambda x: x.get('w1', 0), reverse=True)
 
+    all_price_tickers = list(dict.fromkeys(
+        ETF_MAIN + SUBMARKET + SECTOR + SECTOR_EW + THEMATIC + COUNTRY +
+        CRYPTO_YF + ['^VIX', 'DX-Y.NYB'] + FUTURES + METALS + ENERGY +
+        GLOBAL_IDX + YIELDS
+    ))
+    print(f"\nFetching ticker names ({len(all_price_tickers)} symbols)...")
+    name_map = fetch_ticker_short_names(all_price_tickers, existing)
+    apply_ticker_names(output, name_map, existing)
+    print(f"\u2713 Names attached for {len(name_map)} symbols")
+
     # If any section came back empty (API failure), preserve existing data
     # rather than overwriting with empty arrays.
     if existing:
@@ -821,7 +931,7 @@ if __name__ == '__main__':
     print(f"=== Market Dashboard Data Fetch [{mode}] ===")
     print(f"Time: {datetime.datetime.utcnow()} UTC\n")
     data = fetch_all(prices_only=args.prices_only)
-    out_path = Path('public/data.json')
+    out_path = DATA_PATH
     out_path.parent.mkdir(exist_ok=True)
     with open(out_path, 'w') as f:
         json.dump(data, f, indent=2)

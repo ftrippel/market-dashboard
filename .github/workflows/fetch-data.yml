@@ -2,12 +2,16 @@ name: Fetch Market Data
 
 on:
   schedule:
-    # 06:00 UTC Mon–Fri ≈ 07:00 CET / 08:00 CEST (one run per night)
-    - cron: '0 6 * * 1-5'
+    # Every 6 hours (00:00, 06:00, 12:00, 18:00 UTC)
+    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: fetch-data
+  cancel-in-progress: false
 
 jobs:
   fetch:
@@ -16,16 +20,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
         with:
           python-version: '3.11'
+          enable-cache: true
 
       - name: Install Python dependencies
-        run: pip install yfinance requests pandas beautifulsoup4 lxml
+        run: uv pip install -r scripts/requirements.txt
 
       - name: Run data fetcher
-        run: python scripts/fetch_data.py
+        run: uv run python scripts/fetch_data.py
         env:
           MASSIVE_API_KEY: ${{ secrets.MASSIVE_API_KEY }}
 
