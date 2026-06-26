@@ -103,8 +103,10 @@ export function PositionCalculator() {
     return { shares, rAmt, posVal, rPts, pctEq, levels, rrTargets };
   }, [direction, stops, equity, riskPct, entry, stop]);
 
+  // RISK-BASED · STAGGERED STOPS
+
   return (
-    <Section number="04" title="Position Sizing Calculator" subtitle="RISK-BASED · STAGGERED STOPS">
+    <Section number="04" title="Position Sizing Calculator" subtitle="">
       <div className="calc-wrap">
         <div className="cpanel">
           <div className="c-ttl">

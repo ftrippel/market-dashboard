@@ -28,6 +28,8 @@ export function EquitiesSection() {
           data={store.submkt}
           nameLabel="Sub-Market / ETF"
           showTrend
+          showHoldings
+          holdings={store.holdings}
           {...rankByW1}
         />
       </Card>

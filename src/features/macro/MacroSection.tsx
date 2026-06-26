@@ -5,8 +5,9 @@ import { colors } from '../../utils/formatting';
 export function MacroSection() {
   const store = useMarketStore();
 
+  //  EOD SNAPSHOT · PREV CLOSE · RANKED BY CATEGORY
   return (
-    <Section number="01" title="Macro Overview" subtitle="EOD SNAPSHOT · PREV CLOSE · RANKED BY CATEGORY">
+    <Section number="01" title="Macro Overview" subtitle="">
       <div className="mg">
         <Card label={<CardLabel>US Index Futures</CardLabel>}>
           <MarketTable data={store.futures} nameLabel="Contract" />

@@ -112,11 +112,12 @@ interface BreadthSectionProps {
 export function BreadthSection({ breadth }: BreadthSectionProps) {
   const cards = breadth ? buildBreadthCards(breadth) : null;
 
+  // S&P 500 INTERNALS · SENTIMENT INDICATORS · UPDATED DAILY
   return (
     <Section
       number="03"
       title="Market Breadth & Sentiment"
-      subtitle="S&P 500 INTERNALS · SENTIMENT INDICATORS · UPDATED DAILY"
+      subtitle=""
     >
       <Card label={<CardLabel>Market Internals Dashboard</CardLabel>} style={{ padding: '16px 18px' }}>
         <div
