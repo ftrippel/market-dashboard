@@ -34,35 +34,65 @@ const TV_SYMBOL_MAP: Record<string, string> = {
   XRP: 'CRYPTOCAP:XRP',
 };
 
+export const TRADINGVIEW_ADVANCED_CHART_SCRIPT =
+  'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+
 export function toTradingViewSymbol(rawSym: string): string {
   return TV_SYMBOL_MAP[rawSym] ?? rawSym;
 }
 
-export function buildTradingViewEmbedUrl(tvSym: string, theme: 'light' | 'dark' = 'dark'): string {
-  const studies = JSON.stringify([
-    { id: 'MAExp@tv-basicstudies', inputs: { length: 20 } },
-    { id: 'MASimple@tv-basicstudies', inputs: { length: 50 } },
-  ]);
+export interface AdvancedChartWidgetConfig {
+  autosize: boolean;
+  symbol: string;
+  interval: string;
+  timezone: string;
+  theme: 'light' | 'dark';
+  backgroundColor: string;
+  style: string;
+  locale: string;
+  allow_symbol_change: boolean;
+  save_image: boolean;
+  hide_side_toolbar: boolean;
+  withdateranges: boolean;
+  show_popup_button: boolean;
+  popup_width: string;
+  popup_height: string;
+  calendar: boolean;
+  support_host: string;
+  studies: Array<
+    | string
+    | {
+        id: string;
+        inputs?: { length: number };
+      }
+  >;
+}
 
-  const params = new URLSearchParams({
-    frameElementId: 'tv_frame',
+export function buildAdvancedChartWidgetConfig(
+  tvSym: string,
+  theme: 'light' | 'dark' = 'dark'
+): AdvancedChartWidgetConfig {
+  return {
+    autosize: true,
     symbol: tvSym,
     interval: 'D',
-    hidesidetoolbar: '0',
-    symboledit: '1',
-    saveimage: '0',
-    toolbarbg: theme === 'dark' ? '131722' : 'f1f3f6',
-    studies,
-    theme,
-    style: '1',
     timezone: 'exchange',
-    withdateranges: '1',
-    showpopupbutton: '1',
-    overrides: '{}',
-    enabled_features: '[]',
-    disabled_features: '[]',
+    theme,
+    backgroundColor: theme === 'dark' ? 'rgba(19, 23, 34, 1)' : 'rgba(255, 255, 255, 1)',
+    style: '1',
     locale: 'en',
-  });
-
-  return `https://s.tradingview.com/widgetembed/?${params.toString()}`;
+    allow_symbol_change: true,
+    save_image: false,
+    hide_side_toolbar: false,
+    withdateranges: true,
+    show_popup_button: true,
+    popup_width: '1000',
+    popup_height: '650',
+    calendar: false,
+    support_host: 'https://www.tradingview.com',
+    studies: [
+      { id: 'MAExp@tv-basicstudies', inputs: { length: 20 } },
+      { id: 'MASimple@tv-basicstudies', inputs: { length: 50 } },
+    ],
+  };
 }

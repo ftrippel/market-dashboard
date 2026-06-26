@@ -353,20 +353,23 @@ body::before {
   text-transform: uppercase;
 }
 
-#tv-frame-wrap.loading #tv-frame {
+#tv-frame-wrap.loading .tv-advanced-chart {
   opacity: 0;
 }
 
-#tv-frame-wrap.ready #tv-frame {
+#tv-frame-wrap.ready .tv-advanced-chart {
   opacity: 1;
 }
 
-#tv-frame {
-  width: 100%;
+.tv-advanced-chart {
   height: 100%;
-  border: none;
-  background: var(--tv-chart-bg);
-  color-scheme: dark light;
+  width: 100%;
+  transition: opacity .15s ease;
+}
+
+.tv-advanced-chart {
+  height: 100%;
+  width: 100%;
   transition: opacity .15s ease;
 }
 

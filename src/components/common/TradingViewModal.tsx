@@ -1,15 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useChartModal } from '../../context/ChartModalContext';
+import { useTheme } from '../../context/ThemeContext';
 import { colors } from '../../utils/formatting';
 import { Icon } from './Icon';
+import { TradingViewAdvancedChart } from './TradingViewAdvancedChart';
 
 export function TradingViewModal() {
   const { chart, closeChart } = useChartModal();
-  const [frameReady, setFrameReady] = useState(false);
+  const { theme } = useTheme();
+  const [chartReady, setChartReady] = useState(false);
 
   useEffect(() => {
-    setFrameReady(false);
-  }, [chart.embedUrl]);
+    setChartReady(false);
+  }, [chart.tvSym, theme]);
+
+  const handleChartReady = useCallback(() => {
+    setChartReady(true);
+  }, []);
 
   if (!chart.open) return null;
 
@@ -31,21 +38,16 @@ export function TradingViewModal() {
             CLOSE
           </button>
         </div>
-        <div id="tv-frame-wrap" className={frameReady ? 'ready' : 'loading'}>
-          {!frameReady && (
+        <div id="tv-frame-wrap" className={chartReady ? 'ready' : 'loading'}>
+          {!chartReady && (
             <div className="tv-frame-loading" aria-live="polite">
               Loading chart...
             </div>
           )}
-          <iframe
-            id="tv-frame"
-            title={`TradingView chart for ${chart.name}`}
-            src={chart.embedUrl}
-            frameBorder={0}
-            allowTransparency
-            scrolling="no"
-            allowFullScreen
-            onLoad={() => setFrameReady(true)}
+          <TradingViewAdvancedChart
+            symbol={chart.tvSym}
+            theme={theme}
+            onReady={handleChartReady}
           />
         </div>
       </div>

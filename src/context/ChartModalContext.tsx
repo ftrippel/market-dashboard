@@ -1,13 +1,11 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
-import { useTheme } from './ThemeContext';
-import { buildTradingViewEmbedUrl, toTradingViewSymbol } from '../utils/tradingView';
+import { toTradingViewSymbol } from '../utils/tradingView';
 
 interface ChartState {
   open: boolean;
   rawSym: string;
   name: string;
   tvSym: string;
-  embedUrl: string;
 }
 
 interface ChartModalContextValue {
@@ -21,28 +19,22 @@ const closedState: ChartState = {
   rawSym: '',
   name: '',
   tvSym: '',
-  embedUrl: '',
 };
 
 const ChartModalContext = createContext<ChartModalContextValue | null>(null);
 
 export function ChartModalProvider({ children }: { children: ReactNode }) {
-  const { theme } = useTheme();
   const [chart, setChart] = useState<ChartState>(closedState);
 
-  const openChart = useCallback(
-    (rawSym: string, name: string) => {
-      const tvSym = toTradingViewSymbol(rawSym);
-      setChart({
-        open: true,
-        rawSym,
-        name,
-        tvSym,
-        embedUrl: buildTradingViewEmbedUrl(tvSym, theme),
-      });
-    },
-    [theme]
-  );
+  const openChart = useCallback((rawSym: string, name: string) => {
+    const tvSym = toTradingViewSymbol(rawSym);
+    setChart({
+      open: true,
+      rawSym,
+      name,
+      tvSym,
+    });
+  }, []);
 
   const closeChart = useCallback(() => {
     setChart(closedState);
