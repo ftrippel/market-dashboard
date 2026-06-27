@@ -23,10 +23,10 @@ export function EquitiesSection() {
         />
       </Card>
 
-      <Card label={<CardLabel>S&P 500 Sub-Market Performance</CardLabel>} style={{ marginBottom: '9px' }}>
+      <Card label={<CardLabel>S&P 500 Sub-Index Performance</CardLabel>} style={{ marginBottom: '9px' }}>
         <MarketTable
           data={store.submkt}
-          nameLabel="Sub-Market / ETF"
+          nameLabel="ETF"
           showTrend
           showHoldings
           holdings={store.holdings}
@@ -38,7 +38,7 @@ export function EquitiesSection() {
         <Card label={<CardLabel>S&P 500 Sub-Sector</CardLabel>}>
           <MarketTable
             data={store.sectors}
-            nameLabel="Sector"
+            nameLabel="ETF"
             hasPrice={false}
             showTrend
             showHoldings
@@ -50,7 +50,7 @@ export function EquitiesSection() {
         <Card label={<CardLabel>S&P 500 EW Sub-Sector</CardLabel>}>
           <MarketTable
             data={store.sectorsEW}
-            nameLabel="EW Sector"
+            nameLabel="ETF"
             hasPrice={false}
             showTrend
             showHoldings

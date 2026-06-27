@@ -207,22 +207,22 @@ src/
 
 ## Data Sources
 
-| Section | Store Field | Source |
-|---------|-------------|--------|
-| Futures | `store.futures` | data.json |
-| Volatility | `store.dxvix` | data.json |
-| Crypto | `store.crypto` | data.json |
-| Metals | `store.metals` | data.json |
-| Commodities | `store.commodities` | data.json |
-| Yields | `store.yields` | data.json |
+| Section        | Store Field | Source |
+|----------------|-------------|--------|
+| Futures        | `store.futures` | data.json |
+| Volatility     | `store.dxvix` | data.json |
+| Crypto         | `store.crypto` | data.json |
+| Metals         | `store.metals` | data.json |
+| Commodities    | `store.commodities` | data.json |
+| Yields         | `store.yields` | data.json |
 | Global Indices | `store.global` | data.json |
-| ETFs | `store.etfs` | data.json |
-| Sub-Market | `store.submkt` | data.json |
-| Sectors | `store.sectors` | data.json |
-| Sector EW | `store.sectorsEW` | data.json |
-| Thematic | `store.thematic` | data.json |
-| Value Trap | `store.valuetrap` | data.json |
-| Growth | `store.growth` | data.json |
+| ETFs           | `store.etfs` | data.json |
+| Sub-Index      | `store.submkt` | data.json |
+| Sectors        | `store.sectors` | data.json |
+| Sector EW      | `store.sectorsEW` | data.json |
+| Thematic       | `store.thematic` | data.json |
+| Value Trap     | `store.valuetrap` | data.json |
+| Growth         | `store.growth` | data.json |
 
 ## Color Palette
 

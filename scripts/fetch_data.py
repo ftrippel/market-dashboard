@@ -29,6 +29,26 @@ SCRIPTS_DIR = Path(__file__).resolve().parent
 REPO_ROOT = SCRIPTS_DIR.parent
 DATA_PATH = REPO_ROOT / 'public' / 'data.json'
 
+def load_dotenv(path):
+    if path.exists():
+        with open(path, 'r', encoding='utf-8') as f:
+            for line in f:
+                line = line.strip()
+                if not line or line.startswith('#'):
+                    continue
+                if '=' in line:
+                    k, v = line.split('=', 1)
+                    k = k.strip()
+                    v = v.strip()
+                    if (v.startswith('"') and v.endswith('"')) or (v.startswith("'") and v.endswith("'")):
+                        v = v[1:-1]
+                    if k:
+                        if k not in os.environ:
+                            os.environ[k] = v
+
+load_dotenv(REPO_ROOT / '.env')
+load_dotenv(REPO_ROOT / '.env.local')
+
 # Smaller batches + pauses avoid Yahoo rate limits on local networks (see ROBUST_FETCHING.md).
 YF_BATCH_SIZE = int(os.environ.get('YF_BATCH_SIZE', '25'))
 YF_BATCH_PAUSE = float(os.environ.get('YF_BATCH_PAUSE', '1.0'))
@@ -334,12 +354,10 @@ def fetch_massive_treasury_yields():
     """
     if not MASSIVE_API_KEY:
         return None
-    end   = datetime.date.today()
-    start = end - datetime.timedelta(days=400)
     url    = f"{MASSIVE_BASE}/fed/v1/treasury-yields"
-    params = {'from': str(start), 'to': str(end), 'limit': 500, 'sort': 'asc', 'apiKey': MASSIVE_API_KEY}
+    params = {'limit': 1000, 'sort': 'date.desc', 'apiKey': MASSIVE_API_KEY}
     try:
-        r = requests.get(url, params=params, timeout=15)
+        r = requests.get(url, params=params, timeout=15, headers={'User-Agent': 'Mozilla/5.0'})
         r.raise_for_status()
         data = r.json()
         results = data.get('results', [])
@@ -889,9 +907,12 @@ def fetch_all(prices_only=False):
         ('commod',    ENERGY),
     ]
 
-    use_massive = bool(MASSIVE_API_KEY) and not prices_only
+    use_massive = bool(MASSIVE_API_KEY)
     if prices_only:
-        print(f"Prices-only mode — using yfinance")
+        if use_massive:
+            print(f"Prices-only mode — using yfinance (Massive API for treasury yields)")
+        else:
+            print(f"Prices-only mode — using yfinance")
     elif use_massive:
         print(f"✓ MASSIVE_API_KEY found — using Massive API for treasury yields only")
     else:

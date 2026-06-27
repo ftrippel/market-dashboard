@@ -38,6 +38,22 @@ else
   echo -e "${RED}✗ Virtual environment activation failed${NC}"
   exit 1
 fi
+# Load .env variables if present and not already set
+if [ -f .env ]; then
+  while IFS= read -r line || [ -n "$line" ]; do
+    if [[ ! "$line" =~ ^# ]] && [[ "$line" =~ = ]]; then
+      key=$(echo "$line" | cut -d'=' -f1 | xargs)
+      val=$(echo "$line" | cut -d'=' -f2- | xargs)
+      val="${val%\"}"
+      val="${val#\"}"
+      val="${val%\'}"
+      val="${val#\'}"
+      if [ -n "$key" ] && [ -z "${!key}" ]; then
+        export "$key"="$val"
+      fi
+    fi
+  done < .env
+fi
 
 echo -e "${YELLOW}Installing dependencies...${NC}"
 uv pip install -q -r scripts/requirements.txt
@@ -48,7 +64,7 @@ if [ -z "$MASSIVE_API_KEY" ]; then
   echo -e "${YELLOW}⚠️  MASSIVE_API_KEY not set — treasury yields via yfinance/FRED only${NC}"
   echo ""
 else
-  echo -e "${GREEN}✓${NC} Using MASSIVE_API_KEY from environment"
+  echo -e "${GREEN}✓${NC} Using MASSIVE_API_KEY from .env / environment"
   echo ""
 fi
 

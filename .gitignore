@@ -30,3 +30,9 @@ __pycache__/
 *.sw?
 
 .DS_Store
+
+# Env files
+.env
+.env.*
+!.env.example
+.env.local
