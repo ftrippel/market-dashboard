@@ -47,6 +47,7 @@ function getVisibleSymbols(): string[] {
 
 function DashboardContent() {
   const store = useMarketStore();
+  const updatePrice = useMarketStore((state) => state.updatePrice);
   const { error: dataError } = useMarketData();
   const wrapRef = useRef<HTMLDivElement>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -82,7 +83,7 @@ function DashboardContent() {
         try {
           const res = await fetchYahooFinancePrice(nextSym);
           if (res && active) {
-            store.updatePrice(nextSym, res.price, res.d1);
+            updatePrice(nextSym, res.price, res.d1);
           }
         } catch (err) {
           console.warn(`Failed to fetch live price for ${nextSym}:`, err);
@@ -100,7 +101,7 @@ function DashboardContent() {
         window.clearTimeout(timeoutId);
       }
     };
-  }, [liveEnabled, store]);
+  }, [liveEnabled, updatePrice]);
 
   const showToast = useCallback((message: string, durationMs = 3200) => {
     setToastDuration(durationMs);
