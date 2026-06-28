@@ -69,6 +69,8 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
     };
   }, []);
 
+  const totalWeight = holdings.reduce((sum, holding) => sum + holding.w, 0);
+
   return (
     <div
       className="table-flyover open"
@@ -131,6 +133,19 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
                   </tr>
                 ))}
               </tbody>
+              <tfoot>
+                <tr style={{ borderTop: `1px solid ${colors.border}` }}>
+                  <td
+                    colSpan={2}
+                    style={{ ...tdStyle, textAlign: 'right', color: colors.text2, fontWeight: 500 }}
+                  >
+                    Total
+                  </td>
+                  <td style={{ ...tdStyle, textAlign: 'right', color: colors.accent, fontWeight: 600 }}>
+                    {totalWeight.toFixed(1)}%
+                  </td>
+                </tr>
+              </tfoot>
             </table>
           </div>
         </div>
