@@ -4,6 +4,7 @@ import { colors } from '../../utils/formatting';
 import type { Holding } from '../../types';
 import { Icon } from './Icon';
 import { useChartModal } from '../../context/ChartModalContext';
+import { stripExchangeSuffix } from '../../utils/symbols';
 import { SymbolLink } from './TradingViewModal';
 
 interface HoldingsFlyoverProps {
@@ -40,7 +41,7 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
   const { chart } = useChartModal();
 
   const handleCopySymbols = async () => {
-    const text = holdings.map((holding) => holding.s).join(', ');
+    const text = holdings.map((holding) => stripExchangeSuffix(holding.s)).join(', ');
     try {
       await copySnapshotText(text);
       setCopied(true);

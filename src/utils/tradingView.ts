@@ -1,3 +1,5 @@
+import { stripExchangeSuffix } from './symbols';
+
 const TV_SYMBOL_MAP: Record<string, string> = {
   'ES1!': 'OANDA:SPX500USD',
   'NQ1!': 'OANDA:NAS100USD',
@@ -40,11 +42,7 @@ export function toTradingViewSymbol(rawSym: string): string {
   const mapped = TV_SYMBOL_MAP[rawSym];
   if (mapped) return mapped;
 
-  if (rawSym.includes('.')) {
-    return rawSym.split('.')[0];
-  }
-
-  return rawSym;
+  return stripExchangeSuffix(rawSym);
 }
 
 export interface AdvancedChartWidgetConfig {
