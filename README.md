@@ -2,6 +2,8 @@
 
 A React dashboard for futures, equities, commodities, market breadth, and a position calculator.
 
+Live version: [https://ftrippel.github.io/market-dashboard](https://ftrippel.github.io/market-dashboard)
+
 React rewrite of the original [market-dashboard](https://github.com/clementang17-alt/market-dashboard) by [Clement Ang](https://github.com/clementang17-alt/market-dashboard).
 
 **Stack:** React 19, TypeScript, Zustand, Vite
