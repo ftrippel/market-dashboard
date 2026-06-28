@@ -788,7 +788,7 @@ def compute_sp500_breadth():
         
         # Convert to DataFrame
         close = pd.DataFrame(all_data)
-        close = close.dropna(axis=1, how='all').ffill()
+        close = close.dropna(axis=1, how='all')
         
         if len(close) < 5:
             raise ValueError(f"Not enough trading days in data (got {len(close)})")
@@ -797,14 +797,20 @@ def compute_sp500_breadth():
         if len(close.columns) < 50:
             print(f"  ⚠ Warning: Only got {len(close.columns)} tickers (partial data)")
         
-        last = close.iloc[-1]
-        prev = close.iloc[-2] if len(close) >= 2 else last
+        # Advancers / Decliners — compare each ticker's last two actual trading
+        # closes (not shared calendar rows). On weekends yfinance often leaves
+        # the latest session NaN for some symbols; ffill would make last == prev.
+        changes = []
+        for col in close.columns:
+            valid = close[col].dropna()
+            if len(valid) >= 2:
+                changes.append(valid.iloc[-1] - valid.iloc[-2])
+        advancers = sum(1 for c in changes if c > 0)
+        decliners = sum(1 for c in changes if c < 0)
+        print(f"  A/D: {advancers} adv / {decliners} dec ({len(changes)} tickers)")
         
-        # Advancers / Decliners
-        changes = last - prev
-        advancers = int((changes > 0).sum())
-        decliners = int((changes < 0).sum())
-        print(f"  A/D: {advancers} adv / {decliners} dec")
+        close = close.ffill()
+        last = close.apply(lambda s: s.dropna().iloc[-1] if s.dropna().size else pd.NA)
         
         # New 52-week Highs / Lows (within 1% of extreme)
         window = close.iloc[-252:] if len(close) >= 252 else close

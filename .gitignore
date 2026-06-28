@@ -17,6 +17,7 @@ dist-ssr
 venv/
 __pycache__/
 *.py[cod]
+*.egg-info/
 
 # Editor directories and files
 .vscode/*

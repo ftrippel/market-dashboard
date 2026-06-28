@@ -27,6 +27,8 @@ jobs:
           enable-cache: true
 
       - name: Install Python dependencies
+        # Resolves latest compatible versions from requirements.txt (e.g. new yfinance releases).
+        # For pinned/reproducible installs, use instead: uv sync --frozen (requires uv.lock committed).
         run: |
           uv venv
           uv pip install -r scripts/requirements.txt

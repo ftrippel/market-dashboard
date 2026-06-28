@@ -62,7 +62,7 @@ function buildBreadthCards(br: Breadth): BreadthCard[] {
     },
     {
       lbl: 'NAAIM Exposure',
-      val: nmVal === null ? '—' : `${nmVal.toFixed(0)}%`,
+      val: nmVal === null ? '—' : `${nmVal.toFixed(1)}%`,
       sub: nmLbl,
       col: nmCol,
       note: nm?.date ? `Active mgr equity exposure · ${nm.date}` : 'Active mgr equity exposure · weekly',
