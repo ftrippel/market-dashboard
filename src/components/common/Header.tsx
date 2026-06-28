@@ -123,6 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
           <Icon name="photo_camera" size="sm" />
           SNAP
         </button>
+        {/*
         <button type="button" className="btn btn-x" onClick={onShareX}>
           <XIcon size={13} />
           SHARE
@@ -131,6 +132,7 @@ export const Header: React.FC<HeaderProps> = ({
           <Icon name="content_copy" size="sm" />
           COPY
         </button>
+        */}
       </div>
 
       <style>{`
