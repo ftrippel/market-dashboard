@@ -101,3 +101,30 @@ export function buildAdvancedChartWidgetConfig(
     ],
   };
 }
+
+export function buildMiniCandleChartWidgetConfig(
+  tvSym: string,
+  theme: 'light' | 'dark' = 'dark'
+) {
+  return {
+    autosize: true,
+    symbol: tvSym,
+    interval: 'D',
+    timezone: 'exchange',
+    theme,
+    backgroundColor: theme === 'dark' ? 'rgba(15, 20, 25, 1)' : 'rgba(255, 255, 255, 1)',
+    style: '1', // 1 = Candlesticks
+    locale: 'en',
+    allow_symbol_change: false,
+    save_image: false,
+    hide_side_toolbar: true,
+    hide_top_toolbar: true,
+    hide_legend: true,
+    withdateranges: false,
+    show_popup_button: false,
+    calendar: false,
+    support_host: 'https://www.tradingview.com',
+    studies: [],
+  };
+}
+

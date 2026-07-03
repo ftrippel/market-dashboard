@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useChartModal } from '../../context/ChartModalContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useSymbolPreview } from '../../context/SymbolPreviewContext';
 import { colors } from '../../utils/formatting';
 import { Icon } from './Icon';
 import { TradingViewAdvancedChart } from './TradingViewAdvancedChart';
@@ -83,12 +84,23 @@ export function SymbolLink({
   label?: string;
 }) {
   const { openChart } = useChartModal();
+  const { onMouseEnterLink, onMouseLeaveLink, hidePreview } = useSymbolPreview();
+
+  const handleMouseEnter = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    onMouseEnterLink(sym, name, rect);
+  };
 
   return (
     <button
       type="button"
       className="tn-link"
-      onClick={() => openChart(sym, name)}
+      onClick={() => {
+        hidePreview();
+        openChart(sym, name);
+      }}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={onMouseLeaveLink}
       style={{
         background: 'none',
         border: 'none',

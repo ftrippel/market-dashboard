@@ -10,3 +10,5 @@ export { Sparkline } from './Sparkline';
 export { PctCell, BpsCell } from './PctCell';
 export { FormattedNumberInput } from './FormattedNumberInput';
 export { TradingViewModal, SymbolLink } from './TradingViewModal';
+export { SymbolPreviewOverlay } from './SymbolPreviewOverlay';
+

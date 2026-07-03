@@ -1,8 +1,9 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { fetchYahooFinancePrice } from './services/api';
-import { Header, Toast, TradingViewModal } from './components/common';
+import { Header, Toast, TradingViewModal, SymbolPreviewOverlay } from './components/common';
 import { ChartModalProvider } from './context/ChartModalContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { SymbolPreviewProvider } from './context/SymbolPreviewContext';
 import { MacroDivider, MacroSection } from './features/macro/MacroSection';
 import { EquitiesSection } from './features/equities/EquitiesSection';
 import { BreadthSection } from './features/breadth/BreadthSection';
@@ -164,6 +165,7 @@ function DashboardContent() {
         onClose={() => setToastMessage(null)}
       />
       <TradingViewModal />
+      <SymbolPreviewOverlay />
 
       <div className="wrap" ref={wrapRef}>
         <Header
@@ -216,7 +218,9 @@ function App() {
   return (
     <ThemeProvider>
       <ChartModalProvider>
-        <DashboardContent />
+        <SymbolPreviewProvider>
+          <DashboardContent />
+        </SymbolPreviewProvider>
       </ChartModalProvider>
     </ThemeProvider>
   );
