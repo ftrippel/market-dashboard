@@ -78,7 +78,7 @@ export function SymbolPreviewOverlay() {
         />
       </div>
       <div className="tv-preview-footer">
-        Click to view interactive chart
+
       </div>
     </div>
   );
