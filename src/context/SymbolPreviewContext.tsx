@@ -85,7 +85,7 @@ export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
           anchorRect: rect,
         });
         showTimeoutRef.current = null;
-      }, 400);
+      }, 0);
 
       return current;
     });

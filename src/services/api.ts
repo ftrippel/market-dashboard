@@ -102,7 +102,7 @@ function getYahooFinanceSymbol(sym: string): string {
   return DASHBOARD_TO_YFINANCE[sym] ?? sym;
 }
 
-export async function fetchYahooFinancePrice(sym: string): Promise<{ price: number; d1: number } | null> {
+export async function fetchYahooFinancePrice(sym: string): Promise<{ price: number; d1: number; updatedAt?: number } | null> {
   if (sym === 'US2Y') return null; // Skip FRED-only yield
 
   const yfSym = getYahooFinanceSymbol(sym);
@@ -136,6 +136,7 @@ export async function fetchYahooFinancePrice(sym: string): Promise<{ price: numb
   return {
     price: currentPrice,
     d1: roundToDecimals(d1, isYield ? 1 : 2),
+    updatedAt: meta.regularMarketTime ? meta.regularMarketTime * 1000 : undefined,
   };
 }
 

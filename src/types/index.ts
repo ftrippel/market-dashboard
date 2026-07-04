@@ -13,6 +13,7 @@ export interface MarketData {
   ytd: number;
   spark: number[];
   ema_uptrend?: boolean;
+  updatedAt?: number;
 }
 
 export interface Future extends MarketData {

@@ -86,7 +86,7 @@ function DashboardContent() {
         try {
           const res = await fetchYahooFinancePrice(nextSym);
           if (res && active) {
-            updatePrice(nextSym, res.price, res.d1);
+            updatePrice(nextSym, res.price, res.d1, res.updatedAt);
           }
         } catch (err) {
           console.warn(`Failed to fetch live price for ${nextSym}:`, err);

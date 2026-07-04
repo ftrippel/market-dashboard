@@ -536,9 +536,11 @@ def fetch_individual(tickers, retries=2):
     for sym in tickers:
         for attempt in range(retries):
             try:
-                df = yf.Ticker(sym).history(period='1y', interval='1d', auto_adjust=True)
+                ticker = yf.Ticker(sym)
+                df = ticker.history(period='1y', interval='1d', auto_adjust=True)
                 if df is not None and not df.empty:
-                    results[sym] = extract_metrics(df, sym)
+                    meta = getattr(ticker, 'history_metadata', None)
+                    results[sym] = extract_metrics(df, sym, metadata=meta)
                 break
             except Exception as e:
                 print(f"  Attempt {attempt+1} failed for {sym}: {e}")
@@ -604,7 +606,7 @@ def fetch_batch(tickers, retries=3):
             time.sleep(YF_BATCH_PAUSE)
     return results
 
-def extract_metrics(df, sym):
+def extract_metrics(df, sym, metadata=None):
     df = df.dropna(subset=['Close'])
     if len(df) < 2:
         return None
@@ -645,6 +647,16 @@ def extract_metrics(df, sym):
         ema20 = _calc_ema(closes, 20)
         ema_uptrend = bool(ema10 > ema20)
 
+    updated_at = None
+    if metadata and isinstance(metadata, dict) and 'regularMarketTime' in metadata:
+        updated_at = int(metadata['regularMarketTime'] * 1000)
+
+    if updated_at is None:
+        try:
+            updated_at = int(df.index[-1].timestamp() * 1000)
+        except Exception:
+            pass
+
     result = {
         'sym':   TICKER_REMAP.get(sym, sym),
         'price': round(price, 4),
@@ -654,6 +666,8 @@ def extract_metrics(df, sym):
         'ytd':   ytd,
         'spark': spark,
     }
+    if updated_at is not None:
+        result['updatedAt'] = updated_at
     if ema_uptrend is not None:
         result['ema_uptrend'] = ema_uptrend
     crypto_ids   = {'BTC-USD':'bitcoin','ETH-USD':'ethereum','SOL-USD':'solana','XRP-USD':'ripple'}

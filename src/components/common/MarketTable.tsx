@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { getDisplayName, getSymbolMeta } from '../../data/symbolMeta';
-import { colors, formatPrice } from '../../utils/formatting';
+import { colors, formatPrice, formatHoverTimestamp } from '../../utils/formatting';
 import type { Holding, MarketData, MarketTableOptions } from '../../types';
 import { Sparkline } from './Sparkline';
 import { BpsCell, PctCell } from './PctCell';
@@ -269,8 +269,16 @@ export const MarketTable: React.FC<MarketTableProps> = ({
                   </span>
                 </td>
                 {hasPrice && item.price !== undefined && (
-                  <td style={{ ...tdStyle, textAlign: 'right', color: colors.text }}>
+                  <td
+                    style={{ ...tdStyle, textAlign: 'right', color: colors.text }}
+                    className="price-cell-tooltip-container"
+                  >
                     {formatPrice(item.price)}
+                    {item.updatedAt && (
+                      <span className="price-cell-tooltip">
+                        {formatHoverTimestamp(item.updatedAt)}
+                      </span>
+                    )}
                   </td>
                 )}
                 {hasPrice && item.price === undefined && (

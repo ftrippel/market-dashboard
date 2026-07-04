@@ -147,3 +147,18 @@ export function formatDataTimestamp(iso: string | null): DataTimestampInfo | nul
     ageLabel,
   };
 }
+
+export function formatHoverTimestamp(timestamp: number | undefined): string {
+  if (!timestamp) return 'No timestamp available';
+  const dt = new Date(timestamp);
+  return new Intl.DateTimeFormat('en-GB', {
+    timeZone: BERLIN_TZ,
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZoneName: 'short',
+    hour12: false,
+  }).format(dt);
+}
