@@ -13,6 +13,7 @@ interface HeaderProps {
   onSnap?: () => void;
   onShareX?: () => void;
   onCopy?: () => void;
+  onOpenSettings?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -25,6 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSnap,
   onShareX,
   onCopy,
+  onOpenSettings,
 }) => {
   const { theme, toggleTheme } = useTheme();
   const [time, setTime] = React.useState<string>('—');
@@ -122,6 +124,15 @@ export const Header: React.FC<HeaderProps> = ({
         <button type="button" className="btn btn-x" onClick={onSnap}>
           <Icon name="photo_camera" size="sm" />
           SNAP
+        </button>
+        <button
+          type="button"
+          className="btn btn-theme"
+          onClick={onOpenSettings}
+          title="Open settings"
+          aria-label="Open settings"
+        >
+          <Icon name="settings" size="sm" />
         </button>
         {/*
         <button type="button" className="btn btn-x" onClick={onShareX}>

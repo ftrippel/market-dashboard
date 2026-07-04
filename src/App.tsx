@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState, useEffect } from 'react';
 import { fetchYahooFinancePrice } from './services/api';
-import { Header, Toast, TradingViewModal, SymbolPreviewOverlay } from './components/common';
+import { Header, Toast, TradingViewModal, SymbolPreviewOverlay, SettingsModal } from './components/common';
 import { ChartModalProvider } from './context/ChartModalContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { SymbolPreviewProvider } from './context/SymbolPreviewContext';
@@ -56,6 +56,7 @@ function DashboardContent() {
   const [toastDuration, setToastDuration] = useState(3200);
   const [snapFlash, setSnapFlash] = useState(false);
   const [liveEnabled, setLiveEnabled] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   // Background process for Live Data refresh
   useEffect(() => {
@@ -166,6 +167,7 @@ function DashboardContent() {
       />
       <TradingViewModal />
       <SymbolPreviewOverlay />
+      <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
       <div className="wrap" ref={wrapRef}>
         <Header
@@ -177,6 +179,7 @@ function DashboardContent() {
           onSnap={handleSnap}
           onShareX={handleShareX}
           onCopy={handleCopy}
+          onOpenSettings={() => setSettingsOpen(true)}
         />
 
         <div className="quote-bar">

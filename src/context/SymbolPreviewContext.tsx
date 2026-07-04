@@ -12,6 +12,8 @@ interface PreviewState {
 
 interface SymbolPreviewContextValue {
   preview: PreviewState;
+  enableHoverPreview: boolean;
+  setEnableHoverPreview: (val: boolean) => void;
   onMouseEnterLink: (rawSym: string, name: string, rect: DOMRect) => void;
   onMouseLeaveLink: () => void;
   onMouseEnterPreview: () => void;
@@ -31,6 +33,17 @@ const SymbolPreviewContext = createContext<SymbolPreviewContextValue | null>(nul
 
 export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
   const [preview, setPreview] = useState<PreviewState>(closedState);
+  const [enableHoverPreview, setEnableHoverPreviewState] = useState<boolean>(() => {
+    const stored = localStorage.getItem('enableHoverPreview');
+    if (stored !== null) return stored === 'true';
+    return config.tradingView.enableHoverPreview;
+  });
+
+  const setEnableHoverPreview = useCallback((val: boolean) => {
+    setEnableHoverPreviewState(val);
+    localStorage.setItem('enableHoverPreview', String(val));
+  }, []);
+
   const showTimeoutRef = useRef<any>(null);
   const hideTimeoutRef = useRef<any>(null);
 
@@ -46,7 +59,7 @@ export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
   };
 
   const onMouseEnterLink = useCallback((rawSym: string, name: string, rect: DOMRect) => {
-    if (!config.tradingView.enableHoverPreview) return;
+    if (!enableHoverPreview) return;
 
     if (hideTimeoutRef.current) {
       window.clearTimeout(hideTimeoutRef.current);
@@ -54,7 +67,6 @@ export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
     }
 
     setPreview((current) => {
-      // If we are already displaying this symbol, don't restart the show timeout
       if (current.open && current.rawSym === rawSym) {
         return current;
       }
@@ -73,11 +85,11 @@ export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
           anchorRect: rect,
         });
         showTimeoutRef.current = null;
-      }, 400); // 400ms delay to prevent overlay flashing during rapid movements
+      }, 400);
 
       return current;
     });
-  }, []);
+  }, [enableHoverPreview]);
 
   const onMouseLeaveLink = useCallback(() => {
     if (showTimeoutRef.current) {
@@ -92,7 +104,7 @@ export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
     hideTimeoutRef.current = window.setTimeout(() => {
       setPreview(closedState);
       hideTimeoutRef.current = null;
-    }, 200); // 200ms delay allows mouse transition into the overlay card
+    }, 200);
   }, []);
 
   const onMouseEnterPreview = useCallback(() => {
@@ -122,6 +134,8 @@ export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
     <SymbolPreviewContext.Provider
       value={{
         preview,
+        enableHoverPreview,
+        setEnableHoverPreview,
         onMouseEnterLink,
         onMouseLeaveLink,
         onMouseEnterPreview,

@@ -71,8 +71,8 @@ export function SymbolPreviewOverlay() {
           </div>
         )}
         <TradingViewMiniChart
-          key={`${preview.tvSym}-${theme}`}
-          symbol={preview.tvSym}
+          key={`${preview.rawSym}-${theme}`}
+          symbol={preview.rawSym}
           theme={theme}
           onReady={() => setChartReady(true)}
         />

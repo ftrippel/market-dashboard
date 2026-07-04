@@ -139,7 +139,59 @@ export async function fetchYahooFinancePrice(sym: string): Promise<{ price: numb
   };
 }
 
+export interface DailyHistoryPoint {
+  time: string;
+  value: number;
+}
+
+export async function fetchYahooFinanceDailyHistory(sym: string): Promise<DailyHistoryPoint[] | null> {
+  if (sym === 'US2Y') return null; // Skip FRED-only yield
+
+  const yfSym = getYahooFinanceSymbol(sym);
+  const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yfSym)}?interval=1d&range=1y`;
+  const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`;
+
+  const res = await fetch(proxyUrl);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch daily history for ${sym}: HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  const result = data?.chart?.result?.[0];
+  if (!result) return null;
+
+  const timestamps = result.timestamp;
+  const closes = result.indicators?.quote?.[0]?.close;
+  if (!timestamps || !closes) return null;
+
+  const history: DailyHistoryPoint[] = [];
+  const isYield = sym === 'US10Y' || sym === 'US30Y';
+
+  for (let i = 0; i < timestamps.length; i++) {
+    const timestamp = timestamps[i];
+    let close = closes[i];
+    if (close == null) continue;
+
+    if (isYield && close > 10) {
+      close = close / 10;
+    }
+
+    const d = new Date(timestamp * 1000);
+    const yyyy = d.getUTCFullYear();
+    const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+    const dd = String(d.getUTCDate()).padStart(2, '0');
+    const timeStr = `${yyyy}-${mm}-${dd}`;
+
+    history.push({
+      time: timeStr,
+      value: roundToDecimals(close, isYield ? 3 : 2),
+    });
+  }
+
+  return history;
+}
+
 function roundToDecimals(val: number, decimals: number): number {
   const p = Math.pow(10, decimals);
   return Math.round(val * p) / p;
 }
+

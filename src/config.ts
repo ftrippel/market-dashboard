@@ -12,8 +12,8 @@ export const config = {
     idleRetryIntervalMs: readPositiveIntEnv(import.meta.env.VITE_LIVE_DATA_IDLE_RETRY_MS, 2000),
   },
   tradingView: {
-    /** Enable hover preview chart (disabled by default). */
-    enableHoverPreview: false,
+    /** Enable hover preview chart (enabled by default). */
+    enableHoverPreview: true,
   },
 } as const;
 
