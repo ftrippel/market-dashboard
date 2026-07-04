@@ -653,7 +653,20 @@ def extract_metrics(df, sym, metadata=None):
 
     if updated_at is None:
         try:
-            updated_at = int(df.index[-1].timestamp() * 1000)
+            is_crypto = (sym.endswith('-USD') or sym in ('BTC-USD', 'ETH-USD', 'SOL-USD', 'XRP-USD'))
+            if is_crypto:
+                # Crypto is open 24/7, so the fetched price represents the current real-time timestamp.
+                updated_at = int(time.time() * 1000)
+            else:
+                last_dt = df.index[-1]
+                last_date = last_dt.date()
+                current_date = datetime.datetime.now(last_dt.tz).date() if last_dt.tz else datetime.datetime.utcnow().date()
+                # If the last candle represents today, it is still active/live.
+                # Use current timestamp instead of the daily candle's midnight start time.
+                if last_date == current_date:
+                    updated_at = int(time.time() * 1000)
+                else:
+                    updated_at = int(last_dt.timestamp() * 1000)
         except Exception:
             pass
 
