@@ -39,6 +39,7 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
   const titleId = useId();
   const [copied, setCopied] = useState(false);
   const { chart } = useChartModal();
+  const siblings = holdings.map((h) => ({ sym: h.s, name: h.n }));
 
   const handleCopySymbols = async () => {
     const text = holdings.map((holding) => stripExchangeSuffix(holding.s)).join(', ');
@@ -125,7 +126,7 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
                     }}
                   >
                     <td style={{ ...tdStyle, textAlign: 'left' }}>
-                      <SymbolLink sym={holding.s} name={holding.n} label={holding.s} />
+                      <SymbolLink sym={holding.s} name={holding.n} label={holding.s} siblings={siblings} />
                     </td>
                     <td style={{ ...tdStyle, textAlign: 'left', color: colors.text2 }}>{holding.n}</td>
                     <td style={{ ...tdStyle, textAlign: 'right', color: colors.accent, fontWeight: 500 }}>

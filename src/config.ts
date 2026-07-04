@@ -11,4 +11,9 @@ export const config = {
     /** Retry delay when no symbols are visible in the viewport (ms). */
     idleRetryIntervalMs: readPositiveIntEnv(import.meta.env.VITE_LIVE_DATA_IDLE_RETRY_MS, 2000),
   },
+  tradingView: {
+    /** Enable hover preview chart (disabled by default). */
+    enableHoverPreview: false,
+  },
 } as const;
+

@@ -1,16 +1,22 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { toTradingViewSymbol } from '../utils/tradingView';
 
+interface SiblingSymbol {
+  sym: string;
+  name: string;
+}
+
 interface ChartState {
   open: boolean;
   rawSym: string;
   name: string;
   tvSym: string;
+  siblings?: SiblingSymbol[];
 }
 
 interface ChartModalContextValue {
   chart: ChartState;
-  openChart: (rawSym: string, name: string) => void;
+  openChart: (rawSym: string, name: string, siblings?: SiblingSymbol[]) => void;
   closeChart: () => void;
 }
 
@@ -19,6 +25,7 @@ const closedState: ChartState = {
   rawSym: '',
   name: '',
   tvSym: '',
+  siblings: [],
 };
 
 const ChartModalContext = createContext<ChartModalContextValue | null>(null);
@@ -26,13 +33,14 @@ const ChartModalContext = createContext<ChartModalContextValue | null>(null);
 export function ChartModalProvider({ children }: { children: ReactNode }) {
   const [chart, setChart] = useState<ChartState>(closedState);
 
-  const openChart = useCallback((rawSym: string, name: string) => {
+  const openChart = useCallback((rawSym: string, name: string, siblings?: SiblingSymbol[]) => {
     const tvSym = toTradingViewSymbol(rawSym);
     setChart({
       open: true,
       rawSym,
       name,
       tvSym,
+      siblings,
     });
   }, []);
 
@@ -41,12 +49,38 @@ export function ChartModalProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
+    if (!chart.open) return;
+
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') closeChart();
+      if (event.key === 'Escape') {
+        closeChart();
+        return;
+      }
+
+      if (!chart.siblings || chart.siblings.length <= 1) return;
+
+      const currentIndex = chart.siblings.findIndex((s) => s.sym === chart.rawSym);
+      if (currentIndex === -1) return;
+
+      let nextIndex = currentIndex;
+      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+        if (currentIndex >= chart.siblings.length - 1) return;
+        nextIndex = currentIndex + 1;
+      } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+        if (currentIndex <= 0) return;
+        nextIndex = currentIndex - 1;
+      } else {
+        return;
+      }
+
+      event.preventDefault();
+      const nextSibling = chart.siblings[nextIndex];
+      openChart(nextSibling.sym, nextSibling.name, chart.siblings);
     };
+
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [closeChart]);
+  }, [chart.open, chart.siblings, chart.rawSym, openChart, closeChart]);
 
   useEffect(() => {
     document.body.style.overflow = chart.open ? 'hidden' : '';

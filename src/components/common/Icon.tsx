@@ -5,6 +5,7 @@ export type MaterialIconName =
   | 'arrow_upward'
   | 'auto_awesome'
   | 'check'
+  | 'chevron_left'
   | 'chevron_right'
   | 'close'
   | 'content_copy'

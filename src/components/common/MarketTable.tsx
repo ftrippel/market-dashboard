@@ -172,6 +172,13 @@ export const MarketTable: React.FC<MarketTableProps> = ({
     return sorted.slice(0, maxRows);
   }, [sorted, maxRows]);
 
+  const siblings = useMemo(() => {
+    return visible.map((x) => ({
+      sym: x.sym,
+      name: resolveDisplayName(x),
+    }));
+  }, [visible]);
+
   return (
     <>
     <div className="table-scroll">
@@ -256,7 +263,7 @@ export const MarketTable: React.FC<MarketTableProps> = ({
               }}
             >
                 <td style={{ ...tdStyle, textAlign: 'left' }}>
-                  <SymbolLink sym={item.sym} name={displayName} flag={flag} />
+                  <SymbolLink sym={item.sym} name={displayName} flag={flag} siblings={siblings} />
                   <span style={{ color: colors.text3, fontSize: '10px', display: 'block', letterSpacing: '0.5px' }}>
                     {meta.sym || item.sym}
                   </span>

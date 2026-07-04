@@ -49,6 +49,7 @@ export interface AdvancedChartWidgetConfig {
   autosize: boolean;
   symbol: string;
   interval: string;
+  range?: string;
   timezone: string;
   theme: 'light' | 'dark';
   backgroundColor: string;

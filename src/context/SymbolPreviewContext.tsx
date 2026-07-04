@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
 import { toTradingViewSymbol } from '../utils/tradingView';
+import { config } from '../config';
 
 interface PreviewState {
   open: boolean;
@@ -45,6 +46,8 @@ export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
   };
 
   const onMouseEnterLink = useCallback((rawSym: string, name: string, rect: DOMRect) => {
+    if (!config.tradingView.enableHoverPreview) return;
+
     if (hideTimeoutRef.current) {
       window.clearTimeout(hideTimeoutRef.current);
       hideTimeoutRef.current = null;
