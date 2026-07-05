@@ -3,6 +3,7 @@ import { fetchYahooFinancePrice } from './services/api';
 import { Header, Toast, TradingViewModal, SymbolPreviewOverlay, SettingsModal } from './components/common';
 import { ChartModalProvider } from './context/ChartModalContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { SettingsProvider } from './context/SettingsContext';
 import { SymbolPreviewProvider } from './context/SymbolPreviewContext';
 import { MacroDivider, MacroSection } from './features/macro/MacroSection';
 import { EquitiesSection } from './features/equities/EquitiesSection';
@@ -220,11 +221,13 @@ function DashboardContent() {
 function App() {
   return (
     <ThemeProvider>
-      <ChartModalProvider>
-        <SymbolPreviewProvider>
-          <DashboardContent />
-        </SymbolPreviewProvider>
-      </ChartModalProvider>
+      <SettingsProvider>
+        <ChartModalProvider>
+          <SymbolPreviewProvider>
+            <DashboardContent />
+          </SymbolPreviewProvider>
+        </ChartModalProvider>
+      </SettingsProvider>
     </ThemeProvider>
   );
 }

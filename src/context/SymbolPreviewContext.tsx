@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
 import { toTradingViewSymbol } from '../utils/tradingView';
-import { config } from '../config';
+import { useSettings } from './SettingsContext';
 
 interface PreviewState {
   open: boolean;
@@ -12,8 +12,6 @@ interface PreviewState {
 
 interface SymbolPreviewContextValue {
   preview: PreviewState;
-  enableHoverPreview: boolean;
-  setEnableHoverPreview: (val: boolean) => void;
   onMouseEnterLink: (rawSym: string, name: string, rect: DOMRect) => void;
   onMouseLeaveLink: () => void;
   onMouseEnterPreview: () => void;
@@ -33,16 +31,7 @@ const SymbolPreviewContext = createContext<SymbolPreviewContextValue | null>(nul
 
 export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
   const [preview, setPreview] = useState<PreviewState>(closedState);
-  const [enableHoverPreview, setEnableHoverPreviewState] = useState<boolean>(() => {
-    const stored = localStorage.getItem('enableHoverPreview');
-    if (stored !== null) return stored === 'true';
-    return config.tradingView.enableHoverPreview;
-  });
-
-  const setEnableHoverPreview = useCallback((val: boolean) => {
-    setEnableHoverPreviewState(val);
-    localStorage.setItem('enableHoverPreview', String(val));
-  }, []);
+  const { enableHoverPreview } = useSettings();
 
   const showTimeoutRef = useRef<any>(null);
   const hideTimeoutRef = useRef<any>(null);
@@ -134,8 +123,6 @@ export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
     <SymbolPreviewContext.Provider
       value={{
         preview,
-        enableHoverPreview,
-        setEnableHoverPreview,
         onMouseEnterLink,
         onMouseLeaveLink,
         onMouseEnterPreview,

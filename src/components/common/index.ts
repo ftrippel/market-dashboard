@@ -7,6 +7,7 @@ export { MarketTable } from './MarketTable';
 export { Section } from './Section';
 export { Toast } from './Toast';
 export { Sparkline } from './Sparkline';
+export { Sparkbar } from './Sparkbar';
 export { PctCell, BpsCell } from './PctCell';
 export { FormattedNumberInput } from './FormattedNumberInput';
 export { TradingViewModal, SymbolLink } from './TradingViewModal';

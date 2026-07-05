@@ -3,6 +3,8 @@ import { getDisplayName, getSymbolMeta } from '../../data/symbolMeta';
 import { colors, formatPrice, formatHoverTimestamp } from '../../utils/formatting';
 import type { Holding, MarketData, MarketTableOptions } from '../../types';
 import { Sparkline } from './Sparkline';
+import { Sparkbar } from './Sparkbar';
+import { useSettings } from '../../context/SettingsContext';
 import { BpsCell, PctCell } from './PctCell';
 import { Icon } from './Icon';
 import { SymbolLink } from './TradingViewModal';
@@ -146,6 +148,9 @@ export const MarketTable: React.FC<MarketTableProps> = ({
   priceLabel = 'Price',
   maxRows,
 }) => {
+  const { sparklineMode } = useSettings();
+  const shouldShowSpark = showSpark && sparklineMode !== 'none';
+
   const [holdingsFlyout, setHoldingsFlyout] = useState<{
     sym: string;
     displayName: string;
@@ -230,7 +235,7 @@ export const MarketTable: React.FC<MarketTableProps> = ({
             order={sort.order}
             onSort={handleSort}
           />
-          {showSpark && <th style={{ ...thStyle, textAlign: 'center' }}>5D</th>}
+          {shouldShowSpark && <th style={{ ...thStyle, textAlign: 'center' }}>5D</th>}
           {showTrend && (
             <SortableHeader
               label="Trend"
@@ -296,9 +301,13 @@ export const MarketTable: React.FC<MarketTableProps> = ({
                 <td style={{ ...tdStyle, textAlign: 'right' }}>
                   {isYield ? <BpsCell value={item.ytd} maxBps={100} /> : <PctCell value={item.ytd} maxPct={20} />}
                 </td>
-                {showSpark && (
+                 {shouldShowSpark && (
                   <td style={{ ...tdStyle, textAlign: 'center', padding: '4px 8px' }}>
-                    <Sparkline data={item.spark ?? []} />
+                    {sparklineMode === 'bar' ? (
+                      <Sparkbar data={item.spark ?? []} />
+                    ) : (
+                      <Sparkline data={item.spark ?? []} />
+                    )}
                   </td>
                 )}
                 {showTrend && (

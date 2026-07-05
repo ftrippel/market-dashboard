@@ -36,8 +36,16 @@ export const Sparkline: React.FC<SparklineProps> = ({ data, positive }) => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    const w = canvas.width;
-    const h = canvas.height;
+    const dpr = window.devicePixelRatio || 1;
+    const w = 64;
+    const h = 26;
+
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    canvas.style.width = `${w}px`;
+    canvas.style.height = `${h}px`;
+
+    ctx.scale(dpr, dpr);
 
     ctx.clearRect(0, 0, w, h);
 
@@ -46,8 +54,8 @@ export const Sparkline: React.FC<SparklineProps> = ({ data, positive }) => {
     const range = max - min || 1;
 
     const points = data.map((v, i) => ({
-      x: (i / (data.length - 1)) * (w - 2) + 1,
-      y: h - ((v - min) / range) * (h - 4) - 2,
+      x: Math.round((i / (data.length - 1)) * (w - 2) + 1),
+      y: Math.round(h - ((v - min) / range) * (h - 4) - 2),
     }));
 
     ctx.beginPath();
@@ -76,8 +84,6 @@ export const Sparkline: React.FC<SparklineProps> = ({ data, positive }) => {
   return (
     <canvas
       ref={canvasRef}
-      width={64}
-      height={26}
       style={{
         display: 'inline-block',
         verticalAlign: 'middle',

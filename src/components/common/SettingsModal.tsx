@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useSymbolPreview } from '../../context/SymbolPreviewContext';
+import { useSettings } from '../../context/SettingsContext';
 import { Icon } from './Icon';
 
 interface SettingsModalProps {
@@ -8,7 +8,7 @@ interface SettingsModalProps {
 }
 
 export function SettingsModal({ open, onClose }: SettingsModalProps) {
-  const { enableHoverPreview, setEnableHoverPreview } = useSymbolPreview();
+  const { enableHoverPreview, setEnableHoverPreview, sparklineMode, setSparklineMode } = useSettings();
 
   useEffect(() => {
     if (!open) return;
@@ -117,6 +117,46 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
           <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
             When enabled, hovering over any financial ticker symbol displays a 1-year daily historical line chart.
           </p>
+
+          <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+                userSelect: 'none',
+              }}
+            >
+              <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+                Sparkline Display
+              </span>
+              <select
+                value={sparklineMode}
+                onChange={(e) => setSparklineMode(e.target.value as any)}
+                style={{
+                  background: 'var(--bg2)',
+                  color: 'var(--text)',
+                  border: '1px solid var(--border2)',
+                  borderRadius: '4px',
+                  padding: '4px 8px',
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  outline: 'none',
+                }}
+              >
+                <option value="line">Line Chart</option>
+                <option value="bar">Bar Chart</option>
+                <option value="none">Disabled</option>
+              </select>
+            </label>
+            <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+              Choose the visualization style for 5-day price changes in the market tables, or disable it completely.
+            </p>
+          </div>
         </div>
 
         <div
