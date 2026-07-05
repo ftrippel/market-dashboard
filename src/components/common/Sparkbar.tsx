@@ -45,10 +45,10 @@ export const Sparkbar: React.FC<SparkbarProps> = ({ data, positive }) => {
       const absVal = Math.abs(v);
       const barHeight = Math.max(1, Math.round((absVal / maxAbs) * maxBarHeight));
 
-      // Calculate exact integer boundaries and subtract 1px for a minimal gap
-      const xStart = Math.round(i * colWidth);
-      const xEnd = Math.round((i + 1) * colWidth);
-      const barWidth = xEnd - xStart - 1;
+      // Calculate exact integer boundaries and pad by 2px on each side for a centered gap
+      const xStart = Math.round(i * colWidth) + 2;
+      const xEnd = Math.round((i + 1) * colWidth) - 2;
+      const barWidth = xEnd - xStart;
 
       const barIsPositive = v >= 0;
       const barColor = barIsPositive ? greenColor : redColor;
