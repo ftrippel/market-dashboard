@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-05T00:55:40Z",
+  "generated_at": "2026-07-05T07:14:26Z",
   "futures": [
     {
       "sym": "ES1!",
@@ -77,19 +77,19 @@
   "dxvix": [
     {
       "sym": "DX-Y.NYB",
-      "price": 100.857,
-      "d1": -0.0,
-      "w1": -0.5,
-      "hi52": -0.93,
+      "price": 100.86,
+      "d1": -0.52,
+      "w1": -0.56,
+      "hi52": -0.92,
       "ytd": 2.48,
       "spark": [
+        -0.07,
         -0.25,
         0.08,
         0.2,
-        -0.52,
-        -0.0
+        -0.52
       ],
-      "updatedAt": 1783036800000,
+      "updatedAt": 1782950400000,
       "ema_uptrend": true,
       "name": "ICE US Dollar Index - Index - C"
     },
@@ -381,6 +381,24 @@
       "updatedAt": 1783062029000,
       "ema_uptrend": false,
       "name": "SSE Composite Index"
+    },
+    {
+      "sym": "000300.SS",
+      "price": 4842.1699,
+      "d1": 0.62,
+      "w1": -0.54,
+      "hi52": -4.39,
+      "ytd": 2.64,
+      "spark": [
+        1.21,
+        1.07,
+        -0.41,
+        -2.96,
+        0.62
+      ],
+      "updatedAt": 1783062029000,
+      "ema_uptrend": true,
+      "name": "CSI 300 Index"
     },
     {
       "sym": "^HSI",
@@ -3224,76 +3242,76 @@
   "crypto": [
     {
       "sym": "BTC",
-      "price": 62916.3203,
-      "d1": 0.59,
-      "w1": 4.62,
-      "hi52": -50.14,
-      "ytd": -29.09,
+      "price": 62681.0781,
+      "d1": 0.22,
+      "w1": 4.23,
+      "hi52": -50.33,
+      "ytd": -29.36,
       "spark": [
         -2.63,
         2.47,
         2.47,
         1.72,
-        0.59
+        0.22
       ],
-      "updatedAt": 1783212975711,
+      "updatedAt": 1783235723270,
       "ema_uptrend": false,
       "id": "bitcoin",
       "name": "Bitcoin"
     },
     {
       "sym": "ETH",
-      "price": 1770.39,
-      "d1": 0.79,
-      "w1": 9.95,
-      "hi52": -64.26,
-      "ytd": -40.99,
+      "price": 1760.7,
+      "d1": 0.24,
+      "w1": 9.35,
+      "hi52": -64.46,
+      "ytd": -41.32,
       "spark": [
         -2.52,
         2.51,
         5.54,
         3.44,
-        0.79
+        0.24
       ],
-      "updatedAt": 1783212975713,
+      "updatedAt": 1783235723272,
       "ema_uptrend": false,
       "id": "ethereum",
       "name": "Ethereum"
     },
     {
       "sym": "SOL",
-      "price": 81.13,
-      "d1": -1.4,
-      "w1": 8.25,
-      "hi52": -67.96,
-      "ytd": -36.0,
+      "price": 80.34,
+      "d1": -2.36,
+      "w1": 7.2,
+      "hi52": -68.27,
+      "ytd": -36.62,
       "spark": [
         -1.9,
         5.25,
         4.21,
         2.03,
-        -1.4
+        -2.36
       ],
-      "updatedAt": 1783212975714,
+      "updatedAt": 1783235723273,
       "ema_uptrend": true,
       "id": "solana",
       "name": "Solana"
     },
     {
       "sym": "XRP",
-      "price": 1.1473,
-      "d1": 1.18,
-      "w1": 8.52,
-      "hi52": -68.57,
-      "ytd": -38.91,
+      "price": 1.1358,
+      "d1": 0.16,
+      "w1": 7.43,
+      "hi52": -68.88,
+      "ytd": -39.52,
       "spark": [
         -1.78,
         1.32,
         3.26,
         4.37,
-        1.18
+        0.16
       ],
-      "updatedAt": 1783212975716,
+      "updatedAt": 1783235723274,
       "ema_uptrend": false,
       "id": "ripple",
       "name": "Ripple"
@@ -10248,8 +10266,8 @@
       "new_highs": 86,
       "new_lows": 2
     },
-    "pct_above_sma20": 68.3,
-    "pct_above_sma50": 67.5,
+    "pct_above_sma20": 68.1,
+    "pct_above_sma50": 67.3,
     "pct_above_sma200": 67.6
   }
 }
