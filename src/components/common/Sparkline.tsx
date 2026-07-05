@@ -5,6 +5,7 @@ import { useTheme } from '../../context/ThemeContext';
 interface SparklineProps {
   data: number[];
   positive?: boolean;
+  showGradient?: boolean;
 }
 
 function hexToRgba(hex: string, alpha: number): string {
@@ -24,7 +25,7 @@ function colorWithAlpha(color: string, alpha: number): string {
   return color;
 }
 
-export const Sparkline: React.FC<SparklineProps> = ({ data, positive }) => {
+export const Sparkline: React.FC<SparklineProps> = ({ data, positive, showGradient = false }) => {
   const { theme } = useTheme();
   const isPositive = positive ?? (data.length > 0 ? data[data.length - 1] >= 0 : true);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -80,24 +81,26 @@ export const Sparkline: React.FC<SparklineProps> = ({ data, positive }) => {
       const segmentIsPositive = val >= 0;
       const segmentColor = segmentIsPositive ? greenColor : redColor;
 
-      // Fill polygon under/above baseline
-      ctx.beginPath();
-      ctx.moveTo(p1.x, p1.y);
-      ctx.lineTo(p2.x, p2.y);
-      ctx.lineTo(p2.x, yBaseline);
-      ctx.lineTo(p1.x, yBaseline);
-      ctx.closePath();
+      // Fill polygon under/above baseline if showGradient is enabled
+      if (showGradient) {
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.lineTo(p2.x, yBaseline);
+        ctx.lineTo(p1.x, yBaseline);
+        ctx.closePath();
 
-      const gradient = ctx.createLinearGradient(0, Math.min(p1.y, p2.y, yBaseline), 0, Math.max(p1.y, p2.y, yBaseline));
-      if (segmentIsPositive) {
-        gradient.addColorStop(0, colorWithAlpha(segmentColor, 0.2));
-        gradient.addColorStop(1, colorWithAlpha(segmentColor, 0));
-      } else {
-        gradient.addColorStop(0, colorWithAlpha(segmentColor, 0));
-        gradient.addColorStop(1, colorWithAlpha(segmentColor, 0.2));
+        const gradient = ctx.createLinearGradient(0, Math.min(p1.y, p2.y, yBaseline), 0, Math.max(p1.y, p2.y, yBaseline));
+        if (segmentIsPositive) {
+          gradient.addColorStop(0, colorWithAlpha(segmentColor, 0.2));
+          gradient.addColorStop(1, colorWithAlpha(segmentColor, 0));
+        } else {
+          gradient.addColorStop(0, colorWithAlpha(segmentColor, 0));
+          gradient.addColorStop(1, colorWithAlpha(segmentColor, 0.2));
+        }
+        ctx.fillStyle = gradient;
+        ctx.fill();
       }
-      ctx.fillStyle = gradient;
-      ctx.fill();
 
       // Stroke segment line
       ctx.beginPath();
@@ -107,7 +110,7 @@ export const Sparkline: React.FC<SparklineProps> = ({ data, positive }) => {
       ctx.lineWidth = 1.5;
       ctx.stroke();
     }
-  }, [data, isPositive, theme]);
+  }, [data, isPositive, theme, showGradient]);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
