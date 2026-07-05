@@ -35,7 +35,6 @@ export const Sparkbar: React.FC<SparkbarProps> = ({ data, positive }) => {
 
     const maxAbs = Math.max(...data.map(Math.abs)) || 1;
     const colWidth = w / data.length;
-    const barWidth = 8;
     const greenColor = getThemeColor('green');
     const redColor = getThemeColor('red');
 
@@ -45,7 +44,11 @@ export const Sparkbar: React.FC<SparkbarProps> = ({ data, positive }) => {
     data.forEach((v, i) => {
       const absVal = Math.abs(v);
       const barHeight = Math.max(1, Math.round((absVal / maxAbs) * maxBarHeight));
-      const x = Math.round(i * colWidth + (colWidth - barWidth) / 2);
+
+      // Calculate exact integer boundaries and subtract 1px for a minimal gap
+      const xStart = Math.round(i * colWidth);
+      const xEnd = Math.round((i + 1) * colWidth);
+      const barWidth = xEnd - xStart - 1;
 
       const barIsPositive = v >= 0;
       const barColor = barIsPositive ? greenColor : redColor;
@@ -53,7 +56,7 @@ export const Sparkbar: React.FC<SparkbarProps> = ({ data, positive }) => {
       const y = barIsPositive ? Math.round(yBaseline - barHeight) : Math.round(yBaseline);
 
       ctx.fillStyle = barColor;
-      ctx.fillRect(x, y, barWidth, barHeight);
+      ctx.fillRect(xStart, y, barWidth, barHeight);
     });
   }, [data, isPositive, theme]);
 
