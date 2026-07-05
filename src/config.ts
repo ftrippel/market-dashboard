@@ -14,6 +14,8 @@ export const config = {
   tradingView: {
     /** Enable hover preview chart (enabled by default). */
     enableHoverPreview: true,
+    /** Enable display name / symbol underlining (disabled by default). */
+    enableUnderline: false,
   },
 } as const;
 

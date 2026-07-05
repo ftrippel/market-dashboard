@@ -3,6 +3,7 @@ import { useChartModal } from '../../context/ChartModalContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useSymbolPreview } from '../../context/SymbolPreviewContext';
 import { colors } from '../../utils/formatting';
+import { config } from '../../config';
 import { Icon } from './Icon';
 import { TradingViewAdvancedChart } from './TradingViewAdvancedChart';
 
@@ -168,7 +169,9 @@ export function SymbolLink({
         fontWeight: 500,
         fontSize: '12px',
         fontFamily: 'inherit',
-        borderBottom: `1px dotted ${colors.linkUnderline}`,
+        borderBottom: config.tradingView.enableUnderline
+          ? `1px dotted ${colors.linkUnderline}`
+          : 'none',
       }}
     >
       {flag ? `${flag} ` : ''}
