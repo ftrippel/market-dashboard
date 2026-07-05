@@ -50,36 +50,63 @@ export const Sparkline: React.FC<SparklineProps> = ({ data, positive }) => {
 
     ctx.clearRect(0, 0, w, h);
 
-    const min = Math.min(...data);
-    const max = Math.max(...data);
-    const range = max - min || 1;
+    const maxAbs = Math.max(...data.map(Math.abs)) || 1;
+    const yBaseline = h / 2;
+    const maxBarHeight = yBaseline - 2;
+
+    const greenColor = getThemeColor('green');
+    const redColor = getThemeColor('red');
 
     const points = data.map((v, i) => ({
       x: Math.round((i / (data.length - 1)) * (w - 2) + 1),
-      y: Math.round(h - ((v - min) / range) * (h - 4) - 2),
+      y: Math.round(yBaseline - (v / maxAbs) * maxBarHeight),
     }));
 
+    // 1. Draw zero baseline
     ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    points.slice(1).forEach((p) => ctx.lineTo(p.x, p.y));
-    ctx.lineTo(points[points.length - 1].x, h);
-    ctx.lineTo(points[0].x, h);
-    ctx.closePath();
-
-    const gradient = ctx.createLinearGradient(0, 0, 0, h);
-    const color = getThemeColor(isPositive ? 'green' : 'red');
-    const fade = getThemeColor('bg');
-    gradient.addColorStop(0, colorWithAlpha(color, 0.25));
-    gradient.addColorStop(1, colorWithAlpha(fade, 0));
-    ctx.fillStyle = gradient;
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.moveTo(points[0].x, points[0].y);
-    points.slice(1).forEach((p) => ctx.lineTo(p.x, p.y));
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 1.5;
+    ctx.moveTo(0, yBaseline);
+    ctx.lineTo(w, yBaseline);
+    ctx.strokeStyle = getThemeColor('border2');
+    ctx.lineWidth = 1;
+    ctx.setLineDash([2, 2]);
     ctx.stroke();
+    ctx.setLineDash([]);
+
+    // 2. Draw each segment (fill & stroke)
+    for (let i = 0; i < points.length - 1; i++) {
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const val = data[i + 1];
+      const segmentIsPositive = val >= 0;
+      const segmentColor = segmentIsPositive ? greenColor : redColor;
+
+      // Fill polygon under/above baseline
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.lineTo(p2.x, yBaseline);
+      ctx.lineTo(p1.x, yBaseline);
+      ctx.closePath();
+
+      const gradient = ctx.createLinearGradient(0, Math.min(p1.y, p2.y, yBaseline), 0, Math.max(p1.y, p2.y, yBaseline));
+      if (segmentIsPositive) {
+        gradient.addColorStop(0, colorWithAlpha(segmentColor, 0.2));
+        gradient.addColorStop(1, colorWithAlpha(segmentColor, 0));
+      } else {
+        gradient.addColorStop(0, colorWithAlpha(segmentColor, 0));
+        gradient.addColorStop(1, colorWithAlpha(segmentColor, 0.2));
+      }
+      ctx.fillStyle = gradient;
+      ctx.fill();
+
+      // Stroke segment line
+      ctx.beginPath();
+      ctx.moveTo(p1.x, p1.y);
+      ctx.lineTo(p2.x, p2.y);
+      ctx.strokeStyle = segmentColor;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+    }
   }, [data, isPositive, theme]);
 
   const handleMouseMove = (event: React.MouseEvent<HTMLCanvasElement>) => {
