@@ -150,6 +150,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               >
                 <option value="line">Line Chart</option>
                 <option value="bar">Bar Chart</option>
+                <option value="dot">Dot Chart</option>
                 <option value="none">Disabled</option>
               </select>
             </label>

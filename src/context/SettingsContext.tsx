@@ -1,7 +1,7 @@
 import React, { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
 import { config } from '../config';
 
-export type SparklineMode = 'none' | 'line' | 'bar';
+export type SparklineMode = 'none' | 'line' | 'bar' | 'dot';
 
 interface SettingsContextValue {
   enableHoverPreview: boolean;
@@ -21,7 +21,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
   const [sparklineMode, setSparklineModeState] = useState<SparklineMode>(() => {
     const stored = localStorage.getItem('sparklineMode') as SparklineMode | null;
-    if (stored === 'none' || stored === 'line' || stored === 'bar') return stored;
+    if (stored === 'none' || stored === 'line' || stored === 'bar' || stored === 'dot') return stored;
     return 'line'; // default to line
   });
 

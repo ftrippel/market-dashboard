@@ -4,6 +4,7 @@ import { colors, formatPrice, formatHoverTimestamp } from '../../utils/formattin
 import type { Holding, MarketData, MarketTableOptions } from '../../types';
 import { Sparkline } from './Sparkline';
 import { Sparkbar } from './Sparkbar';
+import { Sparkdots } from './Sparkdots';
 import { useSettings } from '../../context/SettingsContext';
 import { BpsCell, PctCell } from './PctCell';
 import { Icon } from './Icon';
@@ -305,6 +306,8 @@ export const MarketTable: React.FC<MarketTableProps> = ({
                   <td style={{ ...tdStyle, textAlign: 'center', padding: '4px 8px' }}>
                     {sparklineMode === 'bar' ? (
                       <Sparkbar data={item.spark ?? []} />
+                    ) : sparklineMode === 'dot' ? (
+                      <Sparkdots data={item.spark ?? []} />
                     ) : (
                       <Sparkline data={item.spark ?? []} />
                     )}

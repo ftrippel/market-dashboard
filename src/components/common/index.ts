@@ -8,6 +8,7 @@ export { Section } from './Section';
 export { Toast } from './Toast';
 export { Sparkline } from './Sparkline';
 export { Sparkbar } from './Sparkbar';
+export { Sparkdots } from './Sparkdots';
 export { PctCell, BpsCell } from './PctCell';
 export { FormattedNumberInput } from './FormattedNumberInput';
 export { TradingViewModal, SymbolLink } from './TradingViewModal';
