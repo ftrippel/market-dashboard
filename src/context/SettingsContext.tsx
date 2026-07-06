@@ -2,10 +2,13 @@ import React, { createContext, useCallback, useContext, useState, type ReactNode
 import { config } from '../config';
 
 export type SparklineMode = 'none' | 'line' | 'bar' | 'dot';
+export type HoverPreviewPlacement = 'above-below' | 'left-right';
 
 interface SettingsContextValue {
   enableHoverPreview: boolean;
   setEnableHoverPreview: (val: boolean) => void;
+  hoverPreviewPlacement: HoverPreviewPlacement;
+  setHoverPreviewPlacement: (placement: HoverPreviewPlacement) => void;
   sparklineMode: SparklineMode;
   setSparklineMode: (mode: SparklineMode) => void;
 }
@@ -19,6 +22,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     return config.tradingView.enableHoverPreview;
   });
 
+  const [hoverPreviewPlacement, setHoverPreviewPlacementState] = useState<HoverPreviewPlacement>(() => {
+    const stored = localStorage.getItem('hoverPreviewPlacement') as HoverPreviewPlacement | null;
+    if (stored === 'above-below' || stored === 'left-right') return stored;
+    return 'above-below';
+  });
+
   const [sparklineMode, setSparklineModeState] = useState<SparklineMode>(() => {
     const stored = localStorage.getItem('sparklineMode') as SparklineMode | null;
     if (stored === 'none' || stored === 'line' || stored === 'bar' || stored === 'dot') return stored;
@@ -28,6 +37,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const setEnableHoverPreview = useCallback((val: boolean) => {
     setEnableHoverPreviewState(val);
     localStorage.setItem('enableHoverPreview', String(val));
+  }, []);
+
+  const setHoverPreviewPlacement = useCallback((placement: HoverPreviewPlacement) => {
+    setHoverPreviewPlacementState(placement);
+    localStorage.setItem('hoverPreviewPlacement', placement);
   }, []);
 
   const setSparklineMode = useCallback((mode: SparklineMode) => {
@@ -40,6 +54,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       value={{
         enableHoverPreview,
         setEnableHoverPreview,
+        hoverPreviewPlacement,
+        setHoverPreviewPlacement,
         sparklineMode,
         setSparklineMode,
       }}

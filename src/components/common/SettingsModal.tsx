@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useSettings } from '../../context/SettingsContext';
+import { useSettings, type HoverPreviewPlacement } from '../../context/SettingsContext';
 import { Icon } from './Icon';
 
 interface SettingsModalProps {
@@ -8,7 +8,14 @@ interface SettingsModalProps {
 }
 
 export function SettingsModal({ open, onClose }: SettingsModalProps) {
-  const { enableHoverPreview, setEnableHoverPreview, sparklineMode, setSparklineMode } = useSettings();
+  const {
+    enableHoverPreview,
+    setEnableHoverPreview,
+    hoverPreviewPlacement,
+    setHoverPreviewPlacement,
+    sparklineMode,
+    setSparklineMode,
+  } = useSettings();
 
   useEffect(() => {
     if (!open) return;
@@ -117,6 +124,44 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
           <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
             When enabled, hovering over any financial ticker symbol displays a 1-year daily historical line chart.
           </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', opacity: enableHoverPreview ? 1 : 0.5 }}>
+            <label
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: enableHoverPreview ? 'pointer' : 'default',
+                userSelect: 'none',
+              }}
+            >
+              <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+                Hover Preview Position
+              </span>
+              <select
+                value={hoverPreviewPlacement}
+                onChange={(e) => setHoverPreviewPlacement(e.target.value as HoverPreviewPlacement)}
+                disabled={!enableHoverPreview}
+                style={{
+                  background: 'var(--bg2)',
+                  color: 'var(--text)',
+                  border: '1px solid var(--border2)',
+                  borderRadius: '4px',
+                  padding: '4px 8px',
+                  fontSize: '12px',
+                  fontWeight: 500,
+                  cursor: enableHoverPreview ? 'pointer' : 'default',
+                  outline: 'none',
+                }}
+              >
+                <option value="above-below">Above / Below</option>
+                <option value="left-right">Left / Right</option>
+              </select>
+            </label>
+            <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+              Choose whether the hover preview appears vertically (Above / Below) or horizontally (Left / Right) relative to the hovered item.
+            </p>
+          </div>
 
           <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
 

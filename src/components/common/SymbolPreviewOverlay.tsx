@@ -1,11 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSymbolPreview } from '../../context/SymbolPreviewContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useSettings } from '../../context/SettingsContext';
 import { TradingViewMiniChart } from './TradingViewMiniChart';
 
 export function SymbolPreviewOverlay() {
   const { preview, onMouseEnterPreview, onMouseLeavePreview } = useSymbolPreview();
   const { theme } = useTheme();
+  const { hoverPreviewPlacement } = useSettings();
   const [style, setStyle] = useState<React.CSSProperties>({ display: 'none' });
   const [chartReady, setChartReady] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -21,20 +23,48 @@ export function SymbolPreviewOverlay() {
     const overlayHeight = 240;
     const rect = preview.anchorRect;
 
-    // Calculate horizontal center
-    const linkCenter = rect.left + rect.width / 2;
-    let left = linkCenter - overlayWidth / 2;
-    // Clamp to screen viewport boundaries
-    left = Math.max(10, Math.min(left, window.innerWidth - overlayWidth - 10));
+    let left = 0;
+    let top = 0;
+    let origin = 'bottom center';
 
-    // Calculate vertical position (default above the link)
-    let top = rect.top - overlayHeight - 8;
-    let placeBelow = false;
+    if (hoverPreviewPlacement === 'left-right') {
+      // Calculate vertical position (centered relative to the link)
+      const linkMiddle = rect.top + rect.height / 2;
+      top = linkMiddle - overlayHeight / 2;
+      // Clamp to screen viewport boundaries vertically
+      top = Math.max(10, Math.min(top, window.innerHeight - overlayHeight - 10));
 
-    if (top < 10) {
-      // Not enough space above, place below the link
-      top = rect.bottom + 8;
-      placeBelow = true;
+      // Calculate horizontal position (default to the right of the link)
+      left = rect.right + 8;
+      let placeLeft = false;
+
+      if (left + overlayWidth > window.innerWidth - 10) {
+        // Not enough space to the right, place to the left of the link
+        left = rect.left - overlayWidth - 8;
+        placeLeft = true;
+      }
+
+      // Clamp left horizontally
+      left = Math.max(10, Math.min(left, window.innerWidth - overlayWidth - 10));
+      origin = placeLeft ? 'center right' : 'center left';
+    } else {
+      // above-below (default)
+      // Calculate horizontal center
+      const linkCenter = rect.left + rect.width / 2;
+      left = linkCenter - overlayWidth / 2;
+      // Clamp to screen viewport boundaries horizontally
+      left = Math.max(10, Math.min(left, window.innerWidth - overlayWidth - 10));
+
+      // Calculate vertical position (default above the link)
+      top = rect.top - overlayHeight - 8;
+      let placeBelow = false;
+
+      if (top < 10) {
+        // Not enough space above, place below the link
+        top = rect.bottom + 8;
+        placeBelow = true;
+      }
+      origin = placeBelow ? 'top center' : 'bottom center';
     }
 
     setStyle({
@@ -46,9 +76,9 @@ export function SymbolPreviewOverlay() {
       zIndex: 10000,
       display: 'flex',
       flexDirection: 'column',
-      transformOrigin: placeBelow ? 'top center' : 'bottom center',
+      transformOrigin: origin,
     });
-  }, [preview.open, preview.anchorRect]);
+  }, [preview.open, preview.anchorRect, hoverPreviewPlacement]);
 
   if (!preview.open) return null;
 
