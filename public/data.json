@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-11T06:53:16Z",
+  "generated_at": "2026-07-11T12:25:14Z",
   "futures": [
     {
       "sym": "ES1!",
@@ -3332,30 +3332,30 @@
   "crypto": [
     {
       "sym": "BTC",
-      "price": 64151.9883,
-      "d1": 0.04,
-      "w1": 0.25,
-      "hi52": -49.17,
-      "ytd": -27.7,
+      "price": 64133.1484,
+      "d1": 0.01,
+      "w1": 0.22,
+      "hi52": -49.18,
+      "ytd": -27.72,
       "spark": [
         -1.09,
         -1.64,
         1.5,
         1.48,
-        0.04
+        0.01
       ],
-      "updatedAt": 1783752837730,
+      "updatedAt": 1783772753117,
       "ema_uptrend": true,
       "id": "bitcoin",
       "name": "Bitcoin"
     },
     {
       "sym": "ETH",
-      "price": 1797.7,
+      "price": 1797.6,
       "d1": 0.11,
-      "w1": 0.01,
+      "w1": 0.0,
       "hi52": -63.71,
-      "ytd": -40.08,
+      "ytd": -40.09,
       "spark": [
         -1.62,
         -1.46,
@@ -3363,7 +3363,7 @@
         2.94,
         0.11
       ],
-      "updatedAt": 1783752837731,
+      "updatedAt": 1783772753118,
       "ema_uptrend": true,
       "id": "ethereum",
       "name": "Ethereum"
@@ -3382,26 +3382,26 @@
         0.03,
         -0.12
       ],
-      "updatedAt": 1783752837733,
+      "updatedAt": 1783772753120,
       "ema_uptrend": true,
       "id": "solana",
       "name": "Solana"
     },
     {
       "sym": "XRP",
-      "price": 1.1064,
-      "d1": 0.22,
-      "w1": -3.27,
-      "hi52": -69.69,
-      "ytd": -41.08,
+      "price": 1.1078,
+      "d1": 0.35,
+      "w1": -3.15,
+      "hi52": -69.65,
+      "ytd": -41.01,
       "spark": [
         -2.8,
         -1.96,
         0.31,
         0.97,
-        0.22
+        0.35
       ],
-      "updatedAt": 1783752837734,
+      "updatedAt": 1783772753122,
       "ema_uptrend": false,
       "id": "ripple",
       "name": "Ripple"
