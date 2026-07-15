@@ -1,75 +1,75 @@
 {
-  "generated_at": "2026-07-15T00:39:44Z",
+  "generated_at": "2026-07-15T06:53:30Z",
   "futures": [
     {
       "sym": "ES1!",
-      "price": 7602.5,
-      "d1": 0.52,
-      "w1": 0.68,
-      "hi52": -0.39,
-      "ytd": 10.17,
+      "price": 7607.5,
+      "d1": 0.21,
+      "w1": 1.05,
+      "hi52": -0.32,
+      "ytd": 10.25,
       "spark": [
-        -0.3,
         0.8,
         0.42,
         -0.75,
-        0.52
+        0.37,
+        0.21
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1784098448643,
       "ema_uptrend": true,
       "name": "E-Mini S&P 500 Sep 26"
     },
     {
       "sym": "NQ1!",
-      "price": 29920.5,
-      "d1": 1.51,
-      "w1": 1.8,
-      "hi52": -3.38,
-      "ytd": 17.87,
+      "price": 30021.0,
+      "d1": 0.77,
+      "w1": 1.87,
+      "hi52": -3.06,
+      "ytd": 18.26,
       "spark": [
-        0.26,
         1.59,
         0.32,
         -1.85,
-        1.51
+        1.07,
+        0.77
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1784098448644,
       "ema_uptrend": true,
       "name": "Nasdaq 100 Sep 26"
     },
     {
       "sym": "RTY1!",
-      "price": 2982.0,
-      "d1": 0.39,
-      "w1": -0.56,
-      "hi52": -2.82,
-      "ytd": 18.22,
+      "price": 2984.0,
+      "d1": 0.14,
+      "w1": 0.42,
+      "hi52": -2.75,
+      "ytd": 18.3,
       "spark": [
-        -0.91,
         1.24,
         -0.48,
         -0.79,
-        0.39
+        0.32,
+        0.14
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1784098448645,
       "ema_uptrend": true,
       "name": "E-mini Russell 2000 Index Futur"
     },
     {
       "sym": "YM1!",
-      "price": 52830.0,
-      "d1": 0.13,
-      "w1": -0.69,
-      "hi52": -1.54,
-      "ytd": 8.67,
+      "price": 52815.0,
+      "d1": 0.05,
+      "w1": 0.36,
+      "hi52": -1.57,
+      "ytd": 8.64,
       "spark": [
-        -1.08,
         0.26,
         0.27,
         -0.27,
-        0.13
+        0.05,
+        0.05
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1784098448647,
       "ema_uptrend": true,
       "name": "Mini Dow Jones Indus.-$5 Sep 26"
     }
@@ -77,37 +77,37 @@
   "dxvix": [
     {
       "sym": "DX-Y.NYB",
-      "price": 100.853,
-      "d1": -0.42,
-      "w1": -0.28,
-      "hi52": -0.93,
-      "ytd": 2.47,
+      "price": 100.792,
+      "d1": -0.48,
+      "w1": -0.34,
+      "hi52": -0.99,
+      "ytd": 2.41,
       "spark": [
         -0.09,
         -0.11,
         0.03,
         0.31,
-        -0.42
+        -0.48
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1784098447305,
       "ema_uptrend": true,
       "name": "ICE US Dollar Index - Index - C"
     },
     {
       "sym": "CBOE:VIX",
-      "price": 16.5,
-      "d1": -3.85,
-      "w1": 2.29,
-      "hi52": -53.26,
-      "ytd": 13.71,
+      "price": 17.16,
+      "d1": 14.17,
+      "w1": 10.21,
+      "hi52": -51.39,
+      "ytd": 18.26,
       "spark": [
+        3.6,
         4.77,
         -6.27,
         -5.11,
-        14.17,
-        -3.85
+        14.17
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
       "name": "CBOE Volatility Index"
     }
@@ -115,91 +115,91 @@
   "metals": [
     {
       "sym": "GC1!",
-      "price": 4063.3,
-      "d1": 1.66,
-      "w1": -1.98,
-      "hi52": -27.26,
-      "ytd": -5.82,
+      "price": 4037.3,
+      "d1": -0.59,
+      "w1": -0.83,
+      "hi52": -27.73,
+      "ytd": -6.42,
       "spark": [
-        -1.79,
         1.47,
         -0.64,
         -2.61,
-        1.66
+        1.6,
+        -0.59
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1784098450077,
       "ema_uptrend": false,
       "name": "Gold Aug 26"
     },
     {
       "sym": "SI1!",
-      "price": 59.245,
-      "d1": 2.8,
-      "w1": -2.77,
-      "hi52": -51.16,
-      "ytd": -16.03,
+      "price": 58.58,
+      "d1": -0.33,
+      "w1": 0.72,
+      "hi52": -51.71,
+      "ytd": -16.97,
       "spark": [
-        -4.54,
         3.81,
         -0.94,
         -3.64,
-        2.8
+        1.97,
+        -0.33
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1784098450078,
       "ema_uptrend": false,
       "name": "Silver Jul 26"
     },
     {
       "sym": "HG1!",
-      "price": 6.3735,
-      "d1": 2.25,
-      "w1": 3.27,
-      "hi52": -4.19,
-      "ytd": 13.01,
+      "price": 6.3435,
+      "d1": 0.21,
+      "w1": 4.77,
+      "hi52": -4.64,
+      "ytd": 12.47,
       "spark": [
-        -1.9,
         2.65,
         0.3,
         -0.01,
-        2.25
+        1.56,
+        0.21
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
+      "updatedAt": 1784098450079,
+      "ema_uptrend": true,
       "name": "Copper Jul 26"
     },
     {
       "sym": "PL1!",
-      "price": 1650.7,
-      "d1": 3.03,
-      "w1": -0.03,
-      "hi52": -42.13,
-      "ytd": -22.35,
+      "price": 1642.3,
+      "d1": 0.66,
+      "w1": 4.18,
+      "hi52": -42.42,
+      "ytd": -22.74,
       "spark": [
-        -4.53,
         2.69,
         -0.04,
         -0.98,
-        3.03
+        1.83,
+        0.66
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1784098450081,
       "ema_uptrend": false,
       "name": "Platinum Jul 26"
     },
     {
       "sym": "PA1!",
-      "price": 1312.5,
-      "d1": 5.62,
-      "w1": 3.3,
-      "hi52": -39.51,
-      "ytd": -21.31,
+      "price": 1311.0,
+      "d1": 0.95,
+      "w1": 8.04,
+      "hi52": -39.58,
+      "ytd": -21.4,
       "spark": [
-        -4.5,
         2.51,
         1.8,
         -1.86,
-        5.62
+        4.5,
+        0.95
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1784098450082,
       "ema_uptrend": false,
       "name": "Palladium Sep 26"
     }
@@ -207,55 +207,55 @@
   "commod": [
     {
       "sym": "CL1!",
-      "price": 80.3,
-      "d1": 2.76,
-      "w1": 14.0,
-      "hi52": -32.79,
-      "ytd": 40.09,
+      "price": 79.67,
+      "d1": 0.42,
+      "w1": 8.37,
+      "hi52": -33.32,
+      "ytd": 38.99,
       "spark": [
-        4.37,
         -1.96,
         -0.93,
         9.42,
-        2.76
+        1.54,
+        0.42
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1784098451332,
       "ema_uptrend": false,
       "name": "Crude Oil Aug 26"
     },
     {
       "sym": "NG1!",
-      "price": 2.928,
-      "d1": 1.07,
-      "w1": -10.32,
-      "hi52": -62.59,
-      "ytd": -19.07,
+      "price": 2.908,
+      "d1": 0.14,
+      "w1": -9.46,
+      "hi52": -62.85,
+      "ytd": -19.62,
       "spark": [
-        -1.62,
         -6.23,
         -2.39,
         -1.46,
-        1.07
+        0.24,
+        0.14
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1784098451334,
       "ema_uptrend": false,
       "name": "Natural Gas Jul 26"
     },
     {
       "sym": "USO",
-      "price": 120.17,
-      "d1": 2.02,
-      "w1": 10.33,
-      "hi52": -22.01,
-      "ytd": 74.26,
+      "price": 117.79,
+      "d1": 8.36,
+      "w1": 12.88,
+      "hi52": -23.55,
+      "ytd": 70.81,
       "spark": [
+        4.38,
         3.02,
         -2.85,
         -0.28,
-        8.36,
-        2.02
+        8.36
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
       "name": "United States Oil Fund"
     }
@@ -312,109 +312,109 @@
   "global": [
     {
       "sym": "^N225",
-      "price": 68668.7891,
-      "d1": 2.12,
-      "w1": 0.6,
-      "hi52": -5.72,
-      "ytd": 32.48,
+      "price": 68751.5078,
+      "d1": 2.24,
+      "w1": 0.72,
+      "hi52": -5.6,
+      "ytd": 32.64,
       "spark": [
         -2.11,
         1.38,
         1.2,
         -1.92,
-        2.12
+        2.24
       ],
-      "updatedAt": 1784075080000,
+      "updatedAt": 1784097001000,
       "ema_uptrend": true,
       "name": "Nikkei 225"
     },
     {
       "sym": "^KS11",
-      "price": 7329.6699,
-      "d1": 7.68,
-      "w1": -4.27,
-      "hi52": -21.91,
-      "ytd": 70.08,
+      "price": 7284.4102,
+      "d1": 7.01,
+      "w1": -4.86,
+      "hi52": -22.39,
+      "ytd": 69.03,
       "spark": [
         -5.35,
         0.62,
         2.52,
         -8.95,
-        7.68
+        7.01
       ],
-      "updatedAt": 1784074780000,
+      "updatedAt": 1784097180000,
       "ema_uptrend": false,
       "name": "KOSPI Composite Index"
     },
     {
       "sym": "^NSEI",
-      "price": 24211.0,
-      "d1": 0.02,
-      "w1": -0.9,
-      "hi52": -8.2,
-      "ytd": -7.4,
+      "price": 24182.3008,
+      "d1": -0.12,
+      "w1": -0.89,
+      "hi52": -8.31,
+      "ytd": -7.51,
       "spark": [
-        -0.13,
         -2.12,
         0.34,
         1.02,
-        0.02
+        0.02,
+        -0.12
       ],
-      "updatedAt": 1784023267000,
+      "updatedAt": 1784098410000,
       "ema_uptrend": true,
       "name": "NIFTY 50"
     },
     {
       "sym": "000001.SS",
-      "price": 3913.7939,
-      "d1": -2.06,
-      "w1": -3.15,
-      "hi52": -8.1,
-      "ytd": -2.72,
+      "price": 3954.6548,
+      "d1": 1.04,
+      "w1": -0.89,
+      "hi52": -7.14,
+      "ytd": -1.71,
       "spark": [
-        -1.26,
         -0.49,
         1.65,
         -1.0,
-        -2.06
+        -2.06,
+        1.04
       ],
-      "updatedAt": 1784012429000,
+      "updatedAt": 1784097510000,
       "ema_uptrend": false,
       "name": "SSE Composite Index"
     },
     {
       "sym": "000300.SS",
-      "price": 4780.79,
-      "d1": -1.96,
-      "w1": -1.27,
-      "hi52": -5.6,
-      "ytd": 1.34,
+      "price": 4785.8394,
+      "d1": 0.11,
+      "w1": -1.16,
+      "hi52": -5.5,
+      "ytd": 1.44,
       "spark": [
-        -0.0,
         -1.03,
         -0.77,
         2.54,
-        -1.96
+        -1.96,
+        0.11
       ],
-      "updatedAt": 1784012429000,
+      "updatedAt": 1784097510000,
       "ema_uptrend": false,
       "name": "CSI 300 Index"
     },
     {
       "sym": "^HSI",
-      "price": 24213.7207,
-      "d1": 0.16,
-      "w1": 2.53,
-      "hi52": -13.7,
-      "ytd": -8.07,
+      "price": 24687.1992,
+      "d1": 1.96,
+      "w1": 5.07,
+      "hi52": -12.01,
+      "ytd": -6.27,
       "spark": [
-        -0.51,
         2.99,
         -0.7,
         0.6,
-        0.16
+        0.16,
+        1.96
       ],
-      "updatedAt": 1784016560000,
+      "updatedAt": 1784097510000,
       "ema_uptrend": false,
       "name": "HANG SENG INDEX"
     },
@@ -476,277 +476,295 @@
   "etfmain": [
     {
       "sym": "SPY",
-      "price": 751.83,
-      "d1": 0.36,
-      "w1": 0.55,
-      "hi52": -0.87,
-      "ytd": 10.64,
+      "price": 749.17,
+      "d1": -0.77,
+      "w1": -0.28,
+      "hi52": -1.22,
+      "ytd": 10.24,
       "spark": [
+        -0.48,
         -0.31,
         0.85,
         0.43,
-        -0.77,
-        0.36
+        -0.77
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
       "name": "State Street SPDR S&P 500 ETF T"
     },
     {
       "sym": "QQQ",
-      "price": 719.71,
-      "d1": 1.12,
-      "w1": 1.45,
-      "hi52": -3.76,
-      "ytd": 17.66,
+      "price": 711.74,
+      "d1": -1.9,
+      "w1": -1.53,
+      "hi52": -4.83,
+      "ytd": 16.36,
       "spark": [
+        -1.85,
         0.28,
         1.66,
         0.31,
-        -1.9,
-        1.12
+        -1.9
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
       "name": "Invesco QQQ Trust, Series 1"
     },
     {
       "sym": "DIA",
-      "price": 524.69,
-      "d1": 0.04,
-      "w1": -0.71,
-      "hi52": -1.47,
-      "ytd": 9.3,
+      "price": 524.47,
+      "d1": -0.25,
+      "w1": -1.06,
+      "hi52": -1.52,
+      "ytd": 9.26,
       "spark": [
+        -0.31,
         -1.07,
         0.27,
         0.3,
-        -0.25,
-        0.04
+        -0.25
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
       "name": "State Street SPDR Dow Jones Ind"
     },
     {
       "sym": "IWM",
-      "price": 294.51,
-      "d1": 0.35,
-      "w1": -0.57,
-      "hi52": -2.71,
-      "ytd": 18.87,
+      "price": 293.48,
+      "d1": -0.85,
+      "w1": -1.81,
+      "hi52": -3.05,
+      "ytd": 18.46,
       "spark": [
+        -0.91,
         -0.91,
         1.28,
         -0.42,
-        -0.85,
-        0.35
+        -0.85
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
       "name": "iShares Russell 2000 Index Fund"
     }
   ],
   "submarket": [
     {
-      "sym": "IVW",
-      "price": 137.89,
-      "d1": 1.05,
-      "w1": 1.34,
-      "hi52": -2.79,
-      "ytd": 12.0,
-      "spark": [
-        0.14,
-        1.12,
-        0.6,
-        -1.54,
-        1.05
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares S&P 500 Growth ETF"
-    },
-    {
-      "sym": "MGK",
-      "price": 88.58,
-      "d1": 1.01,
-      "w1": 1.28,
-      "hi52": -4.02,
-      "ytd": 8.0,
-      "spark": [
-        0.01,
-        1.29,
-        0.52,
-        -1.54,
-        1.01
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "Vanguard Mega Cap Growth ETF"
-    },
-    {
-      "sym": "VUG",
-      "price": 86.96,
-      "d1": 0.94,
-      "w1": 1.26,
-      "hi52": -3.91,
-      "ytd": 7.55,
-      "spark": [
-        0.13,
-        1.15,
-        0.48,
-        -1.43,
-        0.94
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "Vanguard Growth ETF"
-    },
-    {
-      "sym": "IJS",
-      "price": 135.4,
-      "d1": 0.17,
-      "w1": 0.8,
-      "hi52": -1.88,
-      "ytd": 18.75,
-      "spark": [
-        -1.24,
-        1.26,
-        0.49,
-        0.13,
-        0.17
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares S&P SmallCap 600 Value"
-    },
-    {
-      "sym": "IJJ",
-      "price": 146.78,
-      "d1": 0.27,
-      "w1": 0.53,
-      "hi52": -0.96,
-      "ytd": 11.06,
-      "spark": [
-        -1.19,
-        1.03,
-        0.49,
-        -0.05,
-        0.27
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares S&P Mid-Cap 400 Value E"
-    },
-    {
-      "sym": "IJK",
-      "price": 113.58,
-      "d1": 0.6,
-      "w1": -0.24,
-      "hi52": -3.42,
-      "ytd": 15.69,
-      "spark": [
-        -0.72,
-        1.48,
-        -0.51,
-        -1.06,
-        0.6
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "iShares S&P Mid-Cap 400 Growth"
-    },
-    {
       "sym": "IVE",
-      "price": 229.94,
-      "d1": -0.41,
-      "w1": -0.36,
-      "hi52": -1.01,
-      "ytd": 8.9,
+      "price": 230.88,
+      "d1": 0.17,
+      "w1": -0.01,
+      "hi52": -0.6,
+      "ytd": 9.34,
       "spark": [
+        -0.06,
         -0.81,
         0.44,
         0.25,
-        0.17,
-        -0.41
+        0.17
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
       "name": "iShares S&P 500 Value ETF"
     },
     {
       "sym": "VTV",
-      "price": 218.6,
-      "d1": -0.35,
-      "w1": -0.44,
-      "hi52": -1.12,
-      "ytd": 14.56,
+      "price": 219.36,
+      "d1": 0.07,
+      "w1": -0.04,
+      "hi52": -0.77,
+      "ytd": 14.96,
       "spark": [
+        0.06,
         -0.88,
         0.42,
         0.29,
-        0.07,
-        -0.35
+        0.07
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
       "name": "Vanguard Value ETF"
     },
     {
-      "sym": "IJT",
-      "price": 173.27,
-      "d1": 0.42,
-      "w1": -0.94,
-      "hi52": -3.55,
-      "ytd": 21.83,
+      "sym": "IJS",
+      "price": 135.17,
+      "d1": 0.13,
+      "w1": -0.15,
+      "hi52": -2.05,
+      "ytd": 18.55,
       "spark": [
+        -0.77,
+        -1.24,
+        1.26,
+        0.49,
+        0.13
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares S&P SmallCap 600 Value"
+    },
+    {
+      "sym": "IJJ",
+      "price": 146.39,
+      "d1": -0.05,
+      "w1": -0.42,
+      "hi52": -1.23,
+      "ytd": 10.77,
+      "spark": [
+        -0.69,
+        -1.19,
+        1.03,
+        0.49,
+        -0.05
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares S&P Mid-Cap 400 Value E"
+    },
+    {
+      "sym": "IVW",
+      "price": 136.46,
+      "d1": -1.54,
+      "w1": -0.48,
+      "hi52": -3.8,
+      "ytd": 10.84,
+      "spark": [
+        -0.77,
+        0.14,
+        1.12,
+        0.6,
+        -1.54
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares S&P 500 Growth ETF"
+    },
+    {
+      "sym": "VUG",
+      "price": 86.15,
+      "d1": -1.43,
+      "w1": -0.61,
+      "hi52": -4.81,
+      "ytd": 6.55,
+      "spark": [
+        -0.92,
+        0.13,
+        1.15,
+        0.48,
+        -1.43
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "Vanguard Growth ETF"
+    },
+    {
+      "sym": "MGK",
+      "price": 87.69,
+      "d1": -1.54,
+      "w1": -0.68,
+      "hi52": -4.98,
+      "ytd": 6.92,
+      "spark": [
+        -0.94,
+        0.01,
+        1.29,
+        0.52,
+        -1.54
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "Vanguard Mega Cap Growth ETF"
+    },
+    {
+      "sym": "IJT",
+      "price": 172.55,
+      "d1": -1.0,
+      "w1": -2.47,
+      "hi52": -3.95,
+      "ytd": 21.32,
+      "spark": [
+        -1.13,
         -1.17,
         1.2,
         -0.38,
-        -1.0,
-        0.42
+        -1.0
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
       "name": "iShares S&P SmallCap 600 Growth"
+    },
+    {
+      "sym": "IJK",
+      "price": 112.9,
+      "d1": -1.06,
+      "w1": -2.63,
+      "hi52": -4.0,
+      "ytd": 15.0,
+      "spark": [
+        -1.81,
+        -0.72,
+        1.48,
+        -0.51,
+        -1.06
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "iShares S&P Mid-Cap 400 Growth"
     }
   ],
   "sector": [
     {
       "sym": "XLE",
-      "price": 56.95,
-      "d1": 0.37,
-      "w1": 4.23,
-      "hi52": -9.61,
-      "ytd": 26.47,
+      "price": 56.74,
+      "d1": 3.01,
+      "w1": 6.79,
+      "hi52": -9.94,
+      "ytd": 26.01,
       "spark": [
+        2.84,
         1.76,
         -1.4,
         0.47,
-        3.01,
-        0.37
+        3.01
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
       "name": "State Street Energy Select Sect"
     },
     {
-      "sym": "XLK",
-      "price": 183.62,
-      "d1": 1.29,
-      "w1": 2.48,
-      "hi52": -7.49,
-      "ytd": 27.56,
+      "sym": "XLU",
+      "price": 45.72,
+      "d1": 0.68,
+      "w1": 0.93,
+      "hi52": -3.56,
+      "ytd": 7.3,
       "spark": [
-        1.24,
-        2.18,
-        0.23,
-        -2.42,
-        1.29
+        0.88,
+        -0.74,
+        -0.51,
+        0.62,
+        0.68
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "State Street Technology Select"
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "State Street Utilities Select S"
+    },
+    {
+      "sym": "XLP",
+      "price": 84.59,
+      "d1": 0.56,
+      "w1": 0.58,
+      "hi52": -4.97,
+      "ytd": 10.25,
+      "spark": [
+        0.9,
+        -0.55,
+        -1.41,
+        1.11,
+        0.56
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "State Street Consumer Staples S"
     },
     {
       "sym": "XLC",
@@ -768,39 +786,39 @@
     },
     {
       "sym": "XLF",
-      "price": 56.18,
-      "d1": 0.2,
-      "w1": 0.23,
-      "hi52": -1.09,
-      "ytd": 3.16,
+      "price": 56.07,
+      "d1": 0.65,
+      "w1": -0.12,
+      "hi52": -0.92,
+      "ytd": 2.96,
       "spark": [
+        -0.16,
         -1.93,
         1.04,
         0.31,
-        0.65,
-        0.2
+        0.65
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
       "name": "State Street Financial Select S"
     },
     {
-      "sym": "XLU",
-      "price": 45.69,
-      "d1": -0.07,
-      "w1": -0.02,
-      "hi52": -3.62,
-      "ytd": 7.23,
+      "sym": "XLV",
+      "price": 161.41,
+      "d1": 0.35,
+      "w1": -0.34,
+      "hi52": -2.54,
+      "ytd": 4.68,
       "spark": [
-        -0.74,
-        -0.51,
-        0.62,
-        0.68,
-        -0.07
+        1.53,
+        -1.3,
+        -0.08,
+        -0.82,
+        0.35
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
-      "name": "State Street Utilities Select S"
+      "name": "State Street Health Care Select"
     },
     {
       "sym": "XLRE",
@@ -821,190 +839,190 @@
       "name": "State Street Real Estate Select"
     },
     {
-      "sym": "XLI",
-      "price": 180.45,
-      "d1": 0.04,
-      "w1": -1.06,
-      "hi52": -3.22,
-      "ytd": 14.83,
+      "sym": "XLK",
+      "price": 181.28,
+      "d1": -2.42,
+      "w1": -1.25,
+      "hi52": -8.67,
+      "ytd": 25.93,
       "spark": [
-        -1.07,
-        0.38,
-        0.45,
-        -0.85,
-        0.04
+        -2.39,
+        1.24,
+        2.18,
+        0.23,
+        -2.42
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "State Street Industrial Select"
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "State Street Technology Select"
     },
     {
       "sym": "XLY",
-      "price": 115.9,
-      "d1": -0.12,
-      "w1": -1.27,
-      "hi52": -6.92,
-      "ytd": -1.68,
+      "price": 116.04,
+      "d1": -1.02,
+      "w1": -1.67,
+      "hi52": -6.8,
+      "ytd": -1.56,
       "spark": [
+        -0.53,
         -1.78,
         1.34,
         0.33,
-        -1.02,
-        -0.12
+        -1.02
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
       "name": "State Street Consumer Discretio"
     },
     {
       "sym": "XLB",
-      "price": 50.64,
-      "d1": 0.12,
-      "w1": -1.69,
-      "hi52": -5.7,
-      "ytd": 10.7,
+      "price": 50.58,
+      "d1": -0.61,
+      "w1": -2.69,
+      "hi52": -5.81,
+      "ytd": 10.57,
       "spark": [
+        -0.9,
         -2.62,
         0.2,
         1.25,
-        -0.61,
-        0.12
+        -0.61
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
       "name": "State Street Materials Select S"
     },
     {
-      "sym": "XLP",
-      "price": 83.42,
-      "d1": -1.38,
-      "w1": -1.7,
-      "hi52": -6.29,
-      "ytd": 8.73,
+      "sym": "XLI",
+      "price": 180.37,
+      "d1": -0.85,
+      "w1": -2.8,
+      "hi52": -3.26,
+      "ytd": 14.78,
       "spark": [
-        -0.55,
-        -1.41,
-        1.11,
-        0.56,
-        -1.38
+        -1.71,
+        -1.07,
+        0.38,
+        0.45,
+        -0.85
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
-      "name": "State Street Consumer Staples S"
-    },
-    {
-      "sym": "XLV",
-      "price": 158.29,
-      "d1": -1.93,
-      "w1": -3.74,
-      "hi52": -4.42,
-      "ytd": 2.66,
-      "spark": [
-        -1.3,
-        -0.08,
-        -0.82,
-        0.35,
-        -1.93
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "State Street Health Care Select"
+      "name": "State Street Industrial Select"
     }
   ],
   "sectorew": [
     {
       "sym": "RSPG",
-      "price": 103.88,
-      "d1": 0.56,
-      "w1": 4.21,
-      "hi52": -8.38,
-      "ytd": 29.16,
+      "price": 103.3,
+      "d1": 2.64,
+      "w1": 6.2,
+      "hi52": -8.89,
+      "ytd": 28.44,
       "spark": [
+        2.48,
         2.17,
         -1.39,
         0.22,
-        2.64,
-        0.56
+        2.64
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
       "name": "Invesco S&P 500 Equal Weight En"
     },
     {
-      "sym": "RSPT",
-      "price": 62.06,
-      "d1": 0.62,
-      "w1": 1.36,
-      "hi52": -7.98,
-      "ytd": 35.83,
+      "sym": "RSPS",
+      "price": 30.63,
+      "d1": 0.56,
+      "w1": 0.92,
+      "hi52": -6.77,
+      "ytd": 6.91,
       "spark": [
-        0.56,
-        2.39,
-        -0.36,
-        -1.8,
-        0.62
+        0.86,
+        -0.75,
+        -1.05,
+        1.33,
+        0.56
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "Invesco S&P 500 Equal Weight Te"
-    },
-    {
-      "sym": "RSPF",
-      "price": 81.84,
-      "d1": -0.34,
-      "w1": -0.22,
-      "hi52": -0.91,
-      "ytd": 5.31,
-      "spark": [
-        -1.89,
-        0.97,
-        0.39,
-        0.67,
-        -0.34
-      ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
-      "name": "Invesco S&P 500 Equal Weight Fi"
+      "name": "Invesco S&P 500 Equal Weight Co"
     },
     {
       "sym": "RSPU",
-      "price": 81.5,
-      "d1": -0.15,
-      "w1": -0.35,
-      "hi52": -2.81,
-      "ytd": 9.24,
+      "price": 81.62,
+      "d1": 0.6,
+      "w1": 0.75,
+      "hi52": -2.67,
+      "ytd": 9.4,
       "spark": [
+        0.96,
         -0.78,
         -0.57,
         0.55,
-        0.6,
-        -0.15
+        0.6
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
       "name": "Invesco S&P 500 Equal Weight Ut"
     },
     {
-      "sym": "RSP",
-      "price": 213.45,
-      "d1": -0.36,
-      "w1": -0.6,
-      "hi52": -1.35,
-      "ytd": 11.58,
+      "sym": "RSPF",
+      "price": 82.12,
+      "d1": 0.67,
+      "w1": 0.38,
+      "hi52": -0.57,
+      "ytd": 5.67,
       "spark": [
+        0.26,
+        -1.89,
+        0.97,
+        0.39,
+        0.67
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "Invesco S&P 500 Equal Weight Fi"
+    },
+    {
+      "sym": "RSP",
+      "price": 214.23,
+      "d1": -0.03,
+      "w1": -0.36,
+      "hi52": -0.99,
+      "ytd": 11.99,
+      "spark": [
+        -0.13,
         -1.18,
         0.61,
         0.37,
-        -0.03,
-        -0.36
+        -0.03
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
       "name": "Invesco S&P 500 Equal Weight ET"
     },
     {
+      "sym": "RSPH",
+      "price": 34.1,
+      "d1": 0.35,
+      "w1": -0.61,
+      "hi52": -2.29,
+      "ytd": 6.94,
+      "spark": [
+        0.61,
+        -1.71,
+        0.56,
+        -0.41,
+        0.35
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "Invesco S&P 500 Equal Weight He"
+    },
+    {
       "sym": "RSPR",
-      "price": 36.6303,
+      "price": 36.63,
       "d1": -0.33,
       "w1": -0.87,
       "hi52": -2.27,
@@ -1021,276 +1039,204 @@
       "name": "Invesco S&P 500 Equal Weight Re"
     },
     {
-      "sym": "RSPN",
-      "price": 62.85,
-      "d1": -0.05,
-      "w1": -0.98,
-      "hi52": -2.56,
-      "ytd": 10.04,
+      "sym": "RSPD",
+      "price": 55.4,
+      "d1": -0.95,
+      "w1": -0.95,
+      "hi52": -7.74,
+      "ytd": -2.93,
       "spark": [
-        -1.31,
-        0.43,
-        0.45,
-        -0.49,
-        -0.05
+        0.02,
+        -2.04,
+        1.2,
+        0.85,
+        -0.95
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
-      "name": "Invesco S&P 500 Equal Weight In"
+      "name": "Invesco S&P 500 Equal Weight Co"
     },
     {
       "sym": "RSPC",
-      "price": 35.9057,
-      "d1": -1.03,
-      "w1": -1.09,
-      "hi52": -12.71,
-      "ytd": -8.96,
+      "price": 35.91,
+      "d1": -1.02,
+      "w1": -1.07,
+      "hi52": -12.7,
+      "ytd": -8.95,
       "spark": [
         -1.35,
         0.42,
         0.33,
         0.55,
-        -1.03
+        -1.02
       ],
       "updatedAt": 1783987200000,
       "ema_uptrend": false,
       "name": "Invesco S&P 500 Equal Weight Co"
     },
     {
-      "sym": "RSPD",
-      "price": 55.18,
-      "d1": -0.4,
-      "w1": -1.36,
-      "hi52": -8.11,
-      "ytd": -3.32,
+      "sym": "RSPT",
+      "price": 61.68,
+      "d1": -1.8,
+      "w1": -1.17,
+      "hi52": -8.55,
+      "ytd": 35.0,
       "spark": [
-        -2.04,
-        1.2,
-        0.85,
-        -0.95,
-        -0.4
+        -1.89,
+        0.56,
+        2.39,
+        -0.36,
+        -1.8
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "Invesco S&P 500 Equal Weight Co"
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "Invesco S&P 500 Equal Weight Te"
     },
     {
-      "sym": "RSPS",
-      "price": 30.19,
-      "d1": -1.44,
-      "w1": -1.37,
-      "hi52": -8.11,
-      "ytd": 5.37,
+      "sym": "RSPN",
+      "price": 62.88,
+      "d1": -0.49,
+      "w1": -2.19,
+      "hi52": -2.51,
+      "ytd": 10.09,
       "spark": [
-        -0.75,
-        -1.05,
-        1.33,
-        0.56,
-        -1.44
+        -1.28,
+        -1.31,
+        0.43,
+        0.45,
+        -0.49
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
-      "name": "Invesco S&P 500 Equal Weight Co"
+      "name": "Invesco S&P 500 Equal Weight In"
     },
     {
       "sym": "RSPM",
-      "price": 38.4615,
-      "d1": 0.19,
-      "w1": -1.43,
-      "hi52": -6.33,
-      "ytd": 11.91,
+      "price": 38.39,
+      "d1": -0.44,
+      "w1": -2.44,
+      "hi52": -6.5,
+      "ytd": 11.7,
       "spark": [
+        -0.84,
         -2.64,
         0.18,
         1.31,
-        -0.44,
-        0.19
+        -0.44
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
       "name": "Invesco S&P 500 Equal Weight Ma"
-    },
-    {
-      "sym": "RSPH",
-      "price": 33.52,
-      "d1": -1.7,
-      "w1": -2.9,
-      "hi52": -3.95,
-      "ytd": 5.12,
-      "spark": [
-        -1.71,
-        0.56,
-        -0.41,
-        0.35,
-        -1.7
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "Invesco S&P 500 Equal Weight He"
     }
   ],
   "thematic": [
     {
       "sym": "USO",
-      "price": 120.17,
-      "d1": 2.02,
-      "w1": 10.33,
-      "hi52": -22.01,
-      "ytd": 74.26,
+      "price": 117.79,
+      "d1": 8.36,
+      "w1": 12.88,
+      "hi52": -23.55,
+      "ytd": 70.81,
       "spark": [
+        4.38,
         3.02,
         -2.85,
         -0.28,
-        8.36,
-        2.02
+        8.36
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
       "name": "United States Oil Fund"
     },
     {
-      "sym": "COPX",
-      "price": 78.72,
-      "d1": 5.88,
-      "w1": 5.48,
-      "hi52": -21.0,
-      "ytd": 8.11,
-      "spark": [
-        -2.13,
-        3.23,
-        1.51,
-        -2.86,
-        5.88
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "Global X Copper Miners ETF"
-    },
-    {
       "sym": "XOP",
-      "price": 165.85,
-      "d1": 0.4,
-      "w1": 5.4,
-      "hi52": -12.45,
-      "ytd": 29.76,
+      "price": 165.19,
+      "d1": 4.17,
+      "w1": 7.29,
+      "hi52": -12.8,
+      "ytd": 29.24,
       "spark": [
+        2.21,
         2.94,
         -1.56,
         -0.56,
-        4.17,
-        0.4
+        4.17
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
       "name": "State Street SPDR S&P Oil & Gas"
     },
     {
-      "sym": "OIH",
-      "price": 385.41,
-      "d1": 0.66,
-      "w1": 5.22,
-      "hi52": -16.08,
-      "ytd": 30.21,
+      "sym": "IXC",
+      "price": 52.54,
+      "d1": 2.96,
+      "w1": 6.85,
+      "hi52": -10.02,
+      "ytd": 24.3,
       "spark": [
+        2.99,
+        1.58,
+        -1.3,
+        0.51,
+        2.96
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "iShares Global Energy ETF"
+    },
+    {
+      "sym": "OIH",
+      "price": 382.9,
+      "d1": 0.7,
+      "w1": 6.41,
+      "hi52": -16.63,
+      "ytd": 29.36,
+      "spark": [
+        1.79,
         3.15,
         -0.88,
         1.53,
-        0.7,
-        0.66
+        0.7
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
       "name": "VanEck Oil Services ETF"
     },
     {
       "sym": "DBC",
-      "price": 28.63,
-      "d1": 1.06,
-      "w1": 4.68,
-      "hi52": -9.94,
-      "ytd": 27.87,
+      "price": 28.33,
+      "d1": 2.94,
+      "w1": 4.93,
+      "hi52": -10.88,
+      "ytd": 26.53,
       "spark": [
+        1.3,
         1.65,
         -0.79,
         -0.22,
-        2.94,
-        1.06
+        2.94
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
       "name": "Invesco DB Commodity Index Trac"
     },
     {
-      "sym": "IXC",
-      "price": 52.75,
-      "d1": 0.4,
-      "w1": 4.17,
-      "hi52": -9.66,
-      "ytd": 24.8,
-      "spark": [
-        1.58,
-        -1.3,
-        0.51,
-        2.96,
-        0.4
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares Global Energy ETF"
-    },
-    {
-      "sym": "FXI",
-      "price": 33.77,
-      "d1": 0.99,
-      "w1": 3.94,
-      "hi52": -18.11,
-      "ytd": -14.56,
-      "spark": [
-        2.92,
-        -0.09,
-        0.21,
-        -0.12,
-        0.99
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "iShares China Large-Cap ETF"
-    },
-    {
       "sym": "WEAT",
-      "price": 23.91,
-      "d1": 1.06,
-      "w1": 3.55,
-      "hi52": -6.6,
-      "ytd": 19.55,
+      "price": 23.66,
+      "d1": -0.25,
+      "w1": 3.18,
+      "hi52": -7.58,
+      "ytd": 18.3,
       "spark": [
+        0.7,
         -1.69,
         1.54,
         2.91,
-        -0.25,
-        1.06
+        -0.25
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
       "name": "Teucrium Wheat Fund ETV"
-    },
-    {
-      "sym": "SMH",
-      "price": 600.31,
-      "d1": 2.51,
-      "w1": 3.24,
-      "hi52": -10.65,
-      "ytd": 60.81,
-      "spark": [
-        1.99,
-        2.48,
-        0.54,
-        -4.16,
-        2.51
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "VanEck Semiconductor ETF"
     },
     {
       "sym": "MSOS",
@@ -1311,26 +1257,26 @@
       "name": "AdvisorShares Pure US Cannabis"
     },
     {
-      "sym": "SOXX",
-      "price": 567.92,
-      "d1": 2.58,
-      "w1": 2.94,
-      "hi52": -13.42,
-      "ytd": 81.24,
+      "sym": "FXI",
+      "price": 33.44,
+      "d1": -0.12,
+      "w1": 2.92,
+      "hi52": -18.91,
+      "ytd": -15.39,
       "spark": [
-        1.87,
-        3.5,
-        -0.06,
-        -4.77,
-        2.58
+        0.0,
+        2.92,
+        -0.09,
+        0.21,
+        -0.12
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
-      "name": "iShares PHLX SOX Semiconductor"
+      "name": "iShares China Large-Cap ETF"
     },
     {
       "sym": "BTF",
-      "price": 17.4896,
+      "price": 17.49,
       "d1": 4.79,
       "w1": 2.88,
       "hi52": -55.98,
@@ -1365,24 +1311,6 @@
       "name": "KraneShares CSI China Internet"
     },
     {
-      "sym": "IAI",
-      "price": 193.47,
-      "d1": 2.52,
-      "w1": 2.47,
-      "hi52": -0.23,
-      "ytd": 7.14,
-      "spark": [
-        -1.32,
-        1.3,
-        -0.12,
-        0.11,
-        2.52
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares U.S. Broker-Dealers & S"
-    },
-    {
       "sym": "NANR",
       "price": 77.91,
       "d1": 0.74,
@@ -1399,60 +1327,6 @@
       "updatedAt": 1783987200000,
       "ema_uptrend": false,
       "name": "State Street SPDR S&P North Ame"
-    },
-    {
-      "sym": "XSD",
-      "price": 547.13,
-      "d1": 1.81,
-      "w1": 2.25,
-      "hi52": -16.84,
-      "ytd": 63.3,
-      "spark": [
-        2.54,
-        3.8,
-        -1.06,
-        -4.62,
-        1.81
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "State Street SPDR S&P Semicondu"
-    },
-    {
-      "sym": "IGM",
-      "price": 160.06,
-      "d1": 1.23,
-      "w1": 2.18,
-      "hi52": -6.62,
-      "ytd": 23.82,
-      "spark": [
-        0.82,
-        2.09,
-        0.23,
-        -2.16,
-        1.23
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares Expanded Tech Sector ET"
-    },
-    {
-      "sym": "XME",
-      "price": 104.42,
-      "d1": 2.28,
-      "w1": 1.9,
-      "hi52": -22.94,
-      "ytd": -2.77,
-      "spark": [
-        -0.52,
-        1.28,
-        0.44,
-        -1.54,
-        2.28
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "State Street SPDR S&P Metals &"
     },
     {
       "sym": "CLOU",
@@ -1473,20 +1347,38 @@
       "name": "Global X Cloud Computing ETF"
     },
     {
-      "sym": "FDN",
-      "price": 275.42,
-      "d1": 0.22,
-      "w1": 1.38,
-      "hi52": -5.32,
-      "ytd": 3.72,
+      "sym": "SKYY",
+      "price": 139.99,
+      "d1": 0.16,
+      "w1": 1.77,
+      "hi52": -10.12,
+      "ytd": 9.56,
       "spark": [
+        1.05,
+        -0.12,
+        2.16,
+        -1.47,
+        0.16
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "First Trust Cloud Computing ETF"
+    },
+    {
+      "sym": "FDN",
+      "price": 274.81,
+      "d1": -0.51,
+      "w1": 1.61,
+      "hi52": -5.53,
+      "ytd": 3.49,
+      "spark": [
+        0.45,
         -0.27,
         1.76,
         0.19,
-        -0.51,
-        0.22
+        -0.51
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
       "name": "First Trust DJ Internet Index F"
     },
@@ -1527,22 +1419,22 @@
       "name": "Xtrackers Harvest CSI 300 China"
     },
     {
-      "sym": "KBWB",
-      "price": 96.96,
-      "d1": 1.04,
-      "w1": 0.83,
-      "hi52": -1.33,
-      "ytd": 14.37,
+      "sym": "KIE",
+      "price": 64.46,
+      "d1": 1.58,
+      "w1": 0.96,
+      "hi52": -1.13,
+      "ytd": 9.29,
       "spark": [
-        -2.49,
-        1.92,
-        0.5,
-        -0.09,
-        1.04
+        0.88,
+        -1.29,
+        -0.24,
+        0.05,
+        1.58
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
-      "name": "Invesco KBW Bank ETF"
+      "name": "State Street SPDR S&P Insurance"
     },
     {
       "sym": "ARKW",
@@ -1581,94 +1473,76 @@
       "name": "\"Sprott Physical Platinum and P"
     },
     {
-      "sym": "MOO",
-      "price": 81.51,
-      "d1": 0.04,
-      "w1": 0.74,
-      "hi52": -5.83,
-      "ytd": 10.63,
-      "spark": [
-        -0.05,
-        -0.63,
-        0.76,
-        0.63,
-        0.04
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "VanEck Agribusiness ETF"
-    },
-    {
-      "sym": "XRT",
-      "price": 87.78,
-      "d1": 0.35,
-      "w1": 0.7,
-      "hi52": -3.76,
-      "ytd": 2.69,
-      "spark": [
-        -1.34,
-        1.07,
-        1.33,
-        -0.69,
-        0.35
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "State Street SPDR S&P Retail ET"
-    },
-    {
-      "sym": "TAN",
-      "price": 55.13,
-      "d1": 3.78,
-      "w1": 0.58,
-      "hi52": -27.08,
-      "ytd": 6.84,
-      "spark": [
-        -1.22,
-        1.5,
-        0.02,
-        -3.35,
-        3.78
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "Invesco Solar ETF"
-    },
-    {
-      "sym": "NLR",
-      "price": 111.37,
-      "d1": 1.73,
-      "w1": 0.54,
-      "hi52": -32.59,
-      "ytd": -16.29,
-      "spark": [
-        0.29,
-        1.78,
-        1.23,
-        -4.35,
-        1.73
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "VanEck Uranium and Nuclear ETF"
-    },
-    {
       "sym": "IYT",
-      "price": 87.62,
-      "d1": -0.48,
-      "w1": 0.52,
-      "hi52": -1.31,
-      "ytd": 16.96,
+      "price": 88.04,
+      "d1": -0.09,
+      "w1": 0.73,
+      "hi52": -0.83,
+      "ytd": 17.52,
       "spark": [
+        -0.26,
         -0.67,
         1.84,
         -0.07,
-        -0.09,
-        -0.48
+        -0.09
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
       "name": "iShares U.S. Transportation ETF"
+    },
+    {
+      "sym": "IYR",
+      "price": 103.91,
+      "d1": 0.57,
+      "w1": 0.66,
+      "hi52": -1.19,
+      "ytd": 11.41,
+      "spark": [
+        1.24,
+        -1.65,
+        0.2,
+        0.31,
+        0.57
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares U.S. Real Estate ETF"
+    },
+    {
+      "sym": "DBA",
+      "price": 27.72,
+      "d1": -0.18,
+      "w1": 0.65,
+      "hi52": -3.88,
+      "ytd": 8.45,
+      "spark": [
+        0.04,
+        0.25,
+        0.33,
+        0.22,
+        -0.18
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "Invesco DB Agriculture Fund"
+    },
+    {
+      "sym": "UUP",
+      "price": 28.5,
+      "d1": 0.39,
+      "w1": 0.64,
+      "hi52": -0.21,
+      "ytd": 5.13,
+      "spark": [
+        0.28,
+        -0.14,
+        0.0,
+        0.11,
+        0.39
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "Invesco DB USD Index Bullish Fu"
     },
     {
       "sym": "PAVE",
@@ -1707,202 +1581,58 @@
       "name": "Amplify Online Retail ETF"
     },
     {
-      "sym": "DBA",
-      "price": 27.63,
-      "d1": -0.32,
-      "w1": 0.29,
-      "hi52": -4.2,
-      "ytd": 8.1,
-      "spark": [
-        0.25,
-        0.33,
-        0.22,
-        -0.18,
-        -0.32
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "Invesco DB Agriculture Fund"
-    },
-    {
-      "sym": "SKYY",
-      "price": 139.31,
-      "d1": -0.49,
-      "w1": 0.22,
-      "hi52": -10.56,
-      "ytd": 9.03,
-      "spark": [
-        -0.12,
-        2.16,
-        -1.47,
-        0.16,
-        -0.49
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "First Trust Cloud Computing ETF"
-    },
-    {
       "sym": "SHV",
-      "price": 110.19,
-      "d1": 0.03,
-      "w1": 0.08,
+      "price": 110.16,
+      "d1": -0.01,
+      "w1": 0.05,
       "hi52": -0.01,
-      "ytd": 1.8,
+      "ytd": 1.77,
       "spark": [
+        -0.01,
         0.02,
         0.02,
         0.03,
-        -0.01,
-        0.03
+        -0.01
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
       "name": "iShares 0-1 Year Treasury Bond"
     },
     {
-      "sym": "KBE",
-      "price": 68.78,
-      "d1": -0.06,
-      "w1": 0.04,
-      "hi52": -1.64,
-      "ytd": 13.7,
+      "sym": "MOO",
+      "price": 81.48,
+      "d1": 0.63,
+      "w1": 0.05,
+      "hi52": -5.87,
+      "ytd": 10.59,
       "spark": [
-        -2.25,
-        1.67,
-        0.63,
-        0.1,
-        -0.06
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "State Street SPDR S&P Bank ETF"
-    },
-    {
-      "sym": "EMLC",
-      "price": 25.48,
-      "d1": 0.35,
-      "w1": 0.0,
-      "hi52": -1.74,
-      "ytd": 1.58,
-      "spark": [
-        -0.35,
-        0.2,
-        0.43,
-        -0.63,
-        0.35
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "VanEck J. P. Morgan EM Local Cu"
-    },
-    {
-      "sym": "UUP",
-      "price": 28.39,
-      "d1": -0.39,
-      "w1": -0.04,
-      "hi52": -0.6,
-      "ytd": 4.72,
-      "spark": [
-        -0.14,
-        0.0,
-        0.11,
-        0.39,
-        -0.39
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "Invesco DB USD Index Bullish Fu"
-    },
-    {
-      "sym": "IEI",
-      "price": 116.74,
-      "d1": 0.25,
-      "w1": -0.09,
-      "hi52": -1.88,
-      "ytd": -0.37,
-      "spark": [
-        -0.14,
-        0.14,
-        -0.06,
-        -0.27,
-        0.25
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "iShares 3-7 Year Treasury Bond"
-    },
-    {
-      "sym": "KRE",
-      "price": 75.0,
-      "d1": -0.16,
-      "w1": -0.09,
-      "hi52": -2.39,
-      "ytd": 16.3,
-      "spark": [
-        -2.3,
-        1.79,
-        0.5,
-        0.13,
-        -0.16
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "State Street SPDR S&P Regional"
-    },
-    {
-      "sym": "VGIT",
-      "price": 58.55,
-      "d1": 0.26,
-      "w1": -0.1,
-      "hi52": -2.1,
-      "ytd": -0.39,
-      "spark": [
-        -0.15,
-        0.15,
-        -0.09,
-        -0.27,
-        0.26
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "Vanguard Intermediate-Term Trea"
-    },
-    {
-      "sym": "HYG",
-      "price": 79.68,
-      "d1": 0.2,
-      "w1": -0.1,
-      "hi52": -0.29,
-      "ytd": 1.74,
-      "spark": [
-        -0.13,
-        0.11,
+        -0.65,
         -0.05,
-        -0.24,
-        0.2
+        -0.63,
+        0.76,
+        0.63
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
-      "name": "iShares iBoxx $ High Yield Corp"
+      "name": "VanEck Agribusiness ETF"
     },
     {
-      "sym": "IEF",
-      "price": 93.55,
-      "d1": 0.28,
-      "w1": -0.16,
-      "hi52": -3.04,
-      "ytd": -0.72,
+      "sym": "XRT",
+      "price": 87.47,
+      "d1": -0.69,
+      "w1": -0.17,
+      "hi52": -4.1,
+      "ytd": 2.32,
       "spark": [
-        -0.2,
-        0.21,
-        -0.09,
-        -0.36,
-        0.28
+        -0.51,
+        -1.34,
+        1.07,
+        1.33,
+        -0.69
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "iShares 7-10 Year Treasury Bond"
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "State Street SPDR S&P Retail ET"
     },
     {
       "sym": "AIQ",
@@ -1923,112 +1653,76 @@
       "name": "Global X Artificial Intelligenc"
     },
     {
-      "sym": "AGG",
-      "price": 98.0,
-      "d1": 0.3,
-      "w1": -0.21,
-      "hi52": -1.8,
-      "ytd": 0.11,
+      "sym": "KBWB",
+      "price": 95.96,
+      "d1": -0.09,
+      "w1": -0.3,
+      "hi52": -0.99,
+      "ytd": 13.19,
       "spark": [
-        -0.17,
-        0.14,
-        -0.1,
-        -0.38,
-        0.3
+        -0.09,
+        -2.49,
+        1.92,
+        0.5,
+        -0.09
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "iShares Core U.S. Aggregate Bon"
-    },
-    {
-      "sym": "XSW",
-      "price": 178.32,
-      "d1": -0.17,
-      "w1": -0.42,
-      "hi52": -13.34,
-      "ytd": -2.96,
-      "spark": [
-        -1.69,
-        1.91,
-        -1.31,
-        0.89,
-        -0.17
-      ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
-      "name": "State Street SPDR S&P Software"
+      "name": "Invesco KBW Bank ETF"
     },
     {
-      "sym": "URA",
-      "price": 41.55,
-      "d1": 2.04,
-      "w1": -0.48,
-      "hi52": -33.29,
-      "ytd": -9.79,
+      "sym": "IAI",
+      "price": 188.71,
+      "d1": 0.11,
+      "w1": -0.32,
+      "hi52": -1.2,
+      "ytd": 4.51,
       "spark": [
-        -0.22,
-        1.66,
-        1.46,
-        -5.24,
-        2.04
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "Global X Uranium ETF"
-    },
-    {
-      "sym": "IGV",
-      "price": 93.63,
-      "d1": 1.0,
-      "w1": -0.53,
-      "hi52": -20.63,
-      "ytd": -8.74,
-      "spark": [
-        -1.75,
-        1.51,
-        -1.57,
-        0.31,
-        1.0
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares Expanded Tech-Software"
-    },
-    {
-      "sym": "TLT",
-      "price": 84.08,
-      "d1": 0.13,
-      "w1": -0.56,
-      "hi52": -5.72,
-      "ytd": -1.2,
-      "spark": [
-        -0.22,
-        0.15,
-        -0.02,
-        -0.59,
-        0.13
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "iShares 20+ Year Treasury Bond"
-    },
-    {
-      "sym": "GDXJ",
-      "price": 98.37,
-      "d1": 3.11,
-      "w1": -0.57,
-      "hi52": -37.54,
-      "ytd": -13.1,
-      "spark": [
-        -3.37,
-        3.56,
+        -0.27,
+        -1.32,
+        1.3,
         -0.12,
-        -3.52,
-        3.11
+        0.11
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "VanEck Junior Gold Miners ETF"
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares U.S. Broker-Dealers & S"
+    },
+    {
+      "sym": "HYG",
+      "price": 79.52,
+      "d1": -0.24,
+      "w1": -0.44,
+      "hi52": -0.49,
+      "ytd": 1.54,
+      "spark": [
+        -0.14,
+        -0.13,
+        0.11,
+        -0.05,
+        -0.24
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares iBoxx $ High Yield Corp"
+    },
+    {
+      "sym": "KBE",
+      "price": 68.82,
+      "d1": 0.1,
+      "w1": -0.55,
+      "hi52": -1.59,
+      "ytd": 13.77,
+      "spark": [
+        -0.65,
+        -2.25,
+        1.67,
+        0.63,
+        0.1
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "State Street SPDR S&P Bank ETF"
     },
     {
       "sym": "BLOK",
@@ -2049,22 +1743,58 @@
       "name": "Amplify Blockchain Technology E"
     },
     {
-      "sym": "LQD",
-      "price": 107.21,
-      "d1": 0.23,
-      "w1": -0.62,
-      "hi52": -2.41,
-      "ytd": -0.47,
+      "sym": "KRE",
+      "price": 75.12,
+      "d1": 0.13,
+      "w1": -0.58,
+      "hi52": -2.24,
+      "ytd": 16.49,
       "spark": [
-        -0.19,
-        0.04,
-        -0.23,
-        -0.47,
-        0.23
+        -0.65,
+        -2.3,
+        1.79,
+        0.5,
+        0.13
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "State Street SPDR S&P Regional"
+    },
+    {
+      "sym": "XSW",
+      "price": 178.62,
+      "d1": 0.89,
+      "w1": -0.62,
+      "hi52": -13.19,
+      "ytd": -2.8,
+      "spark": [
+        -0.37,
+        -1.69,
+        1.91,
+        -1.31,
+        0.89
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "State Street SPDR S&P Software"
+    },
+    {
+      "sym": "IEI",
+      "price": 116.45,
+      "d1": -0.27,
+      "w1": -0.64,
+      "hi52": -2.12,
+      "ytd": -0.62,
+      "spark": [
+        -0.31,
+        -0.14,
+        0.14,
+        -0.06,
+        -0.27
+      ],
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
-      "name": "iShares iBoxx $ Investment Grad"
+      "name": "iShares 3-7 Year Treasury Bond"
     },
     {
       "sym": "BUZZ",
@@ -2085,6 +1815,24 @@
       "name": "VanEck Social Sentiment ETF"
     },
     {
+      "sym": "VGIT",
+      "price": 58.4,
+      "d1": -0.27,
+      "w1": -0.7,
+      "hi52": -2.35,
+      "ytd": -0.65,
+      "spark": [
+        -0.34,
+        -0.15,
+        0.15,
+        -0.09,
+        -0.27
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "Vanguard Intermediate-Term Trea"
+    },
+    {
       "sym": "WGMI",
       "price": 52.23,
       "d1": -0.08,
@@ -2101,6 +1849,24 @@
       "updatedAt": 1783987200000,
       "ema_uptrend": false,
       "name": "CoinShares Bitcoin Mining ETF"
+    },
+    {
+      "sym": "EMLC",
+      "price": 25.39,
+      "d1": -0.63,
+      "w1": -0.78,
+      "hi52": -2.08,
+      "ytd": 1.22,
+      "spark": [
+        -0.43,
+        -0.35,
+        0.2,
+        0.43,
+        -0.63
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "VanEck J. P. Morgan EM Local Cu"
     },
     {
       "sym": "FFTY",
@@ -2121,84 +1887,66 @@
       "name": "CapForce IBD 50 ETF"
     },
     {
-      "sym": "IYR",
-      "price": 103.59,
-      "d1": -0.31,
-      "w1": -0.88,
-      "hi52": -1.49,
-      "ytd": 11.07,
+      "sym": "IEF",
+      "price": 93.29,
+      "d1": -0.36,
+      "w1": -0.94,
+      "hi52": -3.3,
+      "ytd": -1.0,
       "spark": [
-        -1.65,
-        0.2,
-        0.31,
-        0.57,
-        -0.31
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares U.S. Real Estate ETF"
-    },
-    {
-      "sym": "PHO",
-      "price": 68.76,
-      "d1": -0.2,
-      "w1": -0.89,
-      "hi52": -7.81,
-      "ytd": -2.64,
-      "spark": [
-        -1.83,
-        0.62,
-        0.74,
+        -0.51,
         -0.2,
-        -0.2
+        0.21,
+        -0.09,
+        -0.36
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "Invesco Water Resources ETF"
-    },
-    {
-      "sym": "PBW",
-      "price": 34.98,
-      "d1": 2.88,
-      "w1": -0.91,
-      "hi52": -25.49,
-      "ytd": 8.83,
-      "spark": [
-        -0.48,
-        1.57,
-        -1.29,
-        -3.46,
-        2.88
-      ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
-      "name": "Invesco WilderHill Clean Energy"
+      "name": "iShares 7-10 Year Treasury Bond"
     },
     {
-      "sym": "IWO",
-      "price": 381.96,
-      "d1": 0.79,
-      "w1": -0.97,
-      "hi52": -3.71,
-      "ytd": 16.94,
+      "sym": "AGG",
+      "price": 97.71,
+      "d1": -0.38,
+      "w1": -0.96,
+      "hi52": -2.09,
+      "ytd": -0.19,
       "spark": [
-        -0.79,
-        1.62,
-        -1.07,
-        -1.48,
-        0.79
+        -0.46,
+        -0.17,
+        0.14,
+        -0.1,
+        -0.38
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "iShares Core U.S. Aggregate Bon"
+    },
+    {
+      "sym": "IGM",
+      "price": 158.11,
+      "d1": -2.16,
+      "w1": -0.96,
+      "hi52": -7.76,
+      "ytd": 22.31,
+      "spark": [
+        -1.88,
+        0.82,
+        2.09,
+        0.23,
+        -2.16
+      ],
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
-      "name": "iShares Russell 2000 Growth Fun"
+      "name": "iShares Expanded Tech Sector ET"
     },
     {
       "sym": "IDRV",
-      "price": 36.6995,
+      "price": 36.7,
       "d1": 0.96,
       "w1": -1.0,
       "hi52": -19.0,
-      "ytd": -4.08,
+      "ytd": -4.07,
       "spark": [
         -1.56,
         0.69,
@@ -2212,17 +1960,17 @@
     },
     {
       "sym": "BOUT",
-      "price": 46.6715,
-      "d1": 1.09,
-      "w1": -1.01,
-      "hi52": -5.54,
-      "ytd": 28.47,
+      "price": 46.67,
+      "d1": 1.08,
+      "w1": -1.02,
+      "hi52": -5.55,
+      "ytd": 28.46,
       "spark": [
         -2.1,
         1.84,
         -0.74,
         -1.05,
-        1.09
+        1.08
       ],
       "updatedAt": 1783987200000,
       "ema_uptrend": false,
@@ -2230,8 +1978,8 @@
     },
     {
       "sym": "QTUM",
-      "price": 149.845,
-      "d1": 0.55,
+      "price": 149.85,
+      "d1": 0.56,
       "w1": -1.05,
       "hi52": -11.71,
       "ytd": 33.83,
@@ -2240,11 +1988,29 @@
         2.03,
         -0.71,
         -3.52,
-        0.55
+        0.56
       ],
       "updatedAt": 1783987200000,
       "ema_uptrend": false,
       "name": "Defiance Quantum ETF"
+    },
+    {
+      "sym": "PPH",
+      "price": 108.78,
+      "d1": -0.02,
+      "w1": -1.07,
+      "hi52": -3.26,
+      "ytd": 6.35,
+      "spark": [
+        1.49,
+        -1.14,
+        -0.63,
+        -0.76,
+        -0.02
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "VanEck Pharmaceutical ETF"
     },
     {
       "sym": "DRIV",
@@ -2265,58 +2031,22 @@
       "name": "Global X Autonomous & Electric"
     },
     {
-      "sym": "XHB",
-      "price": 108.16,
-      "d1": 1.02,
-      "w1": -1.14,
-      "hi52": -11.76,
-      "ytd": 3.92,
+      "sym": "PHO",
+      "price": 68.9,
+      "d1": -0.2,
+      "w1": -1.35,
+      "hi52": -7.62,
+      "ytd": -2.45,
       "spark": [
-        -3.08,
-        1.48,
-        0.93,
-        -1.42,
-        1.02
+        -0.66,
+        -1.83,
+        0.62,
+        0.74,
+        -0.2
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "State Street SPDR S&P Homebuild"
-    },
-    {
-      "sym": "GDX",
-      "price": 74.88,
-      "d1": 2.06,
-      "w1": -1.16,
-      "hi52": -36.1,
-      "ytd": -12.66,
-      "spark": [
-        -2.94,
-        3.06,
-        -0.33,
-        -2.86,
-        2.06
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "VanEck Gold Miners ETF"
-    },
-    {
-      "sym": "GLD",
-      "price": 372.15,
-      "d1": 1.37,
-      "w1": -1.41,
-      "hi52": -26.99,
-      "ytd": -6.56,
-      "spark": [
-        -0.81,
-        1.0,
-        -0.31,
-        -2.62,
-        1.37
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "SPDR Gold Shares"
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "Invesco Water Resources ETF"
     },
     {
       "sym": "OUNZ",
@@ -2337,26 +2067,26 @@
       "name": "VanEck Merk Gold ETF"
     },
     {
-      "sym": "KIE",
-      "price": 63.48,
-      "d1": -1.52,
-      "w1": -1.44,
-      "hi52": -2.64,
-      "ytd": 7.63,
+      "sym": "IHI",
+      "price": 51.34,
+      "d1": 0.0,
+      "w1": -1.48,
+      "hi52": -20.48,
+      "ytd": -16.86,
       "spark": [
-        -1.29,
-        -0.24,
-        0.05,
-        1.58,
-        -1.52
+        0.27,
+        -1.89,
+        0.04,
+        0.12,
+        0.0
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
-      "name": "State Street SPDR S&P Insurance"
+      "name": "iShares U.S. Medical Devices ET"
     },
     {
       "sym": "ESPO",
-      "price": 91.5489,
+      "price": 91.55,
       "d1": -0.25,
       "w1": -1.56,
       "hi52": -24.64,
@@ -2371,6 +2101,24 @@
       "updatedAt": 1783987200000,
       "ema_uptrend": true,
       "name": "VanEck Video Gaming and eSports"
+    },
+    {
+      "sym": "LQD",
+      "price": 106.96,
+      "d1": -0.47,
+      "w1": -1.57,
+      "hi52": -2.63,
+      "ytd": -0.7,
+      "spark": [
+        -0.73,
+        -0.19,
+        0.04,
+        -0.23,
+        -0.47
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "iShares iBoxx $ Investment Grad"
     },
     {
       "sym": "ARKQ",
@@ -2391,6 +2139,42 @@
       "name": "ARK Autonomous Technology & Rob"
     },
     {
+      "sym": "TLT",
+      "price": 83.97,
+      "d1": -0.59,
+      "w1": -1.73,
+      "hi52": -5.85,
+      "ytd": -1.33,
+      "spark": [
+        -1.05,
+        -0.22,
+        0.15,
+        -0.02,
+        -0.59
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "iShares 20+ Year Treasury Bond"
+    },
+    {
+      "sym": "XHS",
+      "price": 135.0,
+      "d1": 0.07,
+      "w1": -1.82,
+      "hi52": -2.82,
+      "ytd": 25.89,
+      "spark": [
+        -0.44,
+        -1.57,
+        1.11,
+        -0.98,
+        0.07
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "State Street SPDR S&P Health Ca"
+    },
+    {
       "sym": "BOTZ",
       "price": 35.88,
       "d1": 0.03,
@@ -2407,24 +2191,6 @@
       "updatedAt": 1783987200000,
       "ema_uptrend": false,
       "name": "Global X Robotics & Artificial"
-    },
-    {
-      "sym": "XHS",
-      "price": 134.21,
-      "d1": -0.59,
-      "w1": -1.96,
-      "hi52": -3.39,
-      "ytd": 25.15,
-      "spark": [
-        -1.57,
-        1.11,
-        -0.98,
-        0.07,
-        -0.59
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "State Street SPDR S&P Health Ca"
     },
     {
       "sym": "ARKK",
@@ -2463,40 +2229,22 @@
       "name": "Renaissance IPO ETF"
     },
     {
-      "sym": "SLV",
-      "price": 53.17,
-      "d1": 1.94,
-      "w1": -2.37,
-      "hi52": -51.59,
-      "ytd": -19.13,
+      "sym": "IGV",
+      "price": 92.7,
+      "d1": 0.31,
+      "w1": -2.2,
+      "hi52": -21.42,
+      "ytd": -9.65,
       "spark": [
-        -2.99,
-        2.48,
-        -0.35,
-        -3.32,
-        1.94
+        -0.7,
+        -1.75,
+        1.51,
+        -1.57,
+        0.31
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "iShares Silver Trust"
-    },
-    {
-      "sym": "REMX",
-      "price": 79.14,
-      "d1": 3.76,
-      "w1": -2.37,
-      "hi52": -29.05,
-      "ytd": 3.07,
-      "spark": [
-        -1.74,
-        0.48,
-        -0.34,
-        -4.38,
-        3.76
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "VanEck Rare Earth and Strategic"
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares Expanded Tech-Software"
     },
     {
       "sym": "ARKX",
@@ -2517,40 +2265,94 @@
       "name": "ARK Space & Defense Innovation"
     },
     {
-      "sym": "ITB",
-      "price": 97.13,
-      "d1": 0.86,
-      "w1": -2.74,
-      "hi52": -17.16,
-      "ytd": -0.01,
+      "sym": "BBH",
+      "price": 204.46,
+      "d1": -0.53,
+      "w1": -2.79,
+      "hi52": -3.8,
+      "ytd": 7.48,
       "spark": [
-        -3.97,
-        1.02,
-        0.9,
-        -1.49,
-        0.86
+        0.98,
+        -1.46,
+        0.41,
+        -2.18,
+        -0.53
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "iShares U.S. Home Construction"
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "VanEck Biotech ETF"
     },
     {
-      "sym": "LIT",
-      "price": 71.58,
-      "d1": 1.91,
-      "w1": -3.01,
-      "hi52": -21.84,
-      "ytd": 8.48,
+      "sym": "IWO",
+      "price": 378.97,
+      "d1": -1.48,
+      "w1": -2.83,
+      "hi52": -4.47,
+      "ytd": 16.02,
       "spark": [
-        -2.28,
-        0.97,
-        -0.69,
-        -2.88,
-        1.91
+        -1.1,
+        -0.79,
+        1.62,
+        -1.07,
+        -1.48
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares Russell 2000 Growth Fun"
+    },
+    {
+      "sym": "IBB",
+      "price": 189.55,
+      "d1": -1.31,
+      "w1": -2.95,
+      "hi52": -4.77,
+      "ytd": 12.26,
+      "spark": [
+        1.5,
+        -0.95,
+        0.51,
+        -2.68,
+        -1.31
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares Biotechnology ETF"
+    },
+    {
+      "sym": "SMH",
+      "price": 585.62,
+      "d1": -4.16,
+      "w1": -3.09,
+      "hi52": -12.83,
+      "ytd": 56.88,
+      "spark": [
+        -3.78,
+        1.99,
+        2.48,
+        0.54,
+        -4.16
+      ],
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
-      "name": "Global X Lithium & Battery Tech"
+      "name": "VanEck Semiconductor ETF"
+    },
+    {
+      "sym": "XBI",
+      "price": 155.34,
+      "d1": -2.32,
+      "w1": -3.4,
+      "hi52": -6.26,
+      "ytd": 27.96,
+      "spark": [
+        1.9,
+        -0.55,
+        0.8,
+        -3.2,
+        -2.32
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "State Street SPDR S&P Biotech E"
     },
     {
       "sym": "ARKG",
@@ -2571,76 +2373,94 @@
       "name": "ARK Genomic Revolution ETF"
     },
     {
-      "sym": "PPH",
-      "price": 106.78,
-      "d1": -1.84,
-      "w1": -4.32,
-      "hi52": -5.03,
-      "ytd": 4.39,
+      "sym": "XME",
+      "price": 102.09,
+      "d1": -1.54,
+      "w1": -3.76,
+      "hi52": -24.66,
+      "ytd": -4.94,
       "spark": [
-        -1.14,
-        -0.63,
-        -0.76,
-        -0.02,
-        -1.84
+        -3.4,
+        -0.52,
+        1.28,
+        0.44,
+        -1.54
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "VanEck Pharmaceutical ETF"
-    },
-    {
-      "sym": "BBH",
-      "price": 202.8323,
-      "d1": -0.8,
-      "w1": -4.5,
-      "hi52": -4.57,
-      "ytd": 6.62,
-      "spark": [
-        -1.46,
-        0.41,
-        -2.18,
-        -0.53,
-        -0.8
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "VanEck Biotech ETF"
-    },
-    {
-      "sym": "XAR",
-      "price": 266.56,
-      "d1": 0.9,
-      "w1": -4.57,
-      "hi52": -9.7,
-      "ytd": 6.52,
-      "spark": [
-        -1.97,
-        0.02,
-        -0.89,
-        -2.68,
-        0.9
-      ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
-      "name": "State Street SPDR S&P Aerospace"
+      "name": "State Street SPDR S&P Metals &"
     },
     {
-      "sym": "IBB",
-      "price": 188.67,
-      "d1": -0.46,
-      "w1": -4.82,
-      "hi52": -5.21,
-      "ytd": 11.74,
+      "sym": "XHB",
+      "price": 107.07,
+      "d1": -1.42,
+      "w1": -3.79,
+      "hi52": -12.65,
+      "ytd": 2.87,
       "spark": [
-        -0.95,
-        0.51,
-        -2.68,
-        -1.31,
-        -0.46
+        -1.69,
+        -3.08,
+        1.48,
+        0.93,
+        -1.42
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
-      "name": "iShares Biotechnology ETF"
+      "name": "State Street SPDR S&P Homebuild"
+    },
+    {
+      "sym": "GLD",
+      "price": 367.13,
+      "d1": -2.62,
+      "w1": -3.93,
+      "hi52": -27.97,
+      "ytd": -7.82,
+      "spark": [
+        -1.21,
+        -0.81,
+        1.0,
+        -0.31,
+        -2.62
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "SPDR Gold Shares"
+    },
+    {
+      "sym": "SOXX",
+      "price": 553.61,
+      "d1": -4.77,
+      "w1": -4.8,
+      "hi52": -15.6,
+      "ytd": 76.68,
+      "spark": [
+        -5.13,
+        1.87,
+        3.5,
+        -0.06,
+        -4.77
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "iShares PHLX SOX Semiconductor"
+    },
+    {
+      "sym": "ITB",
+      "price": 96.3,
+      "d1": -1.49,
+      "w1": -4.95,
+      "hi52": -17.86,
+      "ytd": -0.87,
+      "spark": [
+        -1.42,
+        -3.97,
+        1.02,
+        0.9,
+        -1.49
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares U.S. Home Construction"
     },
     {
       "sym": "JETS",
@@ -2661,22 +2481,22 @@
       "name": "U.S. Global Jets ETF"
     },
     {
-      "sym": "XBI",
-      "price": 155.45,
-      "d1": 0.07,
-      "w1": -5.14,
-      "hi52": -6.19,
-      "ytd": 28.05,
+      "sym": "COPX",
+      "price": 74.35,
+      "d1": -2.86,
+      "w1": -5.26,
+      "hi52": -25.39,
+      "ytd": 2.11,
       "spark": [
-        -0.55,
-        0.8,
-        -3.2,
-        -2.32,
-        0.07
+        -4.91,
+        -2.13,
+        3.23,
+        1.51,
+        -2.86
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "State Street SPDR S&P Biotech E"
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "Global X Copper Miners ETF"
     },
     {
       "sym": "IDNA",
@@ -2715,420 +2535,402 @@
       "name": "Procure Space ETF"
     },
     {
-      "sym": "IHI",
-      "price": 49.22,
-      "d1": -4.13,
-      "w1": -5.8,
-      "hi52": -23.76,
-      "ytd": -20.29,
+      "sym": "XSD",
+      "price": 537.38,
+      "d1": -4.62,
+      "w1": -5.93,
+      "hi52": -18.32,
+      "ytd": 60.39,
       "spark": [
-        -1.89,
-        0.04,
-        0.12,
-        0.0,
-        -4.13
+        -6.34,
+        2.54,
+        3.8,
+        -1.06,
+        -4.62
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares U.S. Medical Devices ET"
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "State Street SPDR S&P Semicondu"
+    },
+    {
+      "sym": "NLR",
+      "price": 109.48,
+      "d1": -4.35,
+      "w1": -6.03,
+      "hi52": -33.73,
+      "ytd": -17.71,
+      "spark": [
+        -4.93,
+        0.29,
+        1.78,
+        1.23,
+        -4.35
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "VanEck Uranium and Nuclear ETF"
+    },
+    {
+      "sym": "GDX",
+      "price": 73.37,
+      "d1": -2.86,
+      "w1": -6.82,
+      "hi52": -37.39,
+      "ytd": -14.42,
+      "spark": [
+        -3.78,
+        -2.94,
+        3.06,
+        -0.33,
+        -2.86
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "VanEck Gold Miners ETF"
+    },
+    {
+      "sym": "SLV",
+      "price": 52.16,
+      "d1": -3.32,
+      "w1": -7.04,
+      "hi52": -52.51,
+      "ytd": -20.67,
+      "spark": [
+        -2.94,
+        -2.99,
+        2.48,
+        -0.35,
+        -3.32
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "iShares Silver Trust"
+    },
+    {
+      "sym": "URA",
+      "price": 40.72,
+      "d1": -5.24,
+      "w1": -7.2,
+      "hi52": -34.62,
+      "ytd": -11.59,
+      "spark": [
+        -4.85,
+        -0.22,
+        1.66,
+        1.46,
+        -5.24
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "Global X Uranium ETF"
+    },
+    {
+      "sym": "TAN",
+      "price": 53.12,
+      "d1": -3.35,
+      "w1": -7.68,
+      "hi52": -29.74,
+      "ytd": 2.95,
+      "spark": [
+        -4.74,
+        -1.22,
+        1.5,
+        0.02,
+        -3.35
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "Invesco Solar ETF"
+    },
+    {
+      "sym": "LIT",
+      "price": 70.24,
+      "d1": -2.88,
+      "w1": -7.79,
+      "hi52": -23.31,
+      "ytd": 6.45,
+      "spark": [
+        -3.11,
+        -2.28,
+        0.97,
+        -0.69,
+        -2.88
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "Global X Lithium & Battery Tech"
+    },
+    {
+      "sym": "GDXJ",
+      "price": 95.4,
+      "d1": -3.52,
+      "w1": -8.19,
+      "hi52": -39.42,
+      "ytd": -15.72,
+      "spark": [
+        -4.79,
+        -3.37,
+        3.56,
+        -0.12,
+        -3.52
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "VanEck Junior Gold Miners ETF"
+    },
+    {
+      "sym": "XAR",
+      "price": 264.17,
+      "d1": -2.68,
+      "w1": -8.82,
+      "hi52": -10.51,
+      "ytd": 5.57,
+      "spark": [
+        -3.59,
+        -1.97,
+        0.02,
+        -0.89,
+        -2.68
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "State Street SPDR S&P Aerospace"
+    },
+    {
+      "sym": "PBW",
+      "price": 34.0,
+      "d1": -3.46,
+      "w1": -9.38,
+      "hi52": -27.58,
+      "ytd": 5.78,
+      "spark": [
+        -5.92,
+        -0.48,
+        1.57,
+        -1.29,
+        -3.46
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "Invesco WilderHill Clean Energy"
+    },
+    {
+      "sym": "REMX",
+      "price": 76.27,
+      "d1": -4.38,
+      "w1": -10.63,
+      "hi52": -31.63,
+      "ytd": -0.66,
+      "spark": [
+        -5.02,
+        -1.74,
+        0.48,
+        -0.34,
+        -4.38
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "VanEck Rare Earth and Strategic"
     },
     {
       "sym": "UNG",
-      "price": 10.52,
-      "d1": 1.45,
-      "w1": -10.54,
-      "hi52": -38.23,
-      "ytd": -12.77,
+      "price": 10.37,
+      "d1": -2.17,
+      "w1": -11.44,
+      "hi52": -39.11,
+      "ytd": -14.01,
       "spark": [
+        0.43,
         -1.36,
         -6.64,
         -2.12,
-        -2.17,
-        1.45
+        -2.17
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
       "name": "United States Natural Gas Fund"
     }
   ],
   "country": [
     {
-      "sym": "EWZ",
-      "price": 36.03,
-      "d1": 1.81,
-      "w1": 4.01,
-      "hi52": -13.44,
-      "ytd": 12.96,
-      "spark": [
-        -0.66,
-        1.6,
-        2.77,
-        -1.5,
-        1.81
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares MSCI Brazil ETF"
-    },
-    {
       "sym": "EWS",
-      "price": 31.63,
-      "d1": 0.64,
-      "w1": 3.16,
-      "hi52": -0.69,
-      "ytd": 16.04,
+      "price": 31.43,
+      "d1": -0.66,
+      "w1": 3.8,
+      "hi52": -0.88,
+      "ytd": 15.3,
       "spark": [
+        1.25,
         1.14,
         1.13,
         0.89,
-        -0.66,
-        0.64
+        -0.66
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
       "name": "iShares MSCI Singapore ETF"
     },
     {
-      "sym": "EWH",
-      "price": 21.67,
-      "d1": 1.74,
-      "w1": 2.85,
-      "hi52": -10.7,
-      "ytd": 0.69,
+      "sym": "EIDO",
+      "price": 11.98,
+      "d1": 1.1,
+      "w1": 1.44,
+      "hi52": -36.73,
+      "ytd": -35.11,
       "spark": [
-        0.19,
-        0.47,
-        1.37,
-        -0.93,
-        1.74
+        1.78,
+        -2.16,
+        0.34,
+        0.42,
+        1.1
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
-      "name": "iShares MSCI Hong Kong Index Fu"
+      "name": "iShares MSCI Indonesia ETF"
+    },
+    {
+      "sym": "EWZ",
+      "price": 35.39,
+      "d1": -1.5,
+      "w1": 1.35,
+      "hi52": -14.98,
+      "ytd": 10.95,
+      "spark": [
+        -0.8,
+        -0.66,
+        1.6,
+        2.77,
+        -1.5
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares MSCI Brazil ETF"
+    },
+    {
+      "sym": "EWC",
+      "price": 58.73,
+      "d1": 0.14,
+      "w1": 1.15,
+      "hi52": -0.98,
+      "ytd": 8.89,
+      "spark": [
+        0.52,
+        -0.67,
+        0.71,
+        0.46,
+        0.14
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares MSCI Canada Index Fund"
     },
     {
       "sym": "MCHI",
-      "price": 53.23,
-      "d1": 1.33,
-      "w1": 2.8,
-      "hi52": -19.49,
-      "ytd": -13.91,
+      "price": 52.53,
+      "d1": -1.13,
+      "w1": 0.98,
+      "hi52": -20.55,
+      "ytd": -15.04,
       "spark": [
+        -0.46,
         2.07,
         0.64,
         -0.11,
-        -1.13,
-        1.33
+        -1.13
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
       "name": "iShares MSCI China ETF"
     },
     {
       "sym": "ARGT",
-      "price": 94.74,
-      "d1": 0.28,
-      "w1": 2.08,
-      "hi52": -8.55,
-      "ytd": 4.34,
+      "price": 94.48,
+      "d1": -0.62,
+      "w1": 0.52,
+      "hi52": -8.8,
+      "ytd": 4.05,
       "spark": [
+        -1.26,
         -0.4,
         -0.23,
         3.08,
-        -0.62,
-        0.28
+        -0.62
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
       "name": "Global X MSCI Argentina ETF"
     },
     {
-      "sym": "EWA",
-      "price": 28.71,
-      "d1": 1.27,
-      "w1": 2.06,
-      "hi52": -4.48,
-      "ytd": 9.99,
+      "sym": "EWH",
+      "price": 21.3,
+      "d1": -0.93,
+      "w1": 0.33,
+      "hi52": -12.23,
+      "ytd": -1.03,
       "spark": [
+        -0.75,
+        0.19,
+        0.47,
+        1.37,
+        -0.93
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "iShares MSCI Hong Kong Index Fu"
+    },
+    {
+      "sym": "EWA",
+      "price": 28.35,
+      "d1": -0.35,
+      "w1": 0.07,
+      "hi52": -5.68,
+      "ytd": 8.61,
+      "spark": [
+        -0.71,
         -0.04,
         0.28,
         0.89,
-        -0.35,
-        1.27
+        -0.35
       ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
       "name": "iShares MSCI Australia Index Fu"
     },
     {
-      "sym": "EWC",
-      "price": 59.18,
-      "d1": 0.77,
-      "w1": 1.41,
-      "hi52": -0.5,
-      "ytd": 9.72,
-      "spark": [
-        -0.67,
-        0.71,
-        0.46,
-        0.14,
-        0.77
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares MSCI Canada Index Fund"
-    },
-    {
-      "sym": "THD",
-      "price": 72.73,
-      "d1": 0.55,
-      "w1": 1.15,
-      "hi52": -0.86,
-      "ytd": 24.26,
-      "spark": [
-        -1.35,
-        1.55,
-        0.67,
-        -0.25,
-        0.55
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares MSCI Thailand ETF"
-    },
-    {
-      "sym": "EWJ",
-      "price": 93.89,
-      "d1": 1.26,
-      "w1": 0.88,
-      "hi52": -3.72,
-      "ytd": 16.07,
-      "spark": [
-        -0.57,
-        1.06,
-        1.1,
-        -1.94,
-        1.26
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares MSCI Japan Index Fund"
-    },
-    {
-      "sym": "EIDO",
-      "price": 12.07,
-      "d1": 0.75,
-      "w1": 0.42,
-      "hi52": -36.25,
-      "ytd": -34.62,
-      "spark": [
-        -2.16,
-        0.34,
-        0.42,
-        1.1,
-        0.75
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "iShares MSCI Indonesia ETF"
-    },
-    {
-      "sym": "EWW",
-      "price": 75.34,
-      "d1": 1.6,
-      "w1": 0.4,
-      "hi52": -6.37,
-      "ytd": 9.75,
-      "spark": [
-        -0.44,
-        -0.63,
-        0.84,
-        -0.95,
-        1.6
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "iShares MSCI Mexico ETF"
-    },
-    {
-      "sym": "ACWI",
-      "price": 156.94,
-      "d1": 0.64,
-      "w1": 0.31,
-      "hi52": -1.29,
-      "ytd": 10.86,
-      "spark": [
-        -0.36,
-        0.72,
-        0.42,
-        -1.1,
-        0.64
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares MSCI ACWI ETF"
-    },
-    {
       "sym": "ECH",
-      "price": 40.01,
-      "d1": 1.6,
-      "w1": 0.3,
-      "hi52": -15.06,
-      "ytd": 0.67,
+      "price": 39.38,
+      "d1": -2.04,
+      "w1": -0.71,
+      "hi52": -16.4,
+      "ytd": -0.91,
       "spark": [
+        0.58,
         -1.75,
         1.86,
         0.7,
-        -2.04,
-        1.6
+        -2.04
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
       "name": "iShares MSCI Chile ETF"
     },
     {
-      "sym": "EWI",
-      "price": 60.63,
-      "d1": 0.26,
-      "w1": 0.07,
-      "hi52": -0.92,
-      "ytd": 12.09,
+      "sym": "THD",
+      "price": 72.33,
+      "d1": -0.25,
+      "w1": -0.8,
+      "hi52": -1.4,
+      "ytd": 23.57,
       "spark": [
-        -0.76,
-        0.25,
-        0.51,
-        -0.2,
-        0.26
+        -1.39,
+        -1.35,
+        1.55,
+        0.67,
+        -0.25
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
-      "name": "iShares MSCI Italy ETF"
-    },
-    {
-      "sym": "EWT",
-      "price": 101.88,
-      "d1": 0.0,
-      "w1": 0.0,
-      "hi52": -9.66,
-      "ytd": 57.3,
-      "spark": [
-        1.98,
-        1.11,
-        1.09,
-        -4.06,
-        0.0
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares MSCI Taiwan ETF"
-    },
-    {
-      "sym": "EEM",
-      "price": 65.67,
-      "d1": 1.81,
-      "w1": -0.08,
-      "hi52": -8.24,
-      "ytd": 17.37,
-      "spark": [
-        0.78,
-        0.83,
-        0.18,
-        -3.59,
-        1.81
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "iShares MSCI Emerging Index Fun"
-    },
-    {
-      "sym": "EUFN",
-      "price": 40.05,
-      "d1": 0.81,
-      "w1": -0.12,
-      "hi52": -1.16,
-      "ytd": 9.93,
-      "spark": [
-        -1.45,
-        0.73,
-        0.75,
-        -0.95,
-        0.81
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares MSCI Europe Financials"
-    },
-    {
-      "sym": "EFA",
-      "price": 103.96,
-      "d1": 0.7,
-      "w1": -0.19,
-      "hi52": -1.48,
-      "ytd": 8.83,
-      "spark": [
-        -0.77,
-        0.54,
-        0.39,
-        -1.04,
-        0.7
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares MSCI EAFE ETF"
-    },
-    {
-      "sym": "EZA",
-      "price": 63.45,
-      "d1": 1.1,
-      "w1": -0.22,
-      "hi52": -20.69,
-      "ytd": -6.57,
-      "spark": [
-        -1.42,
-        0.94,
-        0.85,
-        -1.66,
-        1.1
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "iShares MSCI South Africa Index"
-    },
-    {
-      "sym": "EZU",
-      "price": 68.33,
-      "d1": 0.63,
-      "w1": -0.74,
-      "hi52": -2.82,
-      "ytd": 6.99,
-      "spark": [
-        -0.94,
-        0.47,
-        0.07,
-        -0.96,
-        0.63
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares MSCI Eurozone ETF"
-    },
-    {
-      "sym": "EWD",
-      "price": 49.98,
-      "d1": 0.68,
-      "w1": -0.85,
-      "hi52": -6.86,
-      "ytd": 3.15,
-      "spark": [
-        -1.09,
-        0.88,
-        0.06,
-        -1.37,
-        0.68
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": false,
-      "name": "iShares MSCI Sweden ETF"
+      "name": "iShares MSCI Thailand ETF"
     },
     {
       "sym": "IEUR",
@@ -3149,76 +2951,22 @@
       "name": "iShares Core MSCI Europe ETF"
     },
     {
-      "sym": "EWP",
-      "price": 59.25,
-      "d1": 0.53,
-      "w1": -0.95,
-      "hi52": -2.05,
-      "ytd": 10.05,
+      "sym": "EWI",
+      "price": 60.47,
+      "d1": -0.2,
+      "w1": -1.1,
+      "hi52": -1.16,
+      "ytd": 11.79,
       "spark": [
-        -1.71,
-        0.63,
-        0.47,
-        -0.86,
-        0.53
+        -0.9,
+        -0.76,
+        0.25,
+        0.51,
+        -0.2
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
-      "name": "iShares MSCI Spain ETF"
-    },
-    {
-      "sym": "IEV",
-      "price": 72.55,
-      "d1": 0.47,
-      "w1": -0.97,
-      "hi52": -1.89,
-      "ytd": 6.34,
-      "spark": [
-        -1.08,
-        0.3,
-        0.12,
-        -0.78,
-        0.47
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares Europe ETF"
-    },
-    {
-      "sym": "EWQ",
-      "price": 45.04,
-      "d1": 0.47,
-      "w1": -1.01,
-      "hi52": -4.7,
-      "ytd": 1.78,
-      "spark": [
-        -1.25,
-        0.24,
-        0.0,
-        -0.47,
-        0.47
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "iShares MSCI France Index Fund"
-    },
-    {
-      "sym": "GREK",
-      "price": 76.59,
-      "d1": 0.68,
-      "w1": -1.21,
-      "hi52": -3.15,
-      "ytd": 14.41,
-      "spark": [
-        -1.69,
-        0.63,
-        1.13,
-        -1.93,
-        0.68
-      ],
-      "updatedAt": 1783987200000,
-      "ema_uptrend": true,
-      "name": "Global X MSCI Greece ETF"
+      "name": "iShares MSCI Italy ETF"
     },
     {
       "sym": "INDA",
@@ -3239,6 +2987,24 @@
       "name": "Ishares MSCI India ETF"
     },
     {
+      "sym": "ACWI",
+      "price": 155.94,
+      "d1": -1.1,
+      "w1": -1.29,
+      "hi52": -1.92,
+      "ytd": 10.15,
+      "spark": [
+        -0.96,
+        -0.36,
+        0.72,
+        0.42,
+        -1.1
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares MSCI ACWI ETF"
+    },
+    {
       "sym": "KSA",
       "price": 36.9,
       "d1": -0.57,
@@ -3257,74 +3023,308 @@
       "name": "iShares MSCI Saudi Arabia ETF"
     },
     {
+      "sym": "EUFN",
+      "price": 39.73,
+      "d1": -0.95,
+      "w1": -1.9,
+      "hi52": -1.95,
+      "ytd": 9.05,
+      "spark": [
+        -0.99,
+        -1.45,
+        0.73,
+        0.75,
+        -0.95
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares MSCI Europe Financials"
+    },
+    {
       "sym": "EWL",
       "price": 62.42,
-      "d1": 0.0,
-      "w1": -1.56,
+      "d1": -0.81,
+      "w1": -2.01,
       "hi52": -3.06,
       "ytd": 5.28,
       "spark": [
+        -0.46,
         -0.9,
         0.21,
         -0.06,
-        -0.81,
-        0.0
+        -0.81
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": true,
       "name": "iShares MSCI Switzerland ETF"
     },
     {
-      "sym": "EWG",
-      "price": 41.39,
-      "d1": 0.39,
-      "w1": -1.57,
-      "hi52": -5.44,
-      "ytd": -0.8,
+      "sym": "EFA",
+      "price": 103.24,
+      "d1": -1.04,
+      "w1": -2.11,
+      "hi52": -2.16,
+      "ytd": 8.07,
       "spark": [
-        -1.76,
-        0.56,
-        -0.12,
-        -0.63,
-        0.39
+        -1.23,
+        -0.77,
+        0.54,
+        0.39,
+        -1.04
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares MSCI EAFE ETF"
+    },
+    {
+      "sym": "EWP",
+      "price": 58.94,
+      "d1": -0.86,
+      "w1": -2.22,
+      "hi52": -2.56,
+      "ytd": 9.47,
+      "spark": [
+        -0.76,
+        -1.71,
+        0.63,
+        0.47,
+        -0.86
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares MSCI Spain ETF"
+    },
+    {
+      "sym": "IEV",
+      "price": 72.21,
+      "d1": -0.78,
+      "w1": -2.29,
+      "hi52": -2.35,
+      "ytd": 5.84,
+      "spark": [
+        -0.87,
+        -1.08,
+        0.3,
+        0.12,
+        -0.78
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares Europe ETF"
+    },
+    {
+      "sym": "EWJ",
+      "price": 92.72,
+      "d1": -1.94,
+      "w1": -2.68,
+      "hi52": -4.92,
+      "ytd": 14.62,
+      "spark": [
+        -2.31,
+        -0.57,
+        1.06,
+        1.1,
+        -1.94
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares MSCI Japan Index Fund"
+    },
+    {
+      "sym": "EWQ",
+      "price": 44.83,
+      "d1": -0.47,
+      "w1": -2.69,
+      "hi52": -5.15,
+      "ytd": 1.3,
+      "spark": [
+        -1.24,
+        -1.25,
+        0.24,
+        0.0,
+        -0.47
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares MSCI France Index Fund"
+    },
+    {
+      "sym": "EZU",
+      "price": 67.9,
+      "d1": -0.96,
+      "w1": -2.83,
+      "hi52": -3.43,
+      "ytd": 6.32,
+      "spark": [
+        -1.49,
+        -0.94,
+        0.47,
+        0.07,
+        -0.96
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares MSCI Eurozone ETF"
+    },
+    {
+      "sym": "EWD",
+      "price": 49.64,
+      "d1": -1.37,
+      "w1": -2.86,
+      "hi52": -7.49,
+      "ytd": 2.45,
+      "spark": [
+        -1.35,
+        -1.09,
+        0.88,
+        0.06,
+        -1.37
+      ],
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
-      "name": "iShares MSCI Germany Index Fund"
+      "name": "iShares MSCI Sweden ETF"
+    },
+    {
+      "sym": "EZA",
+      "price": 62.76,
+      "d1": -1.66,
+      "w1": -2.89,
+      "hi52": -21.56,
+      "ytd": -7.59,
+      "spark": [
+        -1.61,
+        -1.42,
+        0.94,
+        0.85,
+        -1.66
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "iShares MSCI South Africa Index"
+    },
+    {
+      "sym": "EWW",
+      "price": 74.15,
+      "d1": -0.95,
+      "w1": -2.98,
+      "hi52": -7.85,
+      "ytd": 8.01,
+      "spark": [
+        -1.82,
+        -0.44,
+        -0.63,
+        0.84,
+        -0.95
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "iShares MSCI Mexico ETF"
     },
     {
       "sym": "TUR",
-      "price": 38.63,
-      "d1": 1.1,
-      "w1": -1.65,
-      "hi52": -11.09,
-      "ytd": 11.98,
+      "price": 38.21,
+      "d1": -1.87,
+      "w1": -3.14,
+      "hi52": -12.05,
+      "ytd": 10.77,
       "spark": [
+        -0.43,
         -1.45,
         -0.46,
         1.06,
-        -1.87,
-        1.1
+        -1.87
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
       "name": "iShares MSCI Turkey ETF"
     },
     {
-      "sym": "EWY",
-      "price": 176.98,
-      "d1": 5.33,
-      "w1": -2.38,
-      "hi52": -19.88,
-      "ytd": 73.14,
+      "sym": "GREK",
+      "price": 76.07,
+      "d1": -1.93,
+      "w1": -3.16,
+      "hi52": -3.81,
+      "ytd": 13.63,
       "spark": [
+        -1.3,
+        -1.69,
+        0.63,
+        1.13,
+        -1.93
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "Global X MSCI Greece ETF"
+    },
+    {
+      "sym": "EWG",
+      "price": 41.23,
+      "d1": -0.63,
+      "w1": -3.35,
+      "hi52": -5.81,
+      "ytd": -1.18,
+      "spark": [
+        -1.43,
+        -1.76,
+        0.56,
+        -0.12,
+        -0.63
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares MSCI Germany Index Fund"
+    },
+    {
+      "sym": "EEM",
+      "price": 64.5,
+      "d1": -3.59,
+      "w1": -4.54,
+      "hi52": -9.88,
+      "ytd": 15.28,
+      "spark": [
+        -2.74,
+        0.78,
+        0.83,
+        0.18,
+        -3.59
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": false,
+      "name": "iShares MSCI Emerging Index Fun"
+    },
+    {
+      "sym": "EWT",
+      "price": 101.88,
+      "d1": -4.06,
+      "w1": -5.02,
+      "hi52": -9.66,
+      "ytd": 57.3,
+      "spark": [
+        -5.02,
+        1.98,
+        1.11,
+        1.09,
+        -4.06
+      ],
+      "updatedAt": 1783900800000,
+      "ema_uptrend": true,
+      "name": "iShares MSCI Taiwan ETF"
+    },
+    {
+      "sym": "EWY",
+      "price": 168.02,
+      "d1": -8.45,
+      "w1": -11.5,
+      "hi52": -23.93,
+      "ytd": 64.37,
+      "spark": [
+        -4.51,
         0.79,
         1.11,
         -0.67,
-        -8.45,
-        5.33
+        -8.45
       ],
-      "updatedAt": 1783987200000,
+      "updatedAt": 1783900800000,
       "ema_uptrend": false,
       "name": "iShares MSCI South Korea ETF"
     }
@@ -3332,76 +3332,76 @@
   "crypto": [
     {
       "sym": "BTC",
-      "price": 64782.7109,
-      "d1": 4.09,
-      "w1": 2.52,
-      "hi52": -48.67,
-      "ytd": -26.99,
+      "price": 64878.3906,
+      "d1": -0.12,
+      "w1": 1.17,
+      "hi52": -48.59,
+      "ytd": -26.88,
       "spark": [
-        1.48,
         -0.51,
         -0.07,
         -2.38,
-        4.09
+        4.37,
+        -0.12
       ],
-      "updatedAt": 1784076019978,
+      "updatedAt": 1784098446075,
       "ema_uptrend": true,
       "id": "bitcoin",
       "name": "Bitcoin"
     },
     {
       "sym": "ETH",
-      "price": 1878.77,
-      "d1": 5.94,
-      "w1": 7.7,
-      "hi52": -62.07,
-      "ytd": -37.38,
+      "price": 1880.42,
+      "d1": -0.48,
+      "w1": 4.72,
+      "hi52": -62.04,
+      "ytd": -37.33,
       "spark": [
-        2.94,
         -0.42,
         0.99,
         -1.79,
-        5.94
+        6.54,
+        -0.48
       ],
-      "updatedAt": 1784076019979,
+      "updatedAt": 1784098446076,
       "ema_uptrend": true,
       "id": "ethereum",
       "name": "Ethereum"
     },
     {
       "sym": "SOL",
-      "price": 77.54,
-      "d1": 3.58,
-      "w1": -0.65,
-      "hi52": -69.38,
-      "ytd": -38.83,
+      "price": 78.13,
+      "d1": 0.47,
+      "w1": 0.08,
+      "hi52": -69.14,
+      "ytd": -38.36,
       "spark": [
-        0.03,
         -1.59,
         0.06,
         -2.62,
-        3.58
+        3.88,
+        0.47
       ],
-      "updatedAt": 1784076019981,
+      "updatedAt": 1784098446078,
       "ema_uptrend": true,
       "id": "solana",
       "name": "Solana"
     },
     {
       "sym": "XRP",
-      "price": 1.1079,
-      "d1": 3.98,
-      "w1": 1.33,
-      "hi52": -69.65,
-      "ytd": -41.0,
+      "price": 1.1089,
+      "d1": -0.2,
+      "w1": 0.45,
+      "hi52": -69.62,
+      "ytd": -40.95,
       "spark": [
-        0.97,
         -0.57,
         -1.08,
         -1.87,
-        3.98
+        4.28,
+        -0.2
       ],
-      "updatedAt": 1784076019983,
+      "updatedAt": 1784098446079,
       "ema_uptrend": false,
       "id": "ripple",
       "name": "Ripple"
@@ -10603,7 +10603,7 @@
   },
   "breadth": {
     "fear_greed": {
-      "score": 43.1,
+      "score": 43.3,
       "rating": "Fear"
     },
     "naaim": {
@@ -10611,15 +10611,15 @@
       "date": "07/08/2026"
     },
     "advance_decline": {
-      "advancers": 203,
-      "decliners": 297
+      "advancers": 277,
+      "decliners": 226
     },
     "new_high_low": {
-      "new_highs": 43,
-      "new_lows": 8
+      "new_highs": 49,
+      "new_lows": 5
     },
-    "pct_above_sma20": 57.7,
-    "pct_above_sma50": 63.7,
-    "pct_above_sma200": 66.8
+    "pct_above_sma20": 62.0,
+    "pct_above_sma50": 66.7,
+    "pct_above_sma200": 68.0
   }
 }
