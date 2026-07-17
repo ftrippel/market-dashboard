@@ -56,6 +56,7 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
       <Card
         label={label}
         style={style}
+        symbols={data.map((x) => x.sym)}
         headerAction={
           canExpand ? (
             <button

@@ -12,7 +12,7 @@ export function EquitiesSection() {
 
   return (
     <Section number="02" title="Equities Overview">
-      <Card label={<CardLabel>Indices</CardLabel>} style={{ marginBottom: '9px' }}>
+      <Card label={<CardLabel>Indices</CardLabel>} symbols={store.etfs.map((x) => x.sym)} style={{ marginBottom: '9px' }}>
         <MarketTable
           data={store.etfs}
           nameLabel="ETF"
@@ -23,7 +23,7 @@ export function EquitiesSection() {
         />
       </Card>
 
-      <Card label={<CardLabel>S&P 500 Sub-Indices</CardLabel>} style={{ marginBottom: '9px' }}>
+      <Card label={<CardLabel>S&P 500 Sub-Indices</CardLabel>} symbols={store.submkt.map((x) => x.sym)} style={{ marginBottom: '9px' }}>
         <MarketTable
           data={store.submkt}
           nameLabel="ETF"
@@ -35,7 +35,7 @@ export function EquitiesSection() {
       </Card>
 
       <div className="g2" style={{ marginBottom: '9px' }}>
-        <Card label={<CardLabel>S&P 500 Sector ETFs</CardLabel>}>
+        <Card label={<CardLabel>S&P 500 Sector ETFs</CardLabel>} symbols={store.sectors.map((x) => x.sym)}>
           <MarketTable
             data={store.sectors}
             nameLabel="ETF"
@@ -47,7 +47,7 @@ export function EquitiesSection() {
             {...rankByW1}
           />
         </Card>
-        <Card label={<CardLabel>S&P 500 Sector ETFs (EW)</CardLabel>}>
+        <Card label={<CardLabel>S&P 500 Sector ETFs (EW)</CardLabel>} symbols={store.sectorsEW.map((x) => x.sym)}>
           <MarketTable
             data={store.sectorsEW}
             nameLabel="ETF"
