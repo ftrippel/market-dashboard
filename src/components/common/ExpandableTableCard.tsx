@@ -110,31 +110,33 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
               onClick={(event) => event.stopPropagation()}
             >
               <div className="table-flyover-hdr">
-                {isSearchOpen ? (
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    style={{
-                      background: colors.bg,
-                      border: `1px solid ${colors.border}`,
-                      color: colors.text,
-                      fontSize: '10px',
-                      padding: '2px 6px',
-                      borderRadius: '2px',
-                      width: '180px',
-                      outline: 'none',
-                      fontFamily: 'IBM Plex Mono, monospace',
-                    }}
-                    autoFocus
-                  />
-                ) : (
-                  <div id={titleId} className="table-flyover-title">
-                    {expandTitle}
-                  </div>
-                )}
+                <div id={titleId} className="table-flyover-title">
+                  {isSearchOpen ? (
+                    <input
+                      type="text"
+                      placeholder="Search..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      style={{
+                        background: colors.bg,
+                        border: `1px solid ${colors.border}`,
+                        color: colors.text,
+                        fontSize: '10px',
+                        padding: '2px 6px',
+                        borderRadius: '2px',
+                        width: '180px',
+                        outline: 'none',
+                        fontFamily: 'IBM Plex Mono, monospace',
+                        textTransform: 'none',
+                        letterSpacing: 'normal',
+                      }}
+                      autoFocus
+                    />
+                  ) : (
+                    expandTitle
+                  )}
+                </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <button
                     type="button"

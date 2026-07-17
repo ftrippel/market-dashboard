@@ -500,7 +500,7 @@ body::before {
 
 .table-flyover-box {
   width: min(1200px, 96vw);
-  max-height: min(900px, 92vh);
+  height: min(900px, 92vh);
   background: var(--bg);
   border: 1px solid var(--border2);
   border-radius: 4px;
@@ -537,7 +537,7 @@ body::before {
 
 .table-flyover-body {
   flex: 1;
-  overflow: auto;
+  overflow-y: scroll;
   overscroll-behavior: contain;
 }
 
