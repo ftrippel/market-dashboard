@@ -1,4 +1,5 @@
 import React, { useEffect, useId, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { Holding, MarketData, MarketTableOptions } from '../../types';
 import { Card, CardCopyButton } from './Card';
 import { CardSearchContext } from './CardSearchContext';
@@ -48,10 +49,29 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
 
   useEffect(() => {
     if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+
+    const html = document.documentElement;
+    const { body } = document;
+    const prev = {
+      htmlOverflow: html.style.overflow,
+      bodyOverflow: body.style.overflow,
+    };
+
+    html.style.overflow = 'hidden';
+    body.style.overflow = 'hidden';
+
+    const preventTouchMove = (event: TouchEvent) => {
+      const target = event.target;
+      if (target instanceof Element && target.closest('.table-flyover-body, .table-scroll')) return;
+      event.preventDefault();
+    };
+
+    document.addEventListener('touchmove', preventTouchMove, { passive: false });
+
     return () => {
-      document.body.style.overflow = prev;
+      html.style.overflow = prev.htmlOverflow;
+      body.style.overflow = prev.bodyOverflow;
+      document.removeEventListener('touchmove', preventTouchMove);
     };
   }, [open]);
 
@@ -93,82 +113,84 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
         <MarketTable data={data} holdings={holdings} maxRows={previewCount} {...tableProps} />
       </Card>
 
-      {open && (
-        <CardSearchContext.Provider value={{ searchQuery, setSearchQuery }}>
-          <div
-            className="table-flyover open"
-            role="presentation"
-            onClick={(event) => {
-              if (event.target === event.currentTarget) setOpen(false);
-            }}
-          >
+      {open &&
+        createPortal(
+          <CardSearchContext.Provider value={{ searchQuery, setSearchQuery }}>
             <div
-              className="table-flyover-box"
-              role="dialog"
-              aria-modal="true"
-              aria-labelledby={titleId}
-              onClick={(event) => event.stopPropagation()}
+              className="table-flyover open"
+              role="presentation"
+              onClick={(event) => {
+                if (event.target === event.currentTarget) setOpen(false);
+              }}
             >
-              <div className="table-flyover-hdr">
-                <div id={titleId} className="table-flyover-title">
-                  {isSearchOpen ? (
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      onKeyDown={handleKeyDown}
-                      style={{
-                        background: colors.bg,
-                        border: `1px solid ${colors.border}`,
-                        color: colors.text,
-                        fontSize: '10px',
-                        padding: '2px 6px',
-                        borderRadius: '2px',
-                        width: '180px',
-                        outline: 'none',
-                        fontFamily: 'IBM Plex Mono, monospace',
-                        textTransform: 'none',
-                        letterSpacing: 'normal',
+              <div
+                className="table-flyover-box"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby={titleId}
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className="table-flyover-hdr">
+                  <div id={titleId} className="table-flyover-title">
+                    {isSearchOpen ? (
+                      <input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        style={{
+                          background: colors.bg,
+                          border: `1px solid ${colors.border}`,
+                          color: colors.text,
+                          fontSize: '10px',
+                          padding: '2px 6px',
+                          borderRadius: '2px',
+                          width: '180px',
+                          outline: 'none',
+                          fontFamily: 'IBM Plex Mono, monospace',
+                          textTransform: 'none',
+                          letterSpacing: 'normal',
+                        }}
+                        autoFocus
+                      />
+                    ) : (
+                      expandTitle
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <button
+                      type="button"
+                      className="table-expand-btn"
+                      title="Search table"
+                      aria-label="Search table"
+                      onClick={() => {
+                        setIsSearchOpen(!isSearchOpen);
+                        if (isSearchOpen) setSearchQuery('');
                       }}
-                      autoFocus
-                    />
-                  ) : (
-                    expandTitle
-                  )}
+                      style={{
+                        color: isSearchOpen ? colors.accent : undefined,
+                        borderColor: isSearchOpen ? colors.accent : undefined,
+                        background: isSearchOpen ? 'var(--accent-subtle-bg)' : undefined,
+                      }}
+                    >
+                      <Icon name="search" size="sm" />
+                    </button>
+                    <CardCopyButton symbols={data.map((x) => x.sym)} />
+                    <button type="button" onClick={() => setOpen(false)}>
+                      <Icon name="close" size="xs" />
+                      CLOSE
+                    </button>
+                  </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <button
-                    type="button"
-                    className="table-expand-btn"
-                    title="Search table"
-                    aria-label="Search table"
-                    onClick={() => {
-                      setIsSearchOpen(!isSearchOpen);
-                      if (isSearchOpen) setSearchQuery('');
-                    }}
-                    style={{
-                      color: isSearchOpen ? colors.accent : undefined,
-                      borderColor: isSearchOpen ? colors.accent : undefined,
-                      background: isSearchOpen ? 'var(--accent-subtle-bg)' : undefined,
-                    }}
-                  >
-                    <Icon name="search" size="sm" />
-                  </button>
-                  <CardCopyButton symbols={data.map((x) => x.sym)} />
-                  <button type="button" onClick={() => setOpen(false)}>
-                    <Icon name="close" size="xs" />
-                    CLOSE
-                  </button>
+                <div className="table-flyover-body">
+                  <MarketTable data={data} holdings={holdings} {...tableProps} />
                 </div>
-              </div>
-              <div className="table-flyover-body">
-                <MarketTable data={data} holdings={holdings} {...tableProps} />
               </div>
             </div>
-          </div>
-        </CardSearchContext.Provider>
-      )}
+          </CardSearchContext.Provider>,
+          document.body,
+        )}
     </>
   );
 };
