@@ -10,6 +10,7 @@ import { BpsCell, PctCell } from './PctCell';
 import { Icon } from './Icon';
 import { SymbolLink } from './TradingViewModal';
 import { HoldingsFlyover } from './HoldingsFlyover';
+import { CardSearchContext } from './CardSearchContext';
 
 type SortKey = 'name' | 'price' | 'd1' | 'w1' | 'hi52' | 'ytd' | 'ema_uptrend';
 type SortOrder = 'asc' | 'desc';
@@ -169,9 +170,22 @@ export const MarketTable: React.FC<MarketTableProps> = ({
     }));
   };
 
+  const searchCtx = React.useContext(CardSearchContext);
+  const searchQuery = searchCtx?.searchQuery || '';
+
+  const filteredData = useMemo(() => {
+    if (!searchQuery) return data;
+    const query = searchQuery.toLowerCase().trim();
+    return data.filter((item) => {
+      const symMatch = item.sym.toLowerCase().includes(query);
+      const nameMatch = resolveDisplayName(item).toLowerCase().includes(query);
+      return symMatch || nameMatch;
+    });
+  }, [data, searchQuery]);
+
   const sorted = useMemo(() => {
-    return [...data].sort((a, b) => compareRows(a, b, sort.key, sort.order));
-  }, [data, sort]);
+    return [...filteredData].sort((a, b) => compareRows(a, b, sort.key, sort.order));
+  }, [filteredData, sort]);
 
   const visible = useMemo(() => {
     if (maxRows == null) return sorted;

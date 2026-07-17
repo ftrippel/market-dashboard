@@ -1011,4 +1011,10 @@ body::before {
   opacity: 1;
 }
 
+.table-flyover-hdr button.table-expand-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-subtle-bg);
+}
+
 

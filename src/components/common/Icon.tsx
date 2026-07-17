@@ -15,6 +15,7 @@ export type MaterialIconName =
   | 'light_mode'
   | 'open_in_full'
   | 'photo_camera'
+  | 'search'
   | 'settings'
   | 'swap_vert'
   | 'unfold_more';
