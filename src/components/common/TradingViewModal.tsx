@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useChartModal } from '../../context/ChartModalContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useSymbolPreview } from '../../context/SymbolPreviewContext';
@@ -56,7 +57,7 @@ export function TradingViewModal() {
 
   if (!chart.open) return null;
 
-  return (
+  return createPortal(
     <div
       id="tv-modal"
       className="tv-modal open"
@@ -124,7 +125,8 @@ export function TradingViewModal() {
           />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
