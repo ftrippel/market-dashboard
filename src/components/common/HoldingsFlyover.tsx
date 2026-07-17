@@ -1,8 +1,8 @@
-import React, { useEffect, useId, useState } from 'react';
-import { copySnapshotText } from '../../services/share';
+import React, { useEffect, useId } from 'react';
 import { colors } from '../../utils/formatting';
 import type { Holding } from '../../types';
 import { Icon } from './Icon';
+import { CardCopyButton } from './Card';
 import { useChartModal } from '../../context/ChartModalContext';
 import { stripExchangeSuffix } from '../../utils/symbols';
 import { SymbolLink } from './TradingViewModal';
@@ -37,20 +37,8 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
   onClose,
 }) => {
   const titleId = useId();
-  const [copied, setCopied] = useState(false);
   const { chart } = useChartModal();
   const siblings = holdings.map((h) => ({ sym: h.s, name: h.n }));
-
-  const handleCopySymbols = async () => {
-    const text = holdings.map((holding) => stripExchangeSuffix(holding.s)).join(', ');
-    try {
-      await copySnapshotText(text);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1500);
-    } catch {
-      setCopied(false);
-    }
-  };
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -92,10 +80,7 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
           <div id={titleId} className="table-flyover-title">
             Top 10 Holdings — {displayName} · {etfSym}
           </div>
-          <button type="button" onClick={handleCopySymbols} aria-label="Copy holding symbols">
-            <Icon name="content_copy" size="xs" />
-            {copied ? 'COPIED' : 'COPY SYMBOLS'}
-          </button>
+          <CardCopyButton symbols={holdings.map((holding) => stripExchangeSuffix(holding.s))} />
           <button type="button" onClick={onClose}>
             <Icon name="close" size="xs" />
             CLOSE
