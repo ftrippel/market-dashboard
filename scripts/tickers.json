@@ -4,16 +4,7 @@
   "sectors":    ["XLK","XLV","XLF","XLE","XLY","XLI","XLB","XLU","XLRE","XLC","XLP"],
   "sectors_ew": ["RSPG","RSPT","RSPF","RSPN","RSPD","RSP","RSPU","RSPM","RSPH","RSPR","RSPS","RSPC"],
   "thematic": [
-    "SLV","GDX","GDXJ","OUNZ","GLD","IDNA","REMX","WGMI","COPX","XBI",
-    "FFTY","SPPP","LIT","NANR","OIH","IXC","DBC","PPH","TAN","TLT",
-    "IEF","IHI","VGIT","IEI","XME","AGG","XHS","LQD","USO","EMLC",
-    "SHV","UUP","IYR","DRIV","BBH","HYG","DBA","ESPO","IDRV","ASHR",
-    "PBW","FXI","SMH","BOUT","XSD","XAR","PHO","BOTZ","UFO","WEAT",
-    "ITB","MOO","IWO","KWEB","NLR","PAVE","XOP","BUZZ","URA","QTUM",
-    "IPO","KIE","XHB","XRT","BLOK","UNG","MSOS","AIQ","IAI",
-    "IYT","FDN","JETS","IBUY","CLOU","KBE","KRE","IGV","XSW","BTF",
-    "SKYY","KBWB", "IBB", "IGM", "SOXX",
-    "ARKK","ARKG", "ARKF", "ARKQ", "ARKW", "ARKX"
+    "USO", "IHAK", "SOXX", "ARKG", "CIBR", "XPH", "XHS", "XBI", "XOP", "SMH", "WEAT", "KBWB", "KRE", "XTN", "IDNA", "XLE", "XSD", "KBE", "IXC", "IYT", "DBC", "IBB", "KIE", "XTL", "WCLD", "AMLP", "IDGT", "BOUT", "IYR", "CLOU", "BBH", "XLRE", "XLK", "PPH", "SPMO", "IWM", "XLF", "XLV", "IGM", "MOO", "XLI", "JETS", "PAVE", "SKYY", "QTUM", "XRT", "XLP", "VIS", "DBA", "SPY", "IWO", "QQQ", "XLU", "ACWI", "SVXY", "IAI", "SLX", "XHE", "BAI", "XSW", "OIH", "SHV", "XLB", "IPO", "MAGS", "UUP", "AIQ", "NANR", "EEM", "EWW", "HYG", "IBUY", "FDN", "XHB", "EMLC", "VGIT", "IEI", "SPPP", "AGG", "ITA", "IEF", "PHO", "ROBO", "LQD", "FDRV", "ITB", "XLY", "TLT", "PPA", "FFTY", "XLC", "IGV", "ARKW", "DRIV", "TAN", "ASHR", "PICK", "BUZZ", "ESPO", "XAR", "ARKK", "FXI", "IHI", "MSOS", "DRAM", "BLOK", "PBW", "ARKF", "MCHI", "UFO", "UNG", "LIT", "COPX", "ARKX", "IDRV", "OUNZ", "ARKQ", "BOTZ", "GLD", "KWEB", "WGMI", "XME", "GDX", "SIL", "BTF", "GDXJ", "SILJ", "REMX", "NLR", "URA", "SLV", "WQTM"
   ],
   "country": [
     "GREK","ARGT","EWS","EWP","EUFN","MCHI","EWZ","EWI","EWY","EWH",
