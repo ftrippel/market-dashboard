@@ -102,6 +102,11 @@ function toYahooFinanceSymbol(sym: string): string {
   return DASHBOARD_TO_YFINANCE[sym] ?? sym;
 }
 
+export function buildYahooFinanceQuoteUrl(sym: string): string {
+  const yfSym = toYahooFinanceSymbol(sym);
+  return `https://finance.yahoo.com/quote/${encodeURIComponent(yfSym)}/`;
+}
+
 export { toYahooFinanceSymbol };
 
 export async function fetchYahooFinancePrice(sym: string): Promise<{ price: number; d1: number; updatedAt?: number } | null> {

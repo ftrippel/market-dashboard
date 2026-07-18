@@ -60,6 +60,7 @@ export const TradingViewMiniChart = memo(function TradingViewMiniChart({
         textColor: theme === 'dark' ? '#9aa5b4' : '#686d78',
         fontSize: 10,
         fontFamily: 'IBM Plex Mono, monospace',
+        attributionLogo: false,
       },
       grid: {
         vertLines: { visible: false },

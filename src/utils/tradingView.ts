@@ -45,6 +45,10 @@ export function toTradingViewSymbol(rawSym: string): string {
   return stripExchangeSuffix(rawSym);
 }
 
+export function buildTradingViewChartUrl(tvSym: string): string {
+  return `https://www.tradingview.com/chart/?symbol=${encodeURIComponent(tvSym)}`;
+}
+
 export interface AdvancedChartWidgetConfig {
   autosize: boolean;
   symbol: string;

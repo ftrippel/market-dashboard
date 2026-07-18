@@ -293,7 +293,6 @@ body::before {
   border-radius: 4px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
 }
 
 #tv-modal-hdr {
@@ -303,6 +302,10 @@ body::before {
   background: var(--bg2);
   border-bottom: 1px solid var(--border);
   gap: 10px;
+  position: relative;
+  z-index: 2;
+  flex-shrink: 0;
+  border-radius: 4px 4px 0 0;
 }
 
 #tv-modal-title {
@@ -343,8 +346,10 @@ body::before {
 #tv-frame-wrap {
   position: relative;
   flex: 1;
+  min-height: 0;
   overflow: hidden;
   background: var(--tv-chart-bg);
+  border-radius: 0 0 4px 4px;
 }
 
 .tv-frame-loading {
@@ -1003,6 +1008,52 @@ body::before {
   text-align: center;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.chart-open-menu {
+  position: relative;
+}
+
+.chart-open-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.chart-open-menu-dropdown {
+  min-width: 140px;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  z-index: 10001;
+  overflow: hidden;
+  pointer-events: auto;
+}
+
+#tv-frame-wrap.menu-open {
+  pointer-events: none;
+}
+
+#tv-frame-wrap.menu-open .tv-advanced-chart {
+  cursor: default;
+}
+
+.chart-open-menu-dropdown a {
+  display: block;
+  padding: 8px 12px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--text);
+  text-decoration: none;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.chart-open-menu-dropdown a:hover {
+  background: var(--accent-subtle-bg);
+  color: var(--accent);
 }
 
 /* Price Cell Tooltip */

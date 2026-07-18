@@ -9,6 +9,7 @@ import { config } from '../../config';
 import { Icon } from './Icon';
 import { TradingViewAdvancedChart } from './TradingViewAdvancedChart';
 import { TradingViewCustomChart } from './TradingViewCustomChart';
+import { ChartOpenMenu } from './ChartOpenMenu';
 import { toYahooFinanceSymbol } from '../../services/api';
 
 export function TradingViewModal() {
@@ -16,6 +17,7 @@ export function TradingViewModal() {
   const { theme } = useTheme();
   const { useCustomCharts } = useSettings();
   const [chartReady, setChartReady] = useState(false);
+  const [openMenu, setOpenMenu] = useState(false);
   const [symbolInput, setSymbolInput] = useState('');
   const symbolInputRef = useRef<HTMLInputElement>(null);
 
@@ -150,11 +152,6 @@ export function TradingViewModal() {
               >
                 LOAD
               </button>
-              {hasSymbol && (
-                <span style={{ fontSize: '10px', color: 'var(--text2)', whiteSpace: 'nowrap' }}>
-                  {displaySym}
-                </span>
-              )}
             </form>
           ) : (
             <div id="tv-modal-title">
@@ -197,12 +194,21 @@ export function TradingViewModal() {
               </button>
             </div>
           )}
+          {hasSymbol && <ChartOpenMenu rawSym={chart.rawSym} onOpenChange={setOpenMenu} />}
           <button type="button" onClick={closeChart}>
             <Icon name="close" size="xs" />
             CLOSE
           </button>
         </div>
-        <div id="tv-frame-wrap" className={hasSymbol && chartReady ? 'ready' : hasSymbol ? 'loading' : 'ready'}>
+        <div
+          id="tv-frame-wrap"
+          className={[
+            hasSymbol && chartReady ? 'ready' : hasSymbol ? 'loading' : 'ready',
+            openMenu ? 'menu-open' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
           {!hasSymbol ? (
             <div className="tv-frame-loading" aria-live="polite">
               Enter a symbol and press Load

@@ -96,6 +96,7 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
         textColor: isDark ? '#9aa5b4' : '#686d78',
         fontSize: 11,
         fontFamily: 'IBM Plex Mono, monospace',
+        attributionLogo: false,
       },
       grid: {
         vertLines: { color: isDark ? 'rgba(42, 46, 57, 0.6)' : 'rgba(197, 203, 206, 0.4)' },
