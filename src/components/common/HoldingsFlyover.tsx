@@ -4,6 +4,7 @@ import type { Holding } from '../../types';
 import { Icon } from './Icon';
 import { CardCopyButton } from './Card';
 import { useChartModal } from '../../context/ChartModalContext';
+import { useScrollLock } from '../../hooks/useScrollLock';
 import { stripExchangeSuffix } from '../../utils/symbols';
 import { SymbolLink } from './TradingViewModal';
 
@@ -40,6 +41,8 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
   const { chart } = useChartModal();
   const siblings = holdings.map((h) => ({ sym: h.s, name: h.n }));
 
+  useScrollLock(true);
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -50,14 +53,6 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [onClose, chart.open]);
-
-  useEffect(() => {
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, []);
 
   const totalWeight = holdings.reduce((sum, holding) => sum + holding.w, 0);
 

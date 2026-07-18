@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useScrollLock } from '../hooks/useScrollLock';
 import { toTradingViewSymbol } from '../utils/tradingView';
 
 interface SiblingSymbol {
@@ -32,6 +33,8 @@ const ChartModalContext = createContext<ChartModalContextValue | null>(null);
 
 export function ChartModalProvider({ children }: { children: ReactNode }) {
   const [chart, setChart] = useState<ChartState>(closedState);
+
+  useScrollLock(chart.open);
 
   const openChart = useCallback((rawSym: string, name: string, siblings?: SiblingSymbol[]) => {
     const tvSym = toTradingViewSymbol(rawSym);
@@ -81,13 +84,6 @@ export function ChartModalProvider({ children }: { children: ReactNode }) {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [chart.open, chart.siblings, chart.rawSym, openChart, closeChart]);
-
-  useEffect(() => {
-    document.body.style.overflow = chart.open ? 'hidden' : '';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [chart.open]);
 
   const value = useMemo(
     () => ({ chart, openChart, closeChart }),

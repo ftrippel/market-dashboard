@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useSettings, type HoverPreviewPlacement } from '../../context/SettingsContext';
+import { useScrollLock } from '../../hooks/useScrollLock';
 import { Icon } from './Icon';
 
 interface SettingsModalProps {
@@ -18,6 +19,8 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     useCustomCharts,
     setUseCustomCharts,
   } = useSettings();
+
+  useScrollLock(open);
 
   useEffect(() => {
     if (!open) return;

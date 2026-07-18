@@ -6,6 +6,7 @@ import { CardSearchContext } from './CardSearchContext';
 import { Icon } from './Icon';
 import { MarketTable } from './MarketTable';
 import { useChartModal } from '../../context/ChartModalContext';
+import { useScrollLock } from '../../hooks/useScrollLock';
 import { colors } from '../../utils/formatting';
 
 interface ExpandableTableCardProps {
@@ -34,6 +35,8 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
   const canExpand = data.length > previewCount;
   const { chart } = useChartModal();
 
+  useScrollLock(open);
+
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (event: KeyboardEvent) => {
@@ -46,34 +49,6 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [open, chart.open]);
-
-  useEffect(() => {
-    if (!open) return;
-
-    const html = document.documentElement;
-    const { body } = document;
-    const prev = {
-      htmlOverflow: html.style.overflow,
-      bodyOverflow: body.style.overflow,
-    };
-
-    html.style.overflow = 'hidden';
-    body.style.overflow = 'hidden';
-
-    const preventTouchMove = (event: TouchEvent) => {
-      const target = event.target;
-      if (target instanceof Element && target.closest('.table-flyover-body, .table-scroll')) return;
-      event.preventDefault();
-    };
-
-    document.addEventListener('touchmove', preventTouchMove, { passive: false });
-
-    return () => {
-      html.style.overflow = prev.htmlOverflow;
-      body.style.overflow = prev.bodyOverflow;
-      document.removeEventListener('touchmove', preventTouchMove);
-    };
-  }, [open]);
 
   useEffect(() => {
     if (!open) {

@@ -99,6 +99,13 @@
 
 html {
   scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+}
+
+html.scroll-locked,
+html.scroll-locked body {
+  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 body {
@@ -270,6 +277,8 @@ body::before {
   background: var(--modal-backdrop);
   align-items: center;
   justify-content: center;
+  overscroll-behavior: none;
+  touch-action: none;
 }
 
 .tv-modal.open {
