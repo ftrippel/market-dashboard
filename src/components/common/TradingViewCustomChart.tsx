@@ -1,7 +1,8 @@
 import { memo, useEffect, useRef, useState } from 'react';
-import { createChart, ColorType, CandlestickSeries, LineSeries, CrosshairMode } from 'lightweight-charts';
+import { createChart, ColorType, CandlestickSeries, LineSeries, CrosshairMode, type MouseEventParams } from 'lightweight-charts';
 import { fetchYahooFinanceOhlcHistory, type DailyOhlcPoint } from '../../services/api';
 import { buildIndicatorSeries, calculateEMA, calculateSMA } from '../../utils/chartIndicators';
+import { colors } from '../../utils/formatting';
 import {
   createMeasureAnchor,
   MeasureToolPrimitive,
@@ -24,6 +25,18 @@ const DEFAULT_VISIBLE_BARS = 126;
 /** Empty bars to the right of the latest candle. */
 const RIGHT_OFFSET_BARS = 12;
 
+interface CrosshairInfo {
+  date: string;
+  close: number;
+  changePct: number | null;
+}
+
+function formatCrosshairChange(changePct: number | null): string {
+  if (changePct === null) return '—';
+  const sign = changePct > 0 ? '+' : '';
+  return `${sign}${changePct.toFixed(2)}%`;
+}
+
 export const TradingViewCustomChart = memo(function TradingViewCustomChart({
   symbol,
   theme,
@@ -33,12 +46,16 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
   const [data, setData] = useState<DailyOhlcPoint[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [crosshairInfo, setCrosshairInfo] = useState<CrosshairInfo | null>(null);
+  const isYield = symbol === 'US10Y' || symbol === 'US30Y';
+  const priceDecimals = isYield ? 3 : 2;
 
   useEffect(() => {
     let active = true;
     setLoading(true);
     setError(null);
     setData(null);
+    setCrosshairInfo(null);
 
     fetchYahooFinanceOhlcHistory(symbol)
       .then((history) => {
@@ -140,6 +157,34 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
     });
     onReady?.();
 
+    let crosshairActive = true;
+    const closeByTime = new Map(data.map((point, index) => [point.time, data[index - 1]?.close ?? null]));
+
+    const onCrosshairMove = (param: MouseEventParams) => {
+      if (!crosshairActive) return;
+
+      if (!param.time || !param.point) {
+        setCrosshairInfo(null);
+        return;
+      }
+
+      const barData = param.seriesData.get(candleSeries);
+      if (!barData || !('close' in barData) || barData.close == null) {
+        setCrosshairInfo(null);
+        return;
+      }
+
+      const date = String(param.time);
+      const prevClose = closeByTime.get(date) ?? null;
+      const close = barData.close;
+      const changePct =
+        prevClose !== null && prevClose !== 0 ? ((close - prevClose) / prevClose) * 100 : null;
+
+      setCrosshairInfo({ date, close, changePct });
+    };
+
+    chart.subscribeCrosshairMove(onCrosshairMove);
+
     let measurePhase: 'idle' | 'active' = 'idle';
 
     const getLocalPoint = (event: PointerEvent) => {
@@ -220,6 +265,8 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
     resizeObserver.observe(container);
 
     return () => {
+      crosshairActive = false;
+      chart.unsubscribeCrosshairMove(onCrosshairMove);
       resizeObserver.disconnect();
       container.removeEventListener('pointerdown', onPointerDown);
       container.removeEventListener('pointermove', onPointerMove);
@@ -257,6 +304,38 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
             {indicator.label}
           </span>
         ))}
+        {crosshairInfo && (
+          <span
+            style={{
+              marginLeft: 'auto',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '10px',
+              fontSize: '10px',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            <span style={{ color: theme === 'dark' ? '#e6edf3' : '#131722' }}>{crosshairInfo.date}</span>
+            <span style={{ color: theme === 'dark' ? '#9aa5b4' : '#686d78' }}>
+              {crosshairInfo.close.toFixed(priceDecimals)}
+            </span>
+            <span
+              style={{
+                color:
+                  crosshairInfo.changePct === null
+                    ? colors.text3
+                    : crosshairInfo.changePct > 0
+                      ? colors.green
+                      : crosshairInfo.changePct < 0
+                        ? colors.red
+                        : colors.text3,
+                fontWeight: 600,
+              }}
+            >
+              {formatCrosshairChange(crosshairInfo.changePct)}
+            </span>
+          </span>
+        )}
       </div>
       {loading && (
         <div className="tv-frame-loading" aria-live="polite">

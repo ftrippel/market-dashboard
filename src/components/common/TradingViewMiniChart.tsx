@@ -1,5 +1,5 @@
 import { memo, useEffect, useRef, useState } from 'react';
-import { createChart, ColorType, LineSeries } from 'lightweight-charts';
+import { createChart, ColorType, LineSeries, CrosshairMode } from 'lightweight-charts';
 import { fetchYahooFinanceDailyHistory, type DailyHistoryPoint } from '../../services/api';
 
 interface TradingViewMiniChartProps {
@@ -72,6 +72,7 @@ export const TradingViewMiniChart = memo(function TradingViewMiniChart({
         borderVisible: false,
       },
       crosshair: {
+        mode: CrosshairMode.Normal,
         horzLine: {
           visible: true,
           labelVisible: true,
@@ -90,7 +91,7 @@ export const TradingViewMiniChart = memo(function TradingViewMiniChart({
     const lineSeries = chart.addSeries(LineSeries, {
       color: theme === 'dark' ? '#5b8cff' : '#1f5aff',
       lineWidth: 2,
-      crosshairMarkerVisible: true,
+      crosshairMarkerVisible: false,
       priceLineVisible: false,
     });
 
