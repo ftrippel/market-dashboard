@@ -33,7 +33,6 @@ interface MeasureTheme {
   upFill: string;
   downFill: string;
   lineColor: string;
-  labelBackground: string;
   labelText: string;
   endpointColor: string;
 }
@@ -43,7 +42,6 @@ const THEMES: Record<'light' | 'dark', MeasureTheme> = {
     upFill: 'rgba(38, 166, 154, 0.18)',
     downFill: 'rgba(239, 83, 80, 0.18)',
     lineColor: '#9aa5b4',
-    labelBackground: 'rgba(19, 23, 34, 0.92)',
     labelText: '#e6edf3',
     endpointColor: '#9aa5b4',
   },
@@ -51,11 +49,52 @@ const THEMES: Record<'light' | 'dark', MeasureTheme> = {
     upFill: 'rgba(8, 153, 129, 0.15)',
     downFill: 'rgba(242, 54, 69, 0.15)',
     lineColor: '#686d78',
-    labelBackground: 'rgba(255, 255, 255, 0.94)',
     labelText: '#131722',
     endpointColor: '#686d78',
   },
 };
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.max(min, Math.min(value, max));
+}
+
+function placeLabelOutsideMeasureArea(
+  left: number,
+  right: number,
+  top: number,
+  bottom: number,
+  boxWidth: number,
+  boxHeight: number,
+  canvasWidth: number,
+  canvasHeight: number,
+  gap: number,
+  margin: number,
+): { boxX: number; boxY: number } {
+  const centeredX = (left + right) / 2 - boxWidth / 2;
+  const centeredY = (top + bottom) / 2 - boxHeight / 2;
+
+  const placements = [
+    { boxX: centeredX, boxY: top - boxHeight - gap },
+    { boxX: centeredX, boxY: bottom + gap },
+    { boxX: right + gap, boxY: centeredY },
+    { boxX: left - boxWidth - gap, boxY: centeredY },
+  ];
+
+  for (const placement of placements) {
+    const fitsHorizontally =
+      placement.boxX >= margin && placement.boxX + boxWidth <= canvasWidth - margin;
+    const fitsVertically =
+      placement.boxY >= margin && placement.boxY + boxHeight <= canvasHeight - margin;
+    if (fitsHorizontally && fitsVertically) {
+      return placement;
+    }
+  }
+
+  return {
+    boxX: clamp(centeredX, margin, canvasWidth - boxWidth - margin),
+    boxY: clamp(top - boxHeight - gap, margin, canvasHeight - boxHeight - margin),
+  };
+}
 
 class MeasurePaneRenderer implements IPrimitivePaneRenderer {
   private _p1: ViewPoint;
@@ -95,8 +134,9 @@ class MeasurePaneRenderer implements IPrimitivePaneRenderer {
       const top = Math.min(y1, y2);
       const bottom = Math.max(y1, y2);
       const isUp = stats.priceDelta >= 0;
+      const areaFill = isUp ? theme.upFill : theme.downFill;
 
-      ctx.fillStyle = isUp ? theme.upFill : theme.downFill;
+      ctx.fillStyle = areaFill;
       ctx.fillRect(left, top, right - left, bottom - top);
 
       ctx.strokeStyle = theme.lineColor;
@@ -141,18 +181,25 @@ class MeasurePaneRenderer implements IPrimitivePaneRenderer {
       const textWidth = Math.max(...lines.map((line) => ctx.measureText(line).width));
       const boxWidth = textWidth + paddingX * 2;
       const boxHeight = lines.length * lineHeight + paddingY * 2;
-      const centerX = (x1 + x2) / 2;
-      const centerY = (y1 + y2) / 2;
-      const boxX = centerX - boxWidth / 2;
-      const boxY = centerY - boxHeight / 2;
+      const gap = 6 * scope.verticalPixelRatio;
+      const margin = 4 * scope.verticalPixelRatio;
+      const { boxX, boxY } = placeLabelOutsideMeasureArea(
+        left,
+        right,
+        top,
+        bottom,
+        boxWidth,
+        boxHeight,
+        scope.bitmapSize.width,
+        scope.bitmapSize.height,
+        gap,
+        margin,
+      );
 
-      ctx.fillStyle = theme.labelBackground;
-      ctx.strokeStyle = theme.lineColor;
-      ctx.lineWidth = Math.max(1, scope.horizontalPixelRatio);
+      ctx.fillStyle = areaFill;
       ctx.beginPath();
       ctx.roundRect(boxX, boxY, boxWidth, boxHeight, 4 * scope.horizontalPixelRatio);
       ctx.fill();
-      ctx.stroke();
 
       ctx.fillStyle = theme.labelText;
       ctx.textBaseline = 'top';
