@@ -98,14 +98,16 @@ const DASHBOARD_TO_YFINANCE: Record<string, string> = {
   'XRP': 'XRP-USD',
 };
 
-function getYahooFinanceSymbol(sym: string): string {
+function toYahooFinanceSymbol(sym: string): string {
   return DASHBOARD_TO_YFINANCE[sym] ?? sym;
 }
+
+export { toYahooFinanceSymbol };
 
 export async function fetchYahooFinancePrice(sym: string): Promise<{ price: number; d1: number; updatedAt?: number } | null> {
   if (sym === 'US2Y') return null; // Skip FRED-only yield
 
-  const yfSym = getYahooFinanceSymbol(sym);
+  const yfSym = toYahooFinanceSymbol(sym);
   const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yfSym)}?interval=1m&range=1d`;
   const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`;
 
@@ -145,19 +147,44 @@ export interface DailyHistoryPoint {
   value: number;
 }
 
-export async function fetchYahooFinanceDailyHistory(sym: string): Promise<DailyHistoryPoint[] | null> {
-  if (sym === 'US2Y') return null; // Skip FRED-only yield
+export interface DailyOhlcPoint {
+  time: string;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+}
 
-  const yfSym = getYahooFinanceSymbol(sym);
-  const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yfSym)}?interval=1d&range=1y`;
+function formatYahooTimestamp(timestamp: number): string {
+  const d = new Date(timestamp * 1000);
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+  const dd = String(d.getUTCDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function scaleYieldValue(value: number): number {
+  return value > 10 ? value / 10 : value;
+}
+
+async function fetchYahooFinanceChartResult(sym: string, range: string) {
+  if (sym === 'US2Y') return null;
+
+  const yfSym = toYahooFinanceSymbol(sym);
+  const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yfSym)}?interval=1d&range=${range}`;
   const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`;
 
   const res = await fetch(proxyUrl);
   if (!res.ok) {
     throw new Error(`Failed to fetch daily history for ${sym}: HTTP ${res.status}`);
   }
+
   const data = await res.json();
-  const result = data?.chart?.result?.[0];
+  return data?.chart?.result?.[0] ?? null;
+}
+
+export async function fetchYahooFinanceDailyHistory(sym: string): Promise<DailyHistoryPoint[] | null> {
+  const result = await fetchYahooFinanceChartResult(sym, '1y');
   if (!result) return null;
 
   const timestamps = result.timestamp;
@@ -168,23 +195,60 @@ export async function fetchYahooFinanceDailyHistory(sym: string): Promise<DailyH
   const isYield = sym === 'US10Y' || sym === 'US30Y';
 
   for (let i = 0; i < timestamps.length; i++) {
-    const timestamp = timestamps[i];
     let close = closes[i];
     if (close == null) continue;
 
-    if (isYield && close > 10) {
-      close = close / 10;
+    if (isYield) {
+      close = scaleYieldValue(close);
     }
 
-    const d = new Date(timestamp * 1000);
-    const yyyy = d.getUTCFullYear();
-    const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
-    const dd = String(d.getUTCDate()).padStart(2, '0');
-    const timeStr = `${yyyy}-${mm}-${dd}`;
+    history.push({
+      time: formatYahooTimestamp(timestamps[i]),
+      value: roundToDecimals(close, isYield ? 3 : 2),
+    });
+  }
+
+  return history;
+}
+
+export async function fetchYahooFinanceOhlcHistory(sym: string): Promise<DailyOhlcPoint[] | null> {
+  const result = await fetchYahooFinanceChartResult(sym, '2y');
+  if (!result) return null;
+
+  const timestamps = result.timestamp;
+  const quote = result.indicators?.quote?.[0];
+  if (!timestamps || !quote) return null;
+
+  const opens = quote.open;
+  const highs = quote.high;
+  const lows = quote.low;
+  const closes = quote.close;
+  if (!opens || !highs || !lows || !closes) return null;
+
+  const history: DailyOhlcPoint[] = [];
+  const isYield = sym === 'US10Y' || sym === 'US30Y';
+  const decimals = isYield ? 3 : 2;
+
+  for (let i = 0; i < timestamps.length; i++) {
+    let open = opens[i];
+    let high = highs[i];
+    let low = lows[i];
+    let close = closes[i];
+    if (open == null || high == null || low == null || close == null) continue;
+
+    if (isYield) {
+      open = scaleYieldValue(open);
+      high = scaleYieldValue(high);
+      low = scaleYieldValue(low);
+      close = scaleYieldValue(close);
+    }
 
     history.push({
-      time: timeStr,
-      value: roundToDecimals(close, isYield ? 3 : 2),
+      time: formatYahooTimestamp(timestamps[i]),
+      open: roundToDecimals(open, decimals),
+      high: roundToDecimals(high, decimals),
+      low: roundToDecimals(low, decimals),
+      close: roundToDecimals(close, decimals),
     });
   }
 

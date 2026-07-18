@@ -11,6 +11,8 @@ interface SettingsContextValue {
   setHoverPreviewPlacement: (placement: HoverPreviewPlacement) => void;
   sparklineMode: SparklineMode;
   setSparklineMode: (mode: SparklineMode) => void;
+  useCustomCharts: boolean;
+  setUseCustomCharts: (val: boolean) => void;
 }
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
@@ -34,6 +36,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     return 'line'; // default to line
   });
 
+  const [useCustomCharts, setUseCustomChartsState] = useState<boolean>(() => {
+    const stored = localStorage.getItem('useCustomCharts');
+    if (stored !== null) return stored === 'true';
+    return config.tradingView.useCustomCharts;
+  });
+
   const setEnableHoverPreview = useCallback((val: boolean) => {
     setEnableHoverPreviewState(val);
     localStorage.setItem('enableHoverPreview', String(val));
@@ -49,6 +57,11 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('sparklineMode', mode);
   }, []);
 
+  const setUseCustomCharts = useCallback((val: boolean) => {
+    setUseCustomChartsState(val);
+    localStorage.setItem('useCustomCharts', String(val));
+  }, []);
+
   return (
     <SettingsContext.Provider
       value={{
@@ -58,6 +71,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
         setHoverPreviewPlacement,
         sparklineMode,
         setSparklineMode,
+        useCustomCharts,
+        setUseCustomCharts,
       }}
     >
       {children}

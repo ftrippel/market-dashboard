@@ -2,15 +2,19 @@ import { useCallback, useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useChartModal } from '../../context/ChartModalContext';
 import { useTheme } from '../../context/ThemeContext';
+import { useSettings } from '../../context/SettingsContext';
 import { useSymbolPreview } from '../../context/SymbolPreviewContext';
 import { colors } from '../../utils/formatting';
 import { config } from '../../config';
 import { Icon } from './Icon';
 import { TradingViewAdvancedChart } from './TradingViewAdvancedChart';
+import { TradingViewCustomChart } from './TradingViewCustomChart';
+import { toYahooFinanceSymbol } from '../../services/api';
 
 export function TradingViewModal() {
   const { chart, openChart, closeChart } = useChartModal();
   const { theme } = useTheme();
+  const { useCustomCharts } = useSettings();
   const [chartReady, setChartReady] = useState(false);
 
   const siblings = chart.siblings || [];
@@ -34,7 +38,7 @@ export function TradingViewModal() {
 
   useEffect(() => {
     setChartReady(false);
-  }, [chart.tvSym, theme]);
+  }, [chart.tvSym, chart.rawSym, theme, useCustomCharts]);
 
   useEffect(() => {
     if (!chart.open) return;
@@ -57,6 +61,8 @@ export function TradingViewModal() {
 
   if (!chart.open) return null;
 
+  const displaySym = useCustomCharts ? toYahooFinanceSymbol(chart.rawSym) : chart.tvSym;
+
   return createPortal(
     <div
       id="tv-modal"
@@ -68,7 +74,7 @@ export function TradingViewModal() {
       <div id="tv-modal-box">
         <div id="tv-modal-hdr">
           <div id="tv-modal-title">
-            {chart.name} · {chart.tvSym}
+            {chart.name} · {displaySym}
           </div>
           {siblings.length > 1 && (
             <div className="tv-modal-nav" style={{ display: 'flex', gap: '6px' }}>
@@ -117,12 +123,21 @@ export function TradingViewModal() {
               Loading chart...
             </div>
           )}
-          <TradingViewAdvancedChart
-            key={`${chart.tvSym}-${theme}`}
-            symbol={chart.tvSym}
-            theme={theme}
-            onReady={handleChartReady}
-          />
+          {useCustomCharts ? (
+            <TradingViewCustomChart
+              key={`${chart.rawSym}-${theme}`}
+              symbol={chart.rawSym}
+              theme={theme}
+              onReady={handleChartReady}
+            />
+          ) : (
+            <TradingViewAdvancedChart
+              key={`${chart.tvSym}-${theme}`}
+              symbol={chart.tvSym}
+              theme={theme}
+              onReady={handleChartReady}
+            />
+          )}
         </div>
       </div>
     </div>,
