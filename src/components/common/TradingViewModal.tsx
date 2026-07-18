@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useChartModal } from '../../context/ChartModalContext';
 import { useTheme } from '../../context/ThemeContext';
@@ -12,15 +12,29 @@ import { TradingViewCustomChart } from './TradingViewCustomChart';
 import { toYahooFinanceSymbol } from '../../services/api';
 
 export function TradingViewModal() {
-  const { chart, openChart, closeChart } = useChartModal();
+  const { chart, openChart, closeChart, setChartSymbol } = useChartModal();
   const { theme } = useTheme();
   const { useCustomCharts } = useSettings();
   const [chartReady, setChartReady] = useState(false);
+  const [symbolInput, setSymbolInput] = useState('');
+  const symbolInputRef = useRef<HTMLInputElement>(null);
 
   const siblings = chart.siblings || [];
   const currentIndex = siblings.findIndex((s) => s.sym === chart.rawSym);
-  const hasPrev = currentIndex > 0;
-  const hasNext = currentIndex !== -1 && currentIndex < siblings.length - 1;
+  const hasPrev = !chart.freeSymbol && currentIndex > 0;
+  const hasNext = !chart.freeSymbol && currentIndex !== -1 && currentIndex < siblings.length - 1;
+  const hasSymbol = chart.rawSym.length > 0;
+
+  useEffect(() => {
+    if (!chart.open) {
+      setSymbolInput('');
+      return;
+    }
+    setSymbolInput(chart.rawSym);
+    if (chart.freeSymbol) {
+      symbolInputRef.current?.focus();
+    }
+  }, [chart.open, chart.freeSymbol, chart.rawSym]);
 
   const handlePrev = () => {
     if (hasPrev) {
@@ -59,9 +73,17 @@ export function TradingViewModal() {
     setChartReady(true);
   }, []);
 
+  const submitSymbol = useCallback(() => {
+    setChartSymbol(symbolInput);
+  }, [setChartSymbol, symbolInput]);
+
   if (!chart.open) return null;
 
-  const displaySym = useCustomCharts ? toYahooFinanceSymbol(chart.rawSym) : chart.tvSym;
+  const displaySym = hasSymbol
+    ? useCustomCharts
+      ? toYahooFinanceSymbol(chart.rawSym)
+      : chart.tvSym
+    : '';
 
   return createPortal(
     <div
@@ -73,10 +95,73 @@ export function TradingViewModal() {
     >
       <div id="tv-modal-box">
         <div id="tv-modal-hdr">
-          <div id="tv-modal-title">
-            {chart.name} · {displaySym}
-          </div>
-          {siblings.length > 1 && (
+          {chart.freeSymbol ? (
+            <form
+              id="tv-modal-title"
+              onSubmit={(event) => {
+                event.preventDefault();
+                submitSymbol();
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                flex: 1,
+                minWidth: 0,
+              }}
+            >
+              <input
+                ref={symbolInputRef}
+                type="text"
+                value={symbolInput}
+                onChange={(event) => setSymbolInput(event.target.value.toUpperCase())}
+                placeholder="Enter symbol (e.g. AAPL, BTC, ES1!)"
+                spellCheck={false}
+                autoComplete="off"
+                style={{
+                  flex: 1,
+                  minWidth: 0,
+                  background: 'var(--bg3)',
+                  color: 'var(--text)',
+                  border: '1px solid var(--border2)',
+                  borderRadius: '4px',
+                  padding: '5px 8px',
+                  fontSize: '11px',
+                  fontFamily: 'IBM Plex Mono, monospace',
+                  letterSpacing: '0.5px',
+                  outline: 'none',
+                }}
+              />
+              <button
+                type="submit"
+                className="btn"
+                style={{
+                  background: 'var(--accent)',
+                  color: '#ffffff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  padding: '5px 10px',
+                  fontSize: '10px',
+                  fontWeight: 500,
+                  cursor: 'pointer',
+                  letterSpacing: '0.5px',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                LOAD
+              </button>
+              {hasSymbol && (
+                <span style={{ fontSize: '10px', color: 'var(--text2)', whiteSpace: 'nowrap' }}>
+                  {displaySym}
+                </span>
+              )}
+            </form>
+          ) : (
+            <div id="tv-modal-title">
+              {chart.name} · {displaySym}
+            </div>
+          )}
+          {siblings.length > 1 && !chart.freeSymbol && (
             <div className="tv-modal-nav" style={{ display: 'flex', gap: '6px' }}>
               <button
                 type="button"
@@ -117,26 +202,34 @@ export function TradingViewModal() {
             CLOSE
           </button>
         </div>
-        <div id="tv-frame-wrap" className={chartReady ? 'ready' : 'loading'}>
-          {!chartReady && (
+        <div id="tv-frame-wrap" className={hasSymbol && chartReady ? 'ready' : hasSymbol ? 'loading' : 'ready'}>
+          {!hasSymbol ? (
             <div className="tv-frame-loading" aria-live="polite">
-              Loading chart...
+              Enter a symbol and press Load
             </div>
-          )}
-          {useCustomCharts ? (
-            <TradingViewCustomChart
-              key={`${chart.rawSym}-${theme}`}
-              symbol={chart.rawSym}
-              theme={theme}
-              onReady={handleChartReady}
-            />
           ) : (
-            <TradingViewAdvancedChart
-              key={`${chart.tvSym}-${theme}`}
-              symbol={chart.tvSym}
-              theme={theme}
-              onReady={handleChartReady}
-            />
+            <>
+              {!chartReady && (
+                <div className="tv-frame-loading" aria-live="polite">
+                  Loading chart...
+                </div>
+              )}
+              {useCustomCharts ? (
+                <TradingViewCustomChart
+                  key={`${chart.rawSym}-${theme}`}
+                  symbol={chart.rawSym}
+                  theme={theme}
+                  onReady={handleChartReady}
+                />
+              ) : (
+                <TradingViewAdvancedChart
+                  key={`${chart.tvSym}-${theme}`}
+                  symbol={chart.tvSym}
+                  theme={theme}
+                  onReady={handleChartReady}
+                />
+              )}
+            </>
           )}
         </div>
       </div>

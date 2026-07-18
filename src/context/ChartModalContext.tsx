@@ -13,11 +13,14 @@ interface ChartState {
   name: string;
   tvSym: string;
   siblings?: SiblingSymbol[];
+  freeSymbol: boolean;
 }
 
 interface ChartModalContextValue {
   chart: ChartState;
   openChart: (rawSym: string, name: string, siblings?: SiblingSymbol[]) => void;
+  openFreeChart: () => void;
+  setChartSymbol: (rawSym: string) => void;
   closeChart: () => void;
 }
 
@@ -27,6 +30,7 @@ const closedState: ChartState = {
   name: '',
   tvSym: '',
   siblings: [],
+  freeSymbol: false,
 };
 
 const ChartModalContext = createContext<ChartModalContextValue | null>(null);
@@ -44,7 +48,30 @@ export function ChartModalProvider({ children }: { children: ReactNode }) {
       name,
       tvSym,
       siblings,
+      freeSymbol: false,
     });
+  }, []);
+
+  const openFreeChart = useCallback(() => {
+    setChart({
+      open: true,
+      rawSym: '',
+      name: '',
+      tvSym: '',
+      siblings: [],
+      freeSymbol: true,
+    });
+  }, []);
+
+  const setChartSymbol = useCallback((rawSym: string) => {
+    const trimmed = rawSym.trim();
+    if (!trimmed) return;
+    setChart((prev) => ({
+      ...prev,
+      rawSym: trimmed,
+      name: trimmed,
+      tvSym: toTradingViewSymbol(trimmed),
+    }));
   }, []);
 
   const closeChart = useCallback(() => {
@@ -86,8 +113,8 @@ export function ChartModalProvider({ children }: { children: ReactNode }) {
   }, [chart.open, chart.siblings, chart.rawSym, openChart, closeChart]);
 
   const value = useMemo(
-    () => ({ chart, openChart, closeChart }),
-    [chart, openChart, closeChart]
+    () => ({ chart, openChart, openFreeChart, setChartSymbol, closeChart }),
+    [chart, openChart, openFreeChart, setChartSymbol, closeChart]
   );
 
   return <ChartModalContext.Provider value={value}>{children}</ChartModalContext.Provider>;

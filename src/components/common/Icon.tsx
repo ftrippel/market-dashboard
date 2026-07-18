@@ -17,6 +17,7 @@ export type MaterialIconName =
   | 'photo_camera'
   | 'search'
   | 'settings'
+  | 'show_chart'
   | 'swap_vert'
   | 'unfold_more';
 

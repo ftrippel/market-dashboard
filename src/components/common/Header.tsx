@@ -1,6 +1,7 @@
 import React from 'react';
 import { colors, formatDataTimestamp } from '../../utils/formatting';
 import { useTheme } from '../../context/ThemeContext';
+import { useChartModal } from '../../context/ChartModalContext';
 import { Icon, XIcon } from './Icon';
 
 interface HeaderProps {
@@ -29,6 +30,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSettings,
 }) => {
   const { theme, toggleTheme } = useTheme();
+  const { openFreeChart } = useChartModal();
   const [time, setTime] = React.useState<string>('—');
   const [date, setDate] = React.useState<string>('—');
 
@@ -124,6 +126,15 @@ export const Header: React.FC<HeaderProps> = ({
         <button type="button" className="btn btn-x" onClick={onSnap}>
           <Icon name="photo_camera" size="sm" />
           SNAP
+        </button>
+        <button
+          type="button"
+          className="btn btn-x"
+          onClick={openFreeChart}
+          title="Open chart for any symbol"
+        >
+          <Icon name="show_chart" size="sm" />
+          CHART
         </button>
         <button
           type="button"
