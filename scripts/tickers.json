@@ -1,6 +1,6 @@
 {
   "etfmain":    ["SPY","QQQ","DIA","IWM"],
-  "submarket":  ["IVW","IVE","IJK","IJJ","IJT","IJS","MGK","VUG","VTV"],
+  "submarket":  ["IVW","IVE","IJK","IJJ","IJT","IJS","MGK","VUG","VTV","SPHQ","SPMO","SPLV","MTUM","XMMO","SMMV","RPV","RPG"],
   "sectors":    ["XLK","XLV","XLF","XLE","XLY","XLI","XLB","XLU","XLRE","XLC","XLP"],
   "sectors_ew": ["RSPG","RSPT","RSPF","RSPN","RSPD","RSP","RSPU","RSPM","RSPH","RSPR","RSPS","RSPC"],
   "thematic": [

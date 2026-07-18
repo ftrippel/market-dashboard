@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 const dist = 'dist';
-const required = ['index.html', 'data.json', '.nojekyll', 'favicon.svg'];
+const required = ['index.html', 'data.json', '.nojekyll', 'favicon.png'];
 
 for (const file of required) {
   const path = join(dist, file);
