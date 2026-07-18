@@ -17,7 +17,7 @@ export const config = {
     /** Enable display name / symbol underlining (disabled by default). */
     enableUnderline: false,
     /** Render modal charts with lightweight-charts + Yahoo Finance instead of TradingView embed. */
-    useCustomCharts: false,
+    useCustomCharts: true,
   },
 } as const;
 

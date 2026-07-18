@@ -2,6 +2,10 @@ import { memo, useEffect, useRef, useState } from 'react';
 import { createChart, ColorType, CandlestickSeries, LineSeries, CrosshairMode } from 'lightweight-charts';
 import { fetchYahooFinanceOhlcHistory, type DailyOhlcPoint } from '../../services/api';
 import { buildIndicatorSeries, calculateEMA, calculateSMA } from '../../utils/chartIndicators';
+import {
+  createMeasureAnchor,
+  MeasureToolPrimitive,
+} from '../../utils/measureToolPrimitive';
 
 interface TradingViewCustomChartProps {
   symbol: string;
@@ -104,6 +108,9 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
 
     candleSeries.setData(data);
 
+    const measurePrimitive = new MeasureToolPrimitive(theme);
+    candleSeries.attachPrimitive(measurePrimitive);
+
     const closes = data.map((point) => point.close);
     const times = data.map((point) => point.time);
 
@@ -133,6 +140,75 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
     });
     onReady?.();
 
+    let measurePhase: 'idle' | 'active' = 'idle';
+
+    const getLocalPoint = (event: PointerEvent) => {
+      const bounds = container.getBoundingClientRect();
+      return {
+        x: event.clientX - bounds.left,
+        y: event.clientY - bounds.top,
+      };
+    };
+
+    const deactivateMeasure = () => {
+      measurePhase = 'idle';
+      container.style.cursor = '';
+    };
+
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.button !== 0) return;
+
+      const point = getLocalPoint(event);
+      const anchor = createMeasureAnchor(chart, candleSeries, point.x, point.y);
+      if (!anchor) return;
+
+      if (measurePhase === 'idle' && event.shiftKey) {
+        measurePhase = 'active';
+        measurePrimitive.setMeasurement(anchor, anchor);
+        container.style.cursor = 'crosshair';
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+
+      if (measurePhase === 'active') {
+        const start = measurePrimitive.getStart();
+        if (!start) {
+          deactivateMeasure();
+          return;
+        }
+        measurePrimitive.setMeasurement(start, anchor);
+        deactivateMeasure();
+        event.preventDefault();
+        event.stopPropagation();
+      }
+    };
+
+    const onPointerMove = (event: PointerEvent) => {
+      if (measurePhase !== 'active') return;
+
+      const point = getLocalPoint(event);
+      const anchor = createMeasureAnchor(chart, candleSeries, point.x, point.y);
+      const start = measurePrimitive.getStart();
+      if (!anchor || !start) return;
+
+      measurePrimitive.setMeasurement(start, anchor);
+    };
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      if (measurePhase !== 'active' && !measurePrimitive.hasMeasurement()) return;
+
+      measurePrimitive.clear();
+      deactivateMeasure();
+      event.preventDefault();
+      event.stopPropagation();
+    };
+
+    container.addEventListener('pointerdown', onPointerDown);
+    container.addEventListener('pointermove', onPointerMove);
+    window.addEventListener('keydown', onKeyDown, true);
+
     const handleResize = () => {
       chart.applyOptions({
         width: container.clientWidth,
@@ -145,6 +221,10 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
 
     return () => {
       resizeObserver.disconnect();
+      container.removeEventListener('pointerdown', onPointerDown);
+      container.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('keydown', onKeyDown, true);
+      container.style.cursor = '';
       chart.remove();
     };
   }, [data, theme, onReady]);
