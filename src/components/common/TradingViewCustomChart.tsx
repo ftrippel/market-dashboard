@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { isYieldSymbol } from '../../data/symbolMaps';
 import { createChart, ColorType, CandlestickSeries, LineSeries, CrosshairMode } from 'lightweight-charts';
 import { fetchYahooFinanceOhlcHistory, type DailyOhlcPoint } from '../../services/api';
 import { buildIndicatorSeries, calculateEMA, calculateSMA } from '../../utils/chartIndicators';
@@ -45,7 +46,7 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
   const [loading, setLoading] = useState(true);
   const [crosshairInfo, setCrosshairInfo] = useState<CrosshairInfo | null>(null);
   const [interactionUi, setInteractionUi] = useState<ChartInteractionUi | null>(null);
-  const isYield = symbol === 'US10Y' || symbol === 'US30Y';
+  const isYield = isYieldSymbol(symbol);
   const priceDecimals = isYield ? 3 : 2;
 
   const handleMeasureButtonPointerDown = useCallback(

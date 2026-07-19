@@ -1,8 +1,8 @@
 {
-  "generated_at": "2026-07-19T06:58:38Z",
+  "generated_at": "2026-07-19T10:47:42Z",
   "futures": [
     {
-      "sym": "ES1!",
+      "sym": "ES=F",
       "price": 7497.75,
       "d1": -1.06,
       "w1": -1.61,
@@ -20,7 +20,7 @@
       "name": "E-Mini S&P 500 Sep 26"
     },
     {
-      "sym": "NQ1!",
+      "sym": "NQ=F",
       "price": 28773.25,
       "d1": -1.55,
       "w1": -4.19,
@@ -38,7 +38,7 @@
       "name": "Nasdaq 100 Sep 26"
     },
     {
-      "sym": "RTY1!",
+      "sym": "RTY=F",
       "price": 2973.5,
       "d1": -0.58,
       "w1": -0.68,
@@ -56,7 +56,7 @@
       "name": "E-mini Russell 2000 Index Futur"
     },
     {
-      "sym": "YM1!",
+      "sym": "YM=F",
       "price": 52375.0,
       "d1": -0.78,
       "w1": -1.0,
@@ -94,7 +94,7 @@
       "name": "ICE US Dollar Index - Index - C"
     },
     {
-      "sym": "CBOE:VIX",
+      "sym": "^VIX",
       "price": 18.77,
       "d1": 12.19,
       "w1": 24.88,
@@ -114,7 +114,7 @@
   ],
   "metals": [
     {
-      "sym": "GC1!",
+      "sym": "GC=F",
       "price": 4018.8,
       "d1": 0.83,
       "w1": -2.08,
@@ -132,7 +132,7 @@
       "name": "Gold Aug 26"
     },
     {
-      "sym": "SI1!",
+      "sym": "SI=F",
       "price": 56.326,
       "d1": 0.77,
       "w1": -5.82,
@@ -147,10 +147,10 @@
       ],
       "updatedAt": 1784246400000,
       "ema_uptrend": false,
-      "name": "Silver Jul 26"
+      "name": "Silver Sep 26"
     },
     {
-      "sym": "HG1!",
+      "sym": "HG=F",
       "price": 6.265,
       "d1": -0.49,
       "w1": 0.51,
@@ -165,10 +165,10 @@
       ],
       "updatedAt": 1784246400000,
       "ema_uptrend": true,
-      "name": "Copper Jul 26"
+      "name": "Copper Sep 26"
     },
     {
-      "sym": "PL1!",
+      "sym": "PL=F",
       "price": 1612.5,
       "d1": -1.42,
       "w1": -0.35,
@@ -183,10 +183,10 @@
       ],
       "updatedAt": 1784246400000,
       "ema_uptrend": false,
-      "name": "Platinum Jul 26"
+      "name": "Platinum Oct 26"
     },
     {
-      "sym": "PA1!",
+      "sym": "PA=F",
       "price": 1252.8,
       "d1": -0.85,
       "w1": -1.07,
@@ -206,7 +206,7 @@
   ],
   "commod": [
     {
-      "sym": "CL1!",
+      "sym": "CL=F",
       "price": 81.78,
       "d1": 3.58,
       "w1": 14.52,
@@ -224,7 +224,7 @@
       "name": "Crude Oil Aug 26"
     },
     {
-      "sym": "NG1!",
+      "sym": "NG=F",
       "price": 2.911,
       "d1": 1.85,
       "w1": -0.99,
@@ -239,7 +239,7 @@
       ],
       "updatedAt": 1784246400000,
       "ema_uptrend": false,
-      "name": "Natural Gas Jul 26"
+      "name": "Natural Gas Aug 26"
     },
     {
       "sym": "USO",
@@ -277,7 +277,7 @@
       ]
     },
     {
-      "sym": "US10Y",
+      "sym": "^TNX",
       "price": 4.57,
       "d1": 2.0,
       "w1": 3.0,
@@ -289,11 +289,10 @@
         -4.0,
         -3.0,
         2.0
-      ],
-      "name": "CBOE Interest Rate 10 Year T No"
+      ]
     },
     {
-      "sym": "US30Y",
+      "sym": "^TYX",
       "price": 5.09,
       "d1": 1.0,
       "w1": 4.0,
@@ -305,8 +304,7 @@
         -2.0,
         0.0,
         1.0
-      ],
-      "name": "Treasury Yield 30 Years"
+      ]
     }
   ],
   "global": [
@@ -384,17 +382,17 @@
     },
     {
       "sym": "000300.SS",
-      "price": 4529.1001,
-      "d1": -3.6,
-      "w1": -5.26,
-      "hi52": -10.57,
-      "ytd": -4.0,
+      "price": 4780.79,
+      "d1": -1.96,
+      "w1": -1.27,
+      "hi52": -5.6,
+      "ytd": 1.34,
       "spark": [
-        -1.79,
-        2.15,
-        -0.2,
-        -1.85,
-        -3.6
+        -0.0,
+        -1.03,
+        -0.77,
+        2.54,
+        -1.96
       ],
       "updatedAt": 1784271624000,
       "ema_uptrend": false,
@@ -4087,80 +4085,76 @@
   ],
   "crypto": [
     {
-      "sym": "BTC",
-      "price": 64668.0898,
-      "d1": -0.2,
-      "w1": -0.44,
-      "hi52": -48.76,
-      "ytd": -27.12,
+      "sym": "BTC-USD",
+      "price": 64612.3203,
+      "d1": -0.28,
+      "w1": -0.53,
+      "hi52": -48.8,
+      "ytd": -27.18,
       "spark": [
         -0.38,
         -1.43,
         0.17,
         1.4,
-        -0.2
+        -0.28
       ],
-      "updatedAt": 1784444399327,
+      "updatedAt": 1784458104851,
       "ema_uptrend": true,
-      "id": "bitcoin",
-      "name": "Bitcoin"
+      "name": "Bitcoin USD"
     },
     {
-      "sym": "ETH",
-      "price": 1867.9,
-      "d1": 0.35,
-      "w1": -1.14,
-      "hi52": -62.29,
-      "ytd": -37.74,
+      "sym": "ETH-USD",
+      "price": 1873.28,
+      "d1": 0.64,
+      "w1": -0.86,
+      "hi52": -62.18,
+      "ytd": -37.57,
       "spark": [
         1.45,
         -2.8,
         -1.19,
         1.11,
-        0.35
+        0.64
       ],
-      "updatedAt": 1784444399328,
+      "updatedAt": 1784458104853,
       "ema_uptrend": true,
-      "id": "ethereum",
-      "name": "Ethereum"
+      "name": "Ethereum USD"
     },
     {
-      "sym": "SOL",
-      "price": 76.06,
-      "d1": 0.79,
-      "w1": -2.19,
-      "hi52": -69.96,
-      "ytd": -40.0,
+      "sym": "SOL-USD",
+      "price": 76.33,
+      "d1": 1.15,
+      "w1": -1.84,
+      "hi52": -69.86,
+      "ytd": -39.78,
       "spark": [
         -0.64,
         -2.58,
         -0.35,
         0.6,
-        0.79
+        1.15
       ],
-      "updatedAt": 1784444399330,
+      "updatedAt": 1784458104855,
       "ema_uptrend": true,
-      "id": "solana",
-      "name": "Solana"
+      "name": "Solana USD"
     },
     {
-      "sym": "XRP",
-      "price": 1.0957,
-      "d1": 0.32,
-      "w1": -1.39,
-      "hi52": -69.92,
-      "ytd": -41.65,
+      "sym": "XRP-USD",
+      "price": 1.0976,
+      "d1": 0.5,
+      "w1": -1.22,
+      "hi52": -69.87,
+      "ytd": -41.55,
       "spark": [
         0.15,
         -2.38,
         0.22,
         0.32,
-        0.32
+        0.5
       ],
-      "updatedAt": 1784444399331,
+      "updatedAt": 1784458104856,
       "ema_uptrend": false,
-      "id": "ripple",
-      "name": "Ripple"
+      "name": "XRP USD"
     }
   ],
   "holdings": {

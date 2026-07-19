@@ -1,0 +1,703 @@
+{
+  "version": 1,
+  "symbols": {
+    "000001.SS": {
+      "name": "Shanghai Comp.",
+      "sym": "SHCOMP",
+      "tradingView": "SSE:000001",
+      "massive": "I:SHCOMP"
+    },
+    "000300.SS": {
+      "name": "CSI 300",
+      "sym": "CSI300",
+      "tradingView": "SZSE:399300",
+      "massive": "I:CSI300"
+    },
+    "^FCHI": {
+      "name": "CAC 40",
+      "sym": "CAC",
+      "tradingView": "OANDA:FR40EUR",
+      "massive": "I:PX1"
+    },
+    "^FTSE": {
+      "name": "FTSE 100",
+      "sym": "UKX",
+      "tradingView": "OANDA:UK100GBP",
+      "massive": "I:UKX"
+    },
+    "^GDAXI": {
+      "name": "DAX",
+      "sym": "DAX",
+      "tradingView": "OANDA:DE30EUR",
+      "massive": "I:DAX"
+    },
+    "^HSI": {
+      "name": "Hang Seng",
+      "sym": "HSI",
+      "tradingView": "FXOPEN:HSI",
+      "massive": "I:HSI"
+    },
+    "^KS11": {
+      "name": "KOSPI",
+      "sym": "KOSPI",
+      "tradingView": "AMEX:EWY",
+      "massive": "I:KOSPI"
+    },
+    "^N225": {
+      "name": "Nikkei 225",
+      "sym": "N225",
+      "tradingView": "OANDA:JP225USD",
+      "massive": "I:NI225"
+    },
+    "^NSEI": {
+      "name": "Nifty 50",
+      "sym": "NIFTY",
+      "tradingView": "AMEX:INDA",
+      "massive": "I:NIFTY50"
+    },
+    "^TNX": {
+      "displaySym": "US10Y",
+      "name": "10-Year Treasury",
+      "isYield": true,
+      "tradingView": "NASDAQ:IEF"
+    },
+    "^TYX": {
+      "displaySym": "US30Y",
+      "name": "30-Year Treasury",
+      "isYield": true,
+      "tradingView": "NASDAQ:TLT"
+    },
+    "^VIX": {
+      "displaySym": "CBOE:VIX",
+      "name": "CBOE VIX",
+      "sym": "VIX",
+      "tradingView": "VIX",
+      "massive": "I:VIX"
+    },
+    "ACES": {
+      "name": "ALPS Clean Energy"
+    },
+    "ACWI": {
+      "name": "MSCI ACWI"
+    },
+    "AGG": {
+      "name": "iShares Core US Agg Bond"
+    },
+    "AIQ": {
+      "name": "Global X AI & Technology"
+    },
+    "ALI1!": {
+      "name": "Aluminum",
+      "tradingView": "AMEX:JJU"
+    },
+    "ARGT": {
+      "name": "Argentina",
+      "flag": "🇦🇷"
+    },
+    "ARKG": {
+      "name": "ARK Genomic Revolution"
+    },
+    "ARKK": {
+      "name": "ARK Innovation"
+    },
+    "ASHR": {
+      "name": "Xtrackers CSI 300 China"
+    },
+    "BBH": {
+      "name": "VanEck Biotech"
+    },
+    "BLOK": {
+      "name": "Amplify Blockchain Tech"
+    },
+    "BOTZ": {
+      "name": "Global X AI & Robotics"
+    },
+    "BOUT": {
+      "name": "Innovator IBD Breakout"
+    },
+    "BTC-USD": {
+      "displaySym": "BTC",
+      "tradingView": "COINBASE:BTCUSD",
+      "massive": "X:BTCUSD"
+    },
+    "BTF": {
+      "name": "CoinShares BTC & Ether"
+    },
+    "BUZZ": {
+      "name": "VanEck Social Sentiment"
+    },
+    "CIBR": {
+      "name": "First Trust Cybersecurity"
+    },
+    "CL=F": {
+      "displaySym": "CL1!",
+      "name": "WTI Crude Oil",
+      "tradingView": "OANDA:WTICOUSD"
+    },
+    "CLOU": {
+      "name": "Global X Cloud Computing"
+    },
+    "COPX": {
+      "name": "Global X Copper Miners"
+    },
+    "DBA": {
+      "name": "Invesco DB Agriculture"
+    },
+    "DBC": {
+      "name": "Invesco DB Commodity"
+    },
+    "DIA": {
+      "name": "SPDR Dow Jones"
+    },
+    "DRIV": {
+      "name": "Global X Autonomous & EV"
+    },
+    "DX-Y.NYB": {
+      "name": "US Dollar Index",
+      "sym": "DXY",
+      "tradingView": "CAPITALCOM:DXY"
+    },
+    "ECH": {
+      "name": "Chile",
+      "flag": "🇨🇱"
+    },
+    "EEM": {
+      "name": "Emerging Markets"
+    },
+    "EFA": {
+      "name": "MSCI EAFE"
+    },
+    "EIDO": {
+      "name": "Indonesia",
+      "flag": "🇮🇩"
+    },
+    "EMLC": {
+      "name": "VanEck EM Local Ccy Bond"
+    },
+    "EPHE": {
+      "name": "Philippines",
+      "flag": "🇵🇭"
+    },
+    "ES=F": {
+      "displaySym": "ES1!",
+      "name": "S&P 500 Futures",
+      "tradingView": "OANDA:SPX500USD"
+    },
+    "ESPO": {
+      "name": "VanEck Video Gaming & eSports"
+    },
+    "ETH-USD": {
+      "displaySym": "ETH",
+      "tradingView": "COINBASE:ETHUSD",
+      "massive": "X:ETHUSD"
+    },
+    "EUFN": {
+      "name": "Europe Financials"
+    },
+    "EWA": {
+      "name": "Australia",
+      "flag": "🇦🇺"
+    },
+    "EWC": {
+      "name": "Canada",
+      "flag": "🇨🇦"
+    },
+    "EWD": {
+      "name": "Sweden",
+      "flag": "🇸🇪"
+    },
+    "EWG": {
+      "name": "Germany",
+      "flag": "🇩🇪"
+    },
+    "EWH": {
+      "name": "Hong Kong",
+      "flag": "🇭🇰"
+    },
+    "EWI": {
+      "name": "Italy",
+      "flag": "🇮🇹"
+    },
+    "EWJ": {
+      "name": "Japan",
+      "flag": "🇯🇵"
+    },
+    "EWK": {
+      "name": "Belgium",
+      "flag": "🇧🇪"
+    },
+    "EWL": {
+      "name": "Switzerland",
+      "flag": "🇨🇭"
+    },
+    "EWM": {
+      "name": "Malaysia",
+      "flag": "🇲🇾"
+    },
+    "EWN": {
+      "name": "Netherlands",
+      "flag": "🇳🇱"
+    },
+    "EWO": {
+      "name": "Austria",
+      "flag": "🇦🇹"
+    },
+    "EWP": {
+      "name": "Spain",
+      "flag": "🇪🇸"
+    },
+    "EWQ": {
+      "name": "France",
+      "flag": "🇫🇷"
+    },
+    "EWS": {
+      "name": "Singapore",
+      "flag": "🇸🇬"
+    },
+    "EWT": {
+      "name": "Taiwan",
+      "flag": "🇹🇼"
+    },
+    "EWU": {
+      "name": "United Kingdom",
+      "flag": "🇬🇧"
+    },
+    "EWW": {
+      "name": "Mexico",
+      "flag": "🇲🇽"
+    },
+    "EWY": {
+      "name": "South Korea",
+      "flag": "🇰🇷"
+    },
+    "EWZ": {
+      "name": "Brazil",
+      "flag": "🇧🇷"
+    },
+    "EZA": {
+      "name": "South Africa",
+      "flag": "🇿🇦"
+    },
+    "EZU": {
+      "name": "Eurozone"
+    },
+    "FDN": {
+      "name": "First Trust DJ Internet"
+    },
+    "FFTY": {
+      "name": "Innovator IBD 50"
+    },
+    "FINX": {
+      "name": "Global X FinTech"
+    },
+    "FXI": {
+      "name": "iShares China Large Cap"
+    },
+    "GC=F": {
+      "displaySym": "GC1!",
+      "name": "Gold",
+      "tradingView": "OANDA:XAUUSD"
+    },
+    "GDX": {
+      "name": "VanEck Gold Miners"
+    },
+    "GDXJ": {
+      "name": "VanEck Jr Gold Miners"
+    },
+    "GLD": {
+      "name": "SPDR Gold"
+    },
+    "GREK": {
+      "name": "Greece",
+      "flag": "🇬🇷"
+    },
+    "GXC": {
+      "name": "China S&P ETF",
+      "flag": "🇨🇳"
+    },
+    "HACK": {
+      "name": "ETFMG Prime Cybersecurity"
+    },
+    "HERO": {
+      "name": "Global X Video Games & Esports"
+    },
+    "HG=F": {
+      "displaySym": "HG1!",
+      "name": "Copper",
+      "tradingView": "CAPITALCOM:COPPER"
+    },
+    "HYG": {
+      "name": "iShares HY Corporate Bond"
+    },
+    "IAI": {
+      "name": "iShares US Broker-Dealers"
+    },
+    "IBUY": {
+      "name": "Amplify Online Retail"
+    },
+    "ICLN": {
+      "name": "iSh Global Clean Energy"
+    },
+    "IDNA": {
+      "name": "iShares Genomics Immuno"
+    },
+    "IDRV": {
+      "name": "iShares Self-Driving EV"
+    },
+    "IEF": {
+      "name": "iShares 7-10 Yr Treasury"
+    },
+    "IEI": {
+      "name": "iShares 3-7 Yr Treasury"
+    },
+    "IEUR": {
+      "name": "Core MSCI Europe"
+    },
+    "IEV": {
+      "name": "Europe"
+    },
+    "IGV": {
+      "name": "iShares Expanded Tech-SW"
+    },
+    "IHI": {
+      "name": "iShares US Medical Devices"
+    },
+    "IJJ": {
+      "name": "iSh S&P 400 MidCap Value"
+    },
+    "IJK": {
+      "name": "iSh S&P 400 MidCap Growth"
+    },
+    "IJS": {
+      "name": "iSh S&P 600 SmCap Value"
+    },
+    "IJT": {
+      "name": "iSh S&P 600 SmCap Growth"
+    },
+    "INDA": {
+      "name": "India",
+      "flag": "🇮🇳"
+    },
+    "IPO": {
+      "name": "Renaissance IPO"
+    },
+    "ITA": {
+      "name": "iSh Aerospace & Defense"
+    },
+    "ITB": {
+      "name": "iShares US Home Const"
+    },
+    "IVE": {
+      "name": "iSh S&P 500 Value"
+    },
+    "IVW": {
+      "name": "iSh S&P 500 Growth"
+    },
+    "IWM": {
+      "name": "iShares Russell 2000"
+    },
+    "IWO": {
+      "name": "iShares Russell 2000 Gr"
+    },
+    "IXC": {
+      "name": "iShares Global Energy"
+    },
+    "IYR": {
+      "name": "iShares US Real Estate"
+    },
+    "IYT": {
+      "name": "iShares US Transportation"
+    },
+    "JETS": {
+      "name": "US Global Jets"
+    },
+    "KBE": {
+      "name": "SPDR S&P Bank"
+    },
+    "KIE": {
+      "name": "SPDR S&P Insurance"
+    },
+    "KRE": {
+      "name": "SPDR S&P Regional Banking"
+    },
+    "KSA": {
+      "name": "Saudi Arabia",
+      "flag": "🇸🇦"
+    },
+    "KWEB": {
+      "name": "KraneShares China Internet"
+    },
+    "LIT": {
+      "name": "Global X Lithium & Battery"
+    },
+    "LQD": {
+      "name": "iShares IG Corporate Bond"
+    },
+    "MCHI": {
+      "name": "China",
+      "flag": "🇨🇳"
+    },
+    "MGK": {
+      "name": "Vanguard Mega Cap Growth"
+    },
+    "MOO": {
+      "name": "VanEck Agribusiness"
+    },
+    "MSOS": {
+      "name": "AdvisorShares US Cannabis"
+    },
+    "NANR": {
+      "name": "SPDR S&P NA Natural Res"
+    },
+    "NG=F": {
+      "displaySym": "NG1!",
+      "name": "Natural Gas",
+      "tradingView": "OANDA:NATGASUSD"
+    },
+    "NLR": {
+      "name": "VanEck Uranium & Nuclear"
+    },
+    "NQ=F": {
+      "displaySym": "NQ1!",
+      "name": "Nasdaq Futures",
+      "tradingView": "OANDA:NAS100USD"
+    },
+    "OIH": {
+      "name": "VanEck Oil Services"
+    },
+    "OUNZ": {
+      "name": "VanEck Merk Gold"
+    },
+    "PA=F": {
+      "displaySym": "PA1!",
+      "name": "Palladium",
+      "tradingView": "OANDA:XPDUSD"
+    },
+    "PAVE": {
+      "name": "Global X U.S. Infrastructure"
+    },
+    "PBW": {
+      "name": "Invesco WilderHill Clean E"
+    },
+    "PHO": {
+      "name": "Invesco Water Resources"
+    },
+    "PL=F": {
+      "displaySym": "PL1!",
+      "name": "Platinum",
+      "tradingView": "OANDA:XPTUSD"
+    },
+    "PPH": {
+      "name": "VanEck Pharmaceutical"
+    },
+    "QQQ": {
+      "name": "Invesco QQQ"
+    },
+    "QTUM": {
+      "name": "Defiance Quantum"
+    },
+    "REMX": {
+      "name": "VanEck Rare Earth Metals"
+    },
+    "ROBO": {
+      "name": "ROBO Global Robotics"
+    },
+    "RSP": {
+      "name": "S&P 500 EW"
+    },
+    "RSPC": {
+      "name": "Comm Svcs EW"
+    },
+    "RSPD": {
+      "name": "Cons Discr EW"
+    },
+    "RSPF": {
+      "name": "Financials EW"
+    },
+    "RSPG": {
+      "name": "Energy EW"
+    },
+    "RSPH": {
+      "name": "Health Care EW"
+    },
+    "RSPM": {
+      "name": "Materials EW"
+    },
+    "RSPN": {
+      "name": "Industrials EW"
+    },
+    "RSPR": {
+      "name": "Real Estate EW"
+    },
+    "RSPS": {
+      "name": "Cons Staples EW"
+    },
+    "RSPT": {
+      "name": "Technology EW"
+    },
+    "RSPU": {
+      "name": "Utilities EW"
+    },
+    "RTY=F": {
+      "displaySym": "RTY1!",
+      "name": "Russell 2000 Futures",
+      "tradingView": "OANDA:US2000USD"
+    },
+    "SHV": {
+      "name": "iShares 0-1 Yr Treasury"
+    },
+    "SI=F": {
+      "displaySym": "SI1!",
+      "name": "Silver",
+      "tradingView": "OANDA:XAGUSD"
+    },
+    "SKYY": {
+      "name": "First Trust Cloud Computing"
+    },
+    "SLV": {
+      "name": "iShares Silver"
+    },
+    "SMH": {
+      "name": "VanEck Semiconductor"
+    },
+    "SOL-USD": {
+      "displaySym": "SOL",
+      "tradingView": "COINBASE:SOLUSD",
+      "massive": "X:SOLUSD"
+    },
+    "SOXX": {
+      "name": "iSh Semiconductor"
+    },
+    "SPPP": {
+      "name": "Sprott Plat & Palladium"
+    },
+    "SPY": {
+      "name": "SPDR S&P 500"
+    },
+    "TAN": {
+      "name": "Invesco Solar"
+    },
+    "THD": {
+      "name": "Thailand",
+      "flag": "🇹🇭"
+    },
+    "TLT": {
+      "name": "iShares 20+ Yr Treasury"
+    },
+    "TUR": {
+      "name": "Turkey",
+      "flag": "🇹🇷"
+    },
+    "UFO": {
+      "name": "Procure Space"
+    },
+    "UNG": {
+      "name": "United States Natural Gas"
+    },
+    "URA": {
+      "name": "Global X Uranium"
+    },
+    "US2Y": {
+      "name": "2-Year Treasury",
+      "sym": "US02Y",
+      "isYield": true,
+      "source": "fred",
+      "tradingView": "NASDAQ:SHY"
+    },
+    "USO": {
+      "name": "United States Oil Fund"
+    },
+    "UUP": {
+      "name": "Invesco DB USD Bullish"
+    },
+    "VGIT": {
+      "name": "Vanguard Int Treasury"
+    },
+    "VNM": {
+      "name": "Vietnam",
+      "flag": "🇻🇳"
+    },
+    "VTV": {
+      "name": "Vanguard Value"
+    },
+    "VUG": {
+      "name": "Vanguard Growth"
+    },
+    "WEAT": {
+      "name": "Teucrium Wheat"
+    },
+    "WGMI": {
+      "name": "CoinShares Crypto Miners"
+    },
+    "XAR": {
+      "name": "SPDR S&P Aero & Defense"
+    },
+    "XBI": {
+      "name": "SPDR Biotech"
+    },
+    "XHB": {
+      "name": "SPDR S&P Homebuilders"
+    },
+    "XHS": {
+      "name": "SPDR S&P Health Care Svcs"
+    },
+    "XLB": {
+      "name": "Materials"
+    },
+    "XLC": {
+      "name": "Comm. Services"
+    },
+    "XLE": {
+      "name": "Energy"
+    },
+    "XLF": {
+      "name": "Financials"
+    },
+    "XLI": {
+      "name": "Industrials"
+    },
+    "XLK": {
+      "name": "Technology"
+    },
+    "XLP": {
+      "name": "Consumer Staples"
+    },
+    "XLRE": {
+      "name": "Real Estate"
+    },
+    "XLU": {
+      "name": "Utilities"
+    },
+    "XLV": {
+      "name": "Health Care"
+    },
+    "XLY": {
+      "name": "Consumer Discret."
+    },
+    "XME": {
+      "name": "SPDR S&P Metals & Mining"
+    },
+    "XOP": {
+      "name": "SPDR S&P Oil & Gas E&P"
+    },
+    "XRP-USD": {
+      "displaySym": "XRP",
+      "tradingView": "COINBASE:XRPUSD",
+      "massive": "X:XRPUSD"
+    },
+    "XRT": {
+      "name": "SPDR S&P Retail"
+    },
+    "XSD": {
+      "name": "SPDR S&P Semiconductor"
+    },
+    "XSW": {
+      "name": "SPDR S&P Software & Svcs"
+    },
+    "YM=F": {
+      "displaySym": "YM1!",
+      "name": "Dow Jones Futures",
+      "tradingView": "OANDA:US30USD"
+    }
+  }
+}

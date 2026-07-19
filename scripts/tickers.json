@@ -17,6 +17,14 @@
   "energy":   ["CL=F","NG=F","USO"],
   "global":   ["^N225","^KS11","^NSEI","000001.SS","000300.SS","^HSI","^FTSE","^FCHI","^GDAXI"],
   "yields":   ["^TNX","^TYX"],
+  "fred_yields": {
+    "US2Y": "DGS2"
+  },
+  "massive_yield_symbols": {
+    "2Y": "US2Y",
+    "10Y": "^TNX",
+    "30Y": "^TYX"
+  },
   "dxvix":    ["DX-Y.NYB","^VIX"],
   "crypto":   ["BTC-USD","ETH-USD","SOL-USD","XRP-USD"]
 }

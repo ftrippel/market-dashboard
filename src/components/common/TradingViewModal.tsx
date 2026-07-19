@@ -117,7 +117,7 @@ export function TradingViewModal() {
                 type="text"
                 value={symbolInput}
                 onChange={(event) => setSymbolInput(event.target.value.toUpperCase())}
-                placeholder="Enter symbol (e.g. AAPL, BTC, ES1!)"
+                placeholder="Enter symbol (e.g. AAPL, ES=F, BTC-USD)"
                 spellCheck={false}
                 autoComplete="off"
                 style={{

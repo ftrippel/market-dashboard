@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { getDisplayName, getSymbolMeta } from '../../data/symbolMeta';
+import { getDisplayName, getSymbolMeta } from '../../data/symbolMaps';
 import { colors, formatPrice, formatHoverTimestamp } from '../../utils/formatting';
 import type { Holding, MarketData, MarketTableOptions } from '../../types';
 import { Sparkline } from './Sparkline';

@@ -1,4 +1,7 @@
 import type { MarketData, MarketState, Holding } from '../types';
+import { isYieldSymbol, isYahooFetchable, toYahooFinanceSymbol } from '../data/symbolMaps';
+
+export { toYahooFinanceSymbol };
 
 interface RawData {
   generated_at?: string;
@@ -71,46 +74,13 @@ function transformData(raw: RawData): MarketState {
   };
 }
 
-const DASHBOARD_TO_YFINANCE: Record<string, string> = {
-  // Futures
-  'ES1!': 'ES=F',
-  'NQ1!': 'NQ=F',
-  'RTY1!': 'RTY=F',
-  'YM1!': 'YM=F',
-  // Metals
-  'GC1!': 'GC=F',
-  'SI1!': 'SI=F',
-  'HG1!': 'HG=F',
-  'PL1!': 'PL=F',
-  'PA1!': 'PA=F',
-  // Commodities
-  'CL1!': 'CL=F',
-  'NG1!': 'NG=F',
-  // Yields
-  'US10Y': '^TNX',
-  'US30Y': '^TYX',
-  // VIX
-  'CBOE:VIX': '^VIX',
-  // Crypto
-  'BTC': 'BTC-USD',
-  'ETH': 'ETH-USD',
-  'SOL': 'SOL-USD',
-  'XRP': 'XRP-USD',
-};
-
-function toYahooFinanceSymbol(sym: string): string {
-  return DASHBOARD_TO_YFINANCE[sym] ?? sym;
-}
-
 export function buildYahooFinanceQuoteUrl(sym: string): string {
   const yfSym = toYahooFinanceSymbol(sym);
   return `https://finance.yahoo.com/quote/${encodeURIComponent(yfSym)}/`;
 }
 
-export { toYahooFinanceSymbol };
-
 export async function fetchYahooFinancePrice(sym: string): Promise<{ price: number; d1: number; updatedAt?: number } | null> {
-  if (sym === 'US2Y') return null; // Skip FRED-only yield
+  if (!isYahooFetchable(sym)) return null;
 
   const yfSym = toYahooFinanceSymbol(sym);
   const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yfSym)}?interval=1m&range=1d`;
@@ -128,7 +98,7 @@ export async function fetchYahooFinancePrice(sym: string): Promise<{ price: numb
   let prevClose = meta.previousClose ?? meta.chartPreviousClose;
   if (currentPrice == null || prevClose == null || prevClose === 0) return null;
 
-  const isYield = sym === 'US10Y' || sym === 'US30Y';
+  const isYield = isYieldSymbol(sym);
   
   if (isYield) {
     // If the index is scaled by 10 (e.g. 44.0 instead of 4.4), scale it down
@@ -173,7 +143,7 @@ function scaleYieldValue(value: number): number {
 }
 
 async function fetchYahooFinanceChartResult(sym: string, range: string) {
-  if (sym === 'US2Y') return null;
+  if (!isYahooFetchable(sym)) return null;
 
   const yfSym = toYahooFinanceSymbol(sym);
   const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yfSym)}?interval=1d&range=${range}`;
@@ -197,7 +167,7 @@ export async function fetchYahooFinanceDailyHistory(sym: string): Promise<DailyH
   if (!timestamps || !closes) return null;
 
   const history: DailyHistoryPoint[] = [];
-  const isYield = sym === 'US10Y' || sym === 'US30Y';
+  const isYield = isYieldSymbol(sym);
 
   for (let i = 0; i < timestamps.length; i++) {
     let close = closes[i];
@@ -231,7 +201,7 @@ export async function fetchYahooFinanceOhlcHistory(sym: string): Promise<DailyOh
   if (!opens || !highs || !lows || !closes) return null;
 
   const history: DailyOhlcPoint[] = [];
-  const isYield = sym === 'US10Y' || sym === 'US30Y';
+  const isYield = isYieldSymbol(sym);
   const decimals = isYield ? 3 : 2;
 
   for (let i = 0; i < timestamps.length; i++) {

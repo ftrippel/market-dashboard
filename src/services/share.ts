@@ -9,8 +9,8 @@ export function buildShareTweetText(data: Pick<MarketState, 'etfs' | 'crypto' | 
   const now = new Date();
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const spy = findBySym(data.etfs, 'SPY');
-  const btc = findBySym(data.crypto, 'BTC');
-  const gold = findBySym(data.metals, 'GC1!');
+  const btc = findBySym(data.crypto, 'BTC-USD');
+  const gold = findBySym(data.metals, 'GC=F');
   const hsi = findBySym(data.global, '^HSI');
 
   const arrow = (v: number) => (v > 0 ? '▲' : '▼');
@@ -34,9 +34,9 @@ export function buildClipboardSnapshot(data: Pick<MarketState, 'etfs' | 'crypto'
   ];
   const spy = findBySym(data.etfs, 'SPY');
   const qqq = findBySym(data.etfs, 'QQQ');
-  const btc = findBySym(data.crypto, 'BTC');
-  const gold = findBySym(data.metals, 'GC1!');
-  const vix = findBySym(data.dxvix, 'CBOE:VIX');
+  const btc = findBySym(data.crypto, 'BTC-USD');
+  const gold = findBySym(data.metals, 'GC=F');
+  const vix = findBySym(data.dxvix, '^VIX');
   const sign = (v: number) => (v > 0 ? '+' : '');
 
   return `MARKET DASHBOARD — EOD SNAPSHOT

@@ -5,7 +5,6 @@ import sys
 import csv
 import math
 import os
-import xml.etree.ElementTree as ET
 import concurrent.futures
 from pathlib import Path
 from io import StringIO
@@ -59,86 +58,63 @@ YF_HOLDINGS_PAUSE = float(os.environ.get('YF_HOLDINGS_PAUSE', '0.4'))
 MASSIVE_API_KEY = os.environ.get('MASSIVE_API_KEY', '')
 MASSIVE_BASE    = 'https://api.massive.com'
 
-# Crypto: yfinance symbol → Massive X: prefix symbol
-MASSIVE_CRYPTO_MAP = {
-    'BTC-USD': 'X:BTCUSD',
-    'ETH-USD': 'X:ETHUSD',
-    'SOL-USD': 'X:SOLUSD',
-    'XRP-USD': 'X:XRPUSD',
-}
+SYMBOL_MAPS_PATH = REPO_ROOT / 'config' / 'symbolMaps.json'
 
-# Global Indices & VIX: yfinance symbol → Massive I: prefix symbol
-MASSIVE_INDICES_MAP = {
-    '^N225':     'I:NI225',
-    '^KS11':     'I:KOSPI',
-    '^NSEI':     'I:NIFTY50',
-    '000001.SS': 'I:SHCOMP',
-    '000300.SS': 'I:CSI300',
-    '^HSI':      'I:HSI',
-    '^FTSE':     'I:UKX',
-    '^FCHI':     'I:PX1',
-    '^GDAXI':    'I:DAX',
-    '^VIX':      'I:VIX',
-}
+def load_symbol_maps():
+    if not SYMBOL_MAPS_PATH.exists():
+        return {}
+    with open(SYMBOL_MAPS_PATH, encoding='utf-8') as f:
+        return json.load(f).get('symbols', {})
 
-# ── DEFAULT TICKERS (overridden by tickers.json if present) ────────────────────
-ETF_MAIN   = ['SPY','QQQ','DIA','IWM']
-SUBMARKET  = ['IVW','IVE','IJK','IJJ','IJT','IJS','MGK','VUG','VTV']
-SECTOR     = ['XLK','XLV','XLF','XLE','XLY','XLI','XLB','XLU','XLRE','XLC','XLP']
-SECTOR_EW  = ['RSPG','RSPT','RSPF','RSPN','RSPD','RSP','RSPU','RSPM','RSPH','RSPR','RSPS','RSPC']
-THEMATIC   = ['BOTZ','HACK','SOXX','ICLN','SKYY','XBI','ITA','FINX','ARKG','URA',
-              'AIQ','CIBR','ROBO','ARKK','DRIV','OGIG','ACES','PAVE','HERO','CLOU']
-COUNTRY    = ['GREK','ARGT','EWS','EWP','EUFN','MCHI','EWZ','EWI','EWY','EWH',
-              'ECH','EWC','EWL','EWQ','EWA','IEV','IEUR','INDA','EWG','EWW',
-              'EZU','EEM','EFA','EWD','TUR','EZA','ACWI','KSA','EIDO','EWJ','EWT','THD']
-FUTURES    = ['ES=F','NQ=F','RTY=F','YM=F']
-METALS     = ['GC=F','SI=F','HG=F','PL=F','PA=F']
-ENERGY     = ['CL=F','NG=F','USO']
-GLOBAL_IDX = ['^N225','^KS11','^NSEI','000001.SS','000300.SS','^HSI','^FTSE','^FCHI','^GDAXI']
-YIELDS     = ['^TNX','^TYX']
-DX_VIX     = ['DX-Y.NYB','^VIX']
-CRYPTO_YF  = ['BTC-USD','ETH-USD','SOL-USD','XRP-USD']
+SYMBOL_MAPS = load_symbol_maps()
+if SYMBOL_MAPS:
+    print(f"\u2713 Loaded {len(SYMBOL_MAPS)} symbols from symbolMaps.json")
 
-# ── LOAD FROM tickers.json ──────────────────────────────────────────────────────────────────────
-config_path = SCRIPTS_DIR / 'tickers.json'
-if config_path.exists():
-    with open(config_path) as f:
-        CFG = json.load(f)
-    ETF_MAIN   = CFG.get('etfmain',    ETF_MAIN)
-    SUBMARKET  = CFG.get('submarket',  SUBMARKET)
-    SECTOR     = CFG.get('sectors',    SECTOR)
-    SECTOR_EW  = CFG.get('sectors_ew', SECTOR_EW)
-    THEMATIC   = CFG.get('thematic',   THEMATIC)
-    COUNTRY    = CFG.get('country',    COUNTRY)
-    FUTURES    = CFG.get('futures',    FUTURES)
-    METALS     = CFG.get('metals',     METALS)
-    ENERGY     = CFG.get('energy',     ENERGY)
-    GLOBAL_IDX = CFG.get('global',     GLOBAL_IDX)
-    YIELDS     = CFG.get('yields',     YIELDS)
-    DX_VIX     = CFG.get('dxvix',      DX_VIX)
-    CRYPTO_YF  = CFG.get('crypto',     CRYPTO_YF)
-    print(f"\u2713 Loaded tickers from tickers.json ({len(THEMATIC)} thematic, {len(COUNTRY)} country)")
-else:
-    print("\u26a0 tickers.json not found \u2014 using built-in defaults")
+def massive_sym_for(yf_sym):
+    return SYMBOL_MAPS.get(yf_sym, {}).get('massive', yf_sym)
 
-# ── TICKER REMAPS ────────────────────────────────────────────────────────────────────────────────
-TICKER_REMAP = {
-    'ES=F':'ES1!', 'NQ=F':'NQ1!', 'RTY=F':'RTY1!', 'YM=F':'YM1!',
-    'GC=F':'GC1!', 'SI=F':'SI1!', 'HG=F':'HG1!', 'PL=F':'PL1!', 'PA=F':'PA1!',
-    'CL=F':'CL1!', 'NG=F':'NG1!',
-    '^TNX':'US10Y', '^TYX':'US30Y',
-    'DX-Y.NYB':'DX-Y.NYB', '^VIX':'CBOE:VIX',
-    'BTC-USD':'BTC','ETH-USD':'ETH','SOL-USD':'SOL','XRP-USD':'XRP',
-}
+# ── LOAD tickers.json (required) ────────────────────────────────────────────────────────────────
+TICKERS_PATH = SCRIPTS_DIR / 'tickers.json'
+if not TICKERS_PATH.exists():
+    sys.exit('Error: scripts/tickers.json is required')
+with open(TICKERS_PATH, encoding='utf-8') as f:
+    CFG = json.load(f)
+print(f"\u2713 Loaded tickers.json")
+
+# output_key -> tickers.json key
+BATCH_SECTIONS = [
+    ('etfmain', 'etfmain'),
+    ('submarket', 'submarket'),
+    ('sector', 'sectors'),
+    ('sectorew', 'sectors_ew'),
+    ('thematic', 'thematic'),
+    ('country', 'country'),
+    ('crypto', 'crypto'),
+    ('dxvix', 'dxvix'),
+    ('futures', 'futures'),
+    ('metals', 'metals'),
+    ('commod', 'energy'),
+]
+INDIVIDUAL_SECTIONS = [
+    ('global', 'global'),
+]
 
 PRICE_SECTIONS = [
     'futures', 'dxvix', 'crypto', 'metals', 'commod', 'yields',
     'global', 'etfmain', 'submarket', 'sector', 'sectorew', 'thematic', 'country',
 ]
 
+def tickers_for(section_key):
+    return CFG.get(section_key, [])
+
+def yield_symbols():
+    return list(CFG.get('fred_yields', {}).keys()) + tickers_for('yields')
+
+YIELD_SYMS = yield_symbols()
+
 # ── TICKER DISPLAY NAMES ───────────────────────────────────────────────────────────────────────────
 def fetch_ticker_short_names(tickers, existing=None):
-    """Map dashboard symbol -> yfinance shortName (fallback longName)."""
+    """Map ticker -> yfinance shortName (fallback longName)."""
     names = {}
     preserved = set()
     if existing:
@@ -149,11 +125,10 @@ def fetch_ticker_short_names(tickers, existing=None):
                     preserved.add(sym)
 
     pending = []
-    for yf_sym in tickers:
-        display_sym = TICKER_REMAP.get(yf_sym, yf_sym)
-        if display_sym in names or display_sym in preserved:
+    for sym in tickers:
+        if sym in names or sym in preserved:
             continue
-        pending.append(yf_sym)
+        pending.append(sym)
 
     if preserved:
         print(f"  Reusing {len(preserved)} names from existing data.json")
@@ -162,14 +137,13 @@ def fetch_ticker_short_names(tickers, existing=None):
         return names
 
     total = len(pending)
-    for i, yf_sym in enumerate(pending):
-        display_sym = TICKER_REMAP.get(yf_sym, yf_sym)
-        print(f"  Names [{i+1}/{total}] {yf_sym}...", end=' ')
+    for i, sym in enumerate(pending):
+        print(f"  Names [{i+1}/{total}] {sym}...", end=' ')
         try:
-            info = yf.Ticker(yf_sym).info
+            info = yf.Ticker(sym).info
             name = (info.get('shortName') or info.get('longName') or '').strip()
             if name:
-                names[display_sym] = name
+                names[sym] = name
                 label = name if len(name) <= 44 else name[:41] + '...'
                 print(f"\u2713 {label}")
             else:
@@ -210,12 +184,7 @@ def fetch_massive_bars(yf_sym, days=400):
     end   = datetime.date.today()
     start = end - datetime.timedelta(days=days)
     # Determine Massive ticker symbol
-    if yf_sym in MASSIVE_CRYPTO_MAP:
-        massive_sym = MASSIVE_CRYPTO_MAP[yf_sym]
-    elif yf_sym in MASSIVE_INDICES_MAP:
-        massive_sym = MASSIVE_INDICES_MAP[yf_sym]
-    else:
-        massive_sym = yf_sym
+    massive_sym = massive_sym_for(yf_sym)
     url    = f"{MASSIVE_BASE}/v2/aggs/ticker/{massive_sym}/range/1/day/{start}/{end}"
     params = {'adjusted': 'true', 'sort': 'asc', 'limit': 500, 'apiKey': MASSIVE_API_KEY}
     try:
@@ -255,10 +224,10 @@ def fetch_batch_massive(tickers):
                 print(f"  ⚠ No data for {sym}")
     return results
 
-# ── 2-YEAR TREASURY YIELD ───────────────────────────────────────────────────────────────────────────────
-def fetch_treasury_2y():
+# ── FRED YIELDS ───────────────────────────────────────────────────────────────────────────────────
+def fetch_fred_yield(sym, series_id):
     try:
-        url = 'https://fred.stlouisfed.org/graph/fredgraph.csv?id=DGS2'
+        url = f'https://fred.stlouisfed.org/graph/fredgraph.csv?id={series_id}'
         resp = requests.get(url, timeout=15, headers={'User-Agent': 'Mozilla/5.0'})
         resp.raise_for_status()
         reader = csv.reader(StringIO(resp.text))
@@ -287,65 +256,27 @@ def fetch_treasury_2y():
             while len(spark) < 5:
                 spark.insert(0, 0.0)
 
-            print(f"  ✓ US2Y = {price}% (FRED CSV)")
+            print(f"  \u2713 {sym} = {price}% (FRED {series_id})")
             return {
-                'sym': 'US2Y',
+                'sym': sym,
                 'price': round(price, 4),
                 'd1': d1,
                 'w1': w1,
                 'hi52': hi52,
                 'ytd': ytd,
-                'spark': spark
+                'spark': spark,
             }
     except Exception as e:
-        print(f"  FRED CSV failed: {e}")
-
-    try:
-        now = datetime.datetime.utcnow()
-        url = ("https://home.treasury.gov/resource-center/data-chart-center/"
-               "interest-rates/pages/xml?data=daily_treasury_yield_curve"
-               f"&field_tdr_date_value={now.strftime('%Y%m')}")
-        resp = requests.get(url, timeout=15, headers={'User-Agent': 'Mozilla/5.0'})
-        resp.raise_for_status()
-        ns_m = 'http://schemas.microsoft.com/ado/2007/08/dataservices/metadata'
-        ns_d = 'http://schemas.microsoft.com/ado/2007/08/dataservices'
-        root = ET.fromstring(resp.content)
-        entries = root.findall(f'.//{{{ns_m}}}properties')
-        if entries:
-            rates = []
-            for entry in entries:
-                val = entry.find(f'{{{ns_d}}}BC_2YEAR')
-                if val is not None and val.text:
-                    try:
-                        rates.append(float(val.text))
-                    except ValueError:
-                        pass
-            if rates:
-                price = rates[-1]
-                d1 = round((rates[-1] - rates[-2]) * 100, 1) if len(rates) >= 2 else 0.0
-                w1 = round((rates[-1] - rates[-6]) * 100, 1) if len(rates) >= 6 else 0.0
-                hi_val = max(rates)
-                hi52 = round((price - hi_val) * 100, 1)
-                ytd = round((price - rates[0]) * 100, 1)
-                spark = []
-                for i in range(max(1, len(rates) - 5), len(rates)):
-                    spark.append(round((rates[i] - rates[i-1]) * 100, 2))
-                while len(spark) < 5:
-                    spark.insert(0, 0.0)
-
-                print(f"  ✓ US2Y = {price}% (Treasury XML)")
-                return {
-                    'sym': 'US2Y',
-                    'price': round(price, 4),
-                    'd1': d1,
-                    'w1': w1,
-                    'hi52': hi52,
-                    'ytd': ytd,
-                    'spark': spark
-                }
-    except Exception as e:
-        print(f"  Treasury XML failed: {e}")
+        print(f"  FRED {series_id} failed: {e}")
     return None
+
+def fetch_fred_yields():
+    records = []
+    for sym, series_id in CFG.get('fred_yields', {}).items():
+        rec = fetch_fred_yield(sym, series_id)
+        if rec:
+            records.append(rec)
+    return records
 
 # ── MASSIVE TREASURY YIELDS ─────────────────────────────────────────────────────────────────────────────
 def fetch_massive_treasury_yields():
@@ -366,11 +297,11 @@ def fetch_massive_treasury_yields():
             return None
         results.sort(key=lambda x: x.get('date', ''))
 
-        # Support multiple possible field name conventions
+        maturity_map = CFG.get('massive_yield_symbols', {})
         maturities = [
-            (['yield_2_year',  'rate_2_year',  'y2y',  'y2'],  'US2Y'),
-            (['yield_10_year', 'rate_10_year', 'y10y', 'y10'], 'US10Y'),
-            (['yield_30_year', 'rate_30_year', 'y30y', 'y30'], 'US30Y'),
+            (['yield_2_year',  'rate_2_year',  'y2y',  'y2'],  maturity_map.get('2Y')),
+            (['yield_10_year', 'rate_10_year', 'y10y', 'y10'], maturity_map.get('10Y')),
+            (['yield_30_year', 'rate_30_year', 'y30y', 'y30'], maturity_map.get('30Y')),
         ]
 
         def _get(row, candidates):
@@ -382,6 +313,8 @@ def fetch_massive_treasury_yields():
 
         yield_records = []
         for fields, sym in maturities:
+            if not sym:
+                continue
             series = [_get(r, fields) for r in results]
             series = [v for v in series if v is not None]
             if len(series) < 2:
@@ -606,14 +539,15 @@ def fetch_batch(tickers, retries=3):
             time.sleep(YF_BATCH_PAUSE)
     return results
 
-def extract_metrics(df, sym, metadata=None):
+def extract_metrics(df, sym, metadata=None, yield_syms=None):
     df = df.dropna(subset=['Close'])
     if len(df) < 2:
         return None
     closes = df['Close'].values
     price  = float(closes[-1])
 
-    is_yield = sym in YIELDS or sym in ('US10Y', 'US30Y', 'US2Y', '^TNX', '^TYX')
+    yield_set = set(yield_syms if yield_syms is not None else YIELD_SYMS)
+    is_yield = sym in yield_set
 
     if is_yield:
         d1     = round((closes[-1] - closes[-2]) * 100, 1) if len(closes) >= 2 else 0.0
@@ -653,7 +587,7 @@ def extract_metrics(df, sym, metadata=None):
 
     if updated_at is None:
         try:
-            is_crypto = (sym.endswith('-USD') or sym in ('BTC-USD', 'ETH-USD', 'SOL-USD', 'XRP-USD'))
+            is_crypto = sym.endswith('-USD')
             if is_crypto:
                 # Crypto is open 24/7, so the fetched price represents the current real-time timestamp.
                 updated_at = int(time.time() * 1000)
@@ -671,7 +605,7 @@ def extract_metrics(df, sym, metadata=None):
             pass
 
     result = {
-        'sym':   TICKER_REMAP.get(sym, sym),
+        'sym':   sym,
         'price': round(price, 4),
         'd1':    d1,
         'w1':    w1,
@@ -683,11 +617,6 @@ def extract_metrics(df, sym, metadata=None):
         result['updatedAt'] = updated_at
     if ema_uptrend is not None:
         result['ema_uptrend'] = ema_uptrend
-    crypto_ids   = {'BTC-USD':'bitcoin','ETH-USD':'ethereum','SOL-USD':'solana','XRP-USD':'ripple'}
-    crypto_names = {'BTC-USD':'Bitcoin','ETH-USD':'Ethereum','SOL-USD':'Solana','XRP-USD':'Ripple'}
-    if sym in crypto_ids:
-        result['id']   = crypto_ids[sym]
-        result['name'] = crypto_names[sym]
     return result
 
 # ── FEAR & GREED ──────────────────────────────────────────────────────────────────────────────────
@@ -917,28 +846,12 @@ def fetch_all(prices_only=False):
         'breadth':  existing.get('breadth',  {}),
     }
 
-    # US ETF sections: always yfinance (Massive API has T+1 delay for US equities)
-    yf_etf_batches = [
-        ('etfmain',   ETF_MAIN),
-        ('submarket', SUBMARKET),
-        ('sector',    SECTOR),
-        ('sectorew',  SECTOR_EW),
-        ('thematic',  THEMATIC),
-        ('country',   COUNTRY),
-    ]
-    # Always yfinance: all price data (Massive has T+1 delay across all asset classes)
-    # Massive is kept only for the treasury yield curve (Economy API).
-    # Global indices fetched individually (batch download returns stale data for non-US indices).
-    yf_individual_batches = [
-        ('global',    GLOBAL_IDX),
-    ]
-    yf_batches = [
-        ('crypto',    CRYPTO_YF),
-        ('dxvix',     ['^VIX', 'DX-Y.NYB']),
-        ('futures',   FUTURES),
-        ('metals',    METALS),
-        ('commod',    ENERGY),
-    ]
+    # US ETF + market sections via yfinance batch download
+    yf_etf_batches = [(out_key, tickers_key) for out_key, tickers_key in BATCH_SECTIONS
+                      if out_key in ('etfmain', 'submarket', 'sector', 'sectorew', 'thematic', 'country')]
+    yf_batches = [(out_key, tickers_key) for out_key, tickers_key in BATCH_SECTIONS
+                  if out_key not in ('etfmain', 'submarket', 'sector', 'sectorew', 'thematic', 'country')]
+    yf_individual_batches = INDIVIDUAL_SECTIONS
 
     use_massive = bool(MASSIVE_API_KEY)
     if prices_only:
@@ -952,26 +865,28 @@ def fetch_all(prices_only=False):
         print(f"⚠ MASSIVE_API_KEY not set — all data via yfinance")
 
     # Fetch global indices individually (batch download returns stale data for non-US indices)
-    for key, tickers in yf_individual_batches:
-        print(f"Fetching {key} ({len(tickers)} tickers) via yfinance (individual)...")
+    for out_key, tickers_key in yf_individual_batches:
+        tickers = tickers_for(tickers_key)
+        print(f"Fetching {out_key} ({len(tickers)} tickers) via yfinance (individual)...")
         raw = fetch_individual(tickers)
-        for yf_sym in tickers:
-            rec = raw.get(yf_sym)
+        for sym in tickers:
+            rec = raw.get(sym)
             if rec:
-                output[key].append(rec)
+                output[out_key].append(rec)
             else:
-                print(f"  \u26a0 No data for {yf_sym}")
+                print(f"  \u26a0 No data for {sym}")
 
     # Fetch all other price sections via yfinance batch download
-    for key, tickers in yf_etf_batches + yf_batches:
-        print(f"Fetching {key} ({len(tickers)} tickers) via yfinance...")
+    for out_key, tickers_key in yf_etf_batches + yf_batches:
+        tickers = tickers_for(tickers_key)
+        print(f"Fetching {out_key} ({len(tickers)} tickers) via yfinance...")
         raw = fetch_batch(tickers)
-        for yf_sym in tickers:
-            rec = raw.get(yf_sym)
+        for sym in tickers:
+            rec = raw.get(sym)
             if rec:
-                output[key].append(rec)
+                output[out_key].append(rec)
             else:
-                print(f"  \u26a0 No data for {yf_sym}")
+                print(f"  \u26a0 No data for {sym}")
         time.sleep(1)
 
     # Treasury yields: Massive Economy API (full curve) with yfinance + FRED fallback
@@ -981,29 +896,25 @@ def fetch_all(prices_only=False):
         output['yields'] = yield_records
     else:
         print("  \u26a0 Massive yields unavailable \u2014 falling back to yfinance + FRED")
-        raw = fetch_batch(YIELDS)
-        for yf_sym in YIELDS:
-            rec = raw.get(yf_sym)
+        yf_yields = tickers_for('yields')
+        raw = fetch_batch(yf_yields)
+        for sym in yf_yields:
+            rec = raw.get(sym)
             if rec:
-                yield_map = {'^TNX': 'US10Y', '^TYX': 'US30Y'}
-                rec['sym'] = yield_map.get(yf_sym, rec['sym'])
                 output['yields'].append(rec)
-        rec_2y = fetch_treasury_2y()
-        if rec_2y:
-            output['yields'].insert(0, rec_2y)
+        output['yields'] = fetch_fred_yields() + output['yields']
 
-    # Ensure dxvix order: DXY first, VIX second
+    # Preserve tickers.json order for dxvix
     if output['dxvix']:
-        _order = {'DX-Y.NYB': 0, 'CBOE:VIX': 1}
-        output['dxvix'].sort(key=lambda x: _order.get(x.get('sym', ''), 99))
+        dx_order = {sym: idx for idx, sym in enumerate(tickers_for('dxvix'))}
+        output['dxvix'].sort(key=lambda x: dx_order.get(x.get('sym', ''), 99))
 
     for key in ('country', 'sector', 'sectorew', 'thematic', 'submarket'):
         output[key].sort(key=lambda x: x.get('w1', 0), reverse=True)
 
     all_price_tickers = list(dict.fromkeys(
-        ETF_MAIN + SUBMARKET + SECTOR + SECTOR_EW + THEMATIC + COUNTRY +
-        CRYPTO_YF + ['^VIX', 'DX-Y.NYB'] + FUTURES + METALS + ENERGY +
-        GLOBAL_IDX + YIELDS
+        [sym for _, tickers_key in BATCH_SECTIONS + INDIVIDUAL_SECTIONS for sym in tickers_for(tickers_key)] +
+        list(CFG.get('fred_yields', {}).keys())
     ))
     print(f"\nFetching ticker names ({len(all_price_tickers)} symbols)...")
     name_map = fetch_ticker_short_names(all_price_tickers, existing)
@@ -1020,17 +931,22 @@ def fetch_all(prices_only=False):
                 output[key] = existing[key]
                 print(f"  \u26a0 {key}: no data returned \u2014 preserving existing values")
         # dxvix: restore VIX from existing if it's missing from this run
-        vix_in_output = any(r.get('sym') == 'CBOE:VIX' for r in output.get('dxvix', []))
-        if not vix_in_output and existing.get('dxvix'):
-            vix_rec = next((r for r in existing['dxvix'] if r.get('sym') == 'CBOE:VIX'), None)
+        dxvix_tickers = tickers_for('dxvix')
+        vix_sym = dxvix_tickers[1] if len(dxvix_tickers) > 1 else None
+        vix_in_output = any(r.get('sym') == vix_sym for r in output.get('dxvix', [])) if vix_sym else True
+        if not vix_in_output and existing.get('dxvix') and vix_sym:
+            vix_rec = next((r for r in existing['dxvix'] if r.get('sym') == vix_sym), None)
             if vix_rec:
                 output['dxvix'].append(vix_rec)
-                output['dxvix'].sort(key=lambda x: {'DX-Y.NYB': 0, 'CBOE:VIX': 1}.get(x.get('sym', ''), 99))
-                print(f"  \u26a0 dxvix/VIX: no data returned \u2014 preserving existing value")
+                dx_order = {sym: idx for idx, sym in enumerate(dxvix_tickers)}
+                output['dxvix'].sort(key=lambda x: dx_order.get(x.get('sym', ''), 99))
+                print(f"  \u26a0 dxvix/{vix_sym}: no data returned \u2014 preserving existing value")
 
     if not prices_only:
         holdings_tickers = list(dict.fromkeys(
-            ETF_MAIN + SUBMARKET + SECTOR + SECTOR_EW + THEMATIC + COUNTRY
+            [sym for out_key, tickers_key in BATCH_SECTIONS
+             if out_key in ('etfmain', 'submarket', 'sector', 'sectorew', 'thematic', 'country')
+             for sym in tickers_for(tickers_key)]
         ))
         print(f"\nFetching ETF holdings ({len(holdings_tickers)} ETFs)...")
         output['holdings'] = fetch_etf_holdings(holdings_tickers)
