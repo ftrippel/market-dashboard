@@ -415,27 +415,34 @@ body::before {
 }
 
 .tv-advanced-chart.tv-chart-measure-armed,
-.tv-advanced-chart.tv-chart-measure-active {
+.tv-advanced-chart.tv-chart-measure-active,
+.tv-advanced-chart.tv-chart-mode-panning {
   touch-action: none;
+}
+
+.tv-advanced-chart.tv-chart-measure-armed,
+.tv-advanced-chart.tv-chart-measure-active {
   cursor: crosshair;
 }
 
+.tv-advanced-chart.tv-chart-mode-panning {
+  cursor: grabbing;
+}
+
 .tv-measure-btn {
-  position: absolute;
-  left: 10px;
-  bottom: 36px;
-  z-index: 2;
+  flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   border: 1px solid var(--border2);
   border-radius: 4px;
   background: var(--bg2);
   color: var(--text2);
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 @media (hover: hover) {

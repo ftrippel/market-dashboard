@@ -27,6 +27,13 @@ const DEFAULT_VISIBLE_BARS = 126;
 /** Empty bars to the right of the latest candle. */
 const RIGHT_OFFSET_BARS = 12;
 
+/** Long-press duration before the crosshair pins on touch. */
+const TOUCH_CROSSHAIR_LONG_PRESS_MS = 450;
+/** Movement beyond this cancels long-press and starts panning instead. */
+const TOUCH_PAN_THRESHOLD_PX = 10;
+
+type ChartInteractionMode = 'crosshair' | 'panning' | 'measuring';
+
 interface CrosshairInfo {
   date: string;
   close: number;
@@ -45,33 +52,38 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
   onReady,
 }: TradingViewCustomChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const measureArmedRef = useRef(false);
-  const setMeasureArmedRef = useRef<(armed: boolean) => void>(() => {});
-  const measureActionsRef = useRef<{ clear: () => void; deactivate: () => void } | null>(null);
+  const setChartModeRef = useRef<(mode: ChartInteractionMode) => void>(() => {});
+  const measureActionsRef = useRef<{
+    enterMeasureMode: () => void;
+    exitMeasureMode: () => void;
+    clear: () => void;
+  } | null>(null);
   const [data, setData] = useState<DailyOhlcPoint[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [crosshairInfo, setCrosshairInfo] = useState<CrosshairInfo | null>(null);
-  const [measureArmed, setMeasureArmed] = useState(false);
+  const [chartMode, setChartMode] = useState<ChartInteractionMode>('crosshair');
   const isYield = symbol === 'US10Y' || symbol === 'US30Y';
   const priceDecimals = isYield ? 3 : 2;
 
-  setMeasureArmedRef.current = setMeasureArmed;
-
-  useEffect(() => {
-    measureArmedRef.current = measureArmed;
-  }, [measureArmed]);
+  setChartModeRef.current = setChartMode;
 
   const toggleMeasureTool = useCallback(() => {
-    setMeasureArmed((armed) => {
-      if (armed) {
-        measureActionsRef.current?.deactivate();
-        return false;
-      }
-      measureActionsRef.current?.clear();
-      return true;
-    });
-  }, []);
+    if (chartMode === 'measuring') {
+      measureActionsRef.current?.exitMeasureMode();
+      return;
+    }
+    measureActionsRef.current?.enterMeasureMode();
+  }, [chartMode]);
+
+  const handleMeasureButtonPointerDown = useCallback(
+    (event: React.PointerEvent<HTMLButtonElement>) => {
+      if (event.button !== 0) return;
+      event.preventDefault();
+      toggleMeasureTool();
+    },
+    [toggleMeasureTool],
+  );
 
   useEffect(() => {
     let active = true;
@@ -79,7 +91,7 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
     setError(null);
     setData(null);
     setCrosshairInfo(null);
-    setMeasureArmed(false);
+    setChartMode('crosshair');
 
     fetchYahooFinanceOhlcHistory(symbol)
       .then((history) => {
@@ -182,35 +194,143 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
     });
     onReady?.();
 
-    let crosshairActive = true;
+    let mode: ChartInteractionMode = 'crosshair';
+    let measurePlacing = false;
+    let suppressCrosshairUntilPointerUp = false;
+    let crosshairPinned = false;
+    let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+    let touchPointerStart: { x: number; y: number } | null = null;
+    let lastPointerType = 'mouse';
     const closeByTime = new Map(data.map((point, index) => [point.time, data[index - 1]?.close ?? null]));
 
-    const onCrosshairMove = (param: MouseEventParams) => {
-      if (!crosshairActive) return;
+    const isHoverPointer = (pointerType: string) => pointerType === 'pen' || pointerType === 'mouse';
 
+    const canShowHoverCrosshair = () =>
+      isHoverPointer(lastPointerType) || (lastPointerType === 'touch' && crosshairPinned);
+
+    const cancelLongPress = () => {
+      if (longPressTimer !== null) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+      touchPointerStart = null;
+    };
+
+    const updateCrosshairInfoFromParam = (param: MouseEventParams) => {
       if (!param.time || !param.point) {
-        setCrosshairInfo(null);
+        if (!crosshairPinned) setCrosshairInfo(null);
         return;
       }
 
       const barData = param.seriesData.get(candleSeries);
       if (!barData || !('close' in barData) || barData.close == null) {
-        setCrosshairInfo(null);
+        if (!crosshairPinned) setCrosshairInfo(null);
         return;
       }
 
       const date = String(param.time);
-      const prevClose = closeByTime.get(date) ?? null;
       const close = barData.close;
+      const prevClose = closeByTime.get(date) ?? null;
       const changePct =
         prevClose !== null && prevClose !== 0 ? ((close - prevClose) / prevClose) * 100 : null;
 
       setCrosshairInfo({ date, close, changePct });
     };
 
-    chart.subscribeCrosshairMove(onCrosshairMove);
+    const updateCrosshairInfoAtTime = (time: string, close: number) => {
+      const prevClose = closeByTime.get(time) ?? null;
+      const changePct =
+        prevClose !== null && prevClose !== 0 ? ((close - prevClose) / prevClose) * 100 : null;
+      setCrosshairInfo({ date: time, close, changePct });
+    };
 
-    let measurePhase: 'idle' | 'active' = 'idle';
+    const resolveAnchorTime = (anchor: NonNullable<ReturnType<typeof createMeasureAnchor>>) => {
+      if (anchor.time) return anchor.time;
+      const index = Math.max(0, Math.min(data.length - 1, Math.round(anchor.logical)));
+      return data[index]?.time ?? null;
+    };
+
+    const pinCrosshair = (anchor: NonNullable<ReturnType<typeof createMeasureAnchor>>) => {
+      const time = resolveAnchorTime(anchor);
+      if (!time) return;
+
+      const bar = data.find((point) => point.time === time);
+
+      crosshairPinned = true;
+      applyModeEffects();
+      chart.setCrosshairPosition(anchor.price, time, candleSeries);
+      if (bar) updateCrosshairInfoAtTime(time, bar.close);
+    };
+
+    const unpinCrosshair = () => {
+      crosshairPinned = false;
+      chart.clearCrosshairPosition();
+      setCrosshairInfo(null);
+      applyModeEffects();
+    };
+
+    const applyModeEffects = () => {
+      container.classList.remove(
+        'tv-chart-mode-panning',
+        'tv-chart-measure-armed',
+        'tv-chart-measure-active',
+      );
+
+      const showCrosshair =
+        mode === 'crosshair' &&
+        !suppressCrosshairUntilPointerUp &&
+        (crosshairPinned || canShowHoverCrosshair());
+
+      chart.applyOptions({
+        crosshair: {
+          mode: showCrosshair ? CrosshairMode.Normal : CrosshairMode.Hidden,
+        },
+        handleScroll: mode === 'measuring' ? false : true,
+      });
+
+      if (!showCrosshair && !crosshairPinned) {
+        chart.clearCrosshairPosition();
+        setCrosshairInfo(null);
+      }
+
+      switch (mode) {
+        case 'crosshair':
+          container.style.cursor = '';
+          measurePlacing = false;
+          break;
+        case 'panning':
+          container.classList.add('tv-chart-mode-panning');
+          container.style.cursor = 'grabbing';
+          break;
+        case 'measuring':
+          container.style.cursor = 'crosshair';
+          container.classList.add(
+            measurePlacing ? 'tv-chart-measure-active' : 'tv-chart-measure-armed',
+          );
+          break;
+      }
+
+      setChartModeRef.current(mode);
+    };
+
+    const setMode = (next: ChartInteractionMode) => {
+      if (next !== 'crosshair') {
+        cancelLongPress();
+        crosshairPinned = false;
+        setCrosshairInfo(null);
+      }
+      mode = next;
+      applyModeEffects();
+    };
+
+    const onCrosshairMove = (param: MouseEventParams) => {
+      if (suppressCrosshairUntilPointerUp) return;
+      if (mode !== 'crosshair') return;
+      if (lastPointerType === 'touch' && !crosshairPinned) return;
+      updateCrosshairInfoFromParam(param);
+    };
+
+    chart.subscribeCrosshairMove(onCrosshairMove);
 
     const getLocalPoint = (event: PointerEvent) => {
       const bounds = container.getBoundingClientRect();
@@ -222,79 +342,186 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
 
     const clearMeasurement = () => {
       measurePrimitive.clear();
-      measurePhase = 'idle';
-      container.style.cursor = '';
-      container.classList.remove('tv-chart-measure-active');
+      measurePlacing = false;
     };
 
-    const deactivateMeasure = () => {
+    const exitMeasureMode = () => {
       clearMeasurement();
-      setMeasureArmedRef.current(false);
+      crosshairPinned = false;
+      setMode('crosshair');
       blurActiveElement();
     };
 
+    const enterMeasureMode = () => {
+      clearMeasurement();
+      cancelLongPress();
+      crosshairPinned = false;
+      chart.clearCrosshairPosition();
+      setCrosshairInfo(null);
+      setMode('measuring');
+    };
+
+    const completeMeasurement = (anchor: NonNullable<ReturnType<typeof createMeasureAnchor>>) => {
+      const start = measurePrimitive.getStart();
+      if (start) {
+        measurePrimitive.setMeasurement(start, anchor);
+      }
+      clearMeasurement();
+      suppressCrosshairUntilPointerUp = true;
+      setMode('crosshair');
+      blurActiveElement();
+    };
+
+    const startMeasurement = (anchor: NonNullable<ReturnType<typeof createMeasureAnchor>>) => {
+      measurePlacing = true;
+      measurePrimitive.setMeasurement(anchor, anchor);
+      setMode('measuring');
+    };
+
     measureActionsRef.current = {
+      enterMeasureMode,
+      exitMeasureMode,
       clear: clearMeasurement,
-      deactivate: deactivateMeasure,
     };
 
     const onPointerDown = (event: PointerEvent) => {
       if (event.button !== 0) return;
+      if (suppressCrosshairUntilPointerUp) return;
+
+      lastPointerType = event.pointerType;
 
       const point = getLocalPoint(event);
       const anchor = createMeasureAnchor(chart, candleSeries, point.x, point.y);
       if (!anchor) return;
 
-      const measureInput = event.shiftKey || measureArmedRef.current;
-
-      if (measurePhase === 'idle' && measureInput) {
-        measurePhase = 'active';
-        measurePrimitive.setMeasurement(anchor, anchor);
-        container.style.cursor = 'crosshair';
-        container.classList.add('tv-chart-measure-active');
+      if (mode === 'crosshair' && event.shiftKey) {
+        cancelLongPress();
+        startMeasurement(anchor);
         event.preventDefault();
         event.stopPropagation();
         return;
       }
 
-      if (measurePhase === 'active') {
-        const start = measurePrimitive.getStart();
-        if (!start) {
-          deactivateMeasure();
-          return;
+      if (mode === 'measuring') {
+        cancelLongPress();
+        if (!measurePlacing) {
+          startMeasurement(anchor);
+        } else {
+          completeMeasurement(anchor);
         }
-        measurePrimitive.setMeasurement(start, anchor);
-        deactivateMeasure();
         event.preventDefault();
         event.stopPropagation();
+        return;
+      }
+
+      if (mode === 'crosshair' && event.pointerType === 'touch') {
+        if (crosshairPinned) {
+          unpinCrosshair();
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+
+        applyModeEffects();
+        touchPointerStart = point;
+        longPressTimer = setTimeout(() => {
+          longPressTimer = null;
+          const pressPoint = touchPointerStart;
+          touchPointerStart = null;
+          if (!pressPoint) return;
+
+          const pressAnchor = createMeasureAnchor(chart, candleSeries, pressPoint.x, pressPoint.y);
+          if (pressAnchor) pinCrosshair(pressAnchor);
+        }, TOUCH_CROSSHAIR_LONG_PRESS_MS);
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+
+      if (mode === 'crosshair') {
+        cancelLongPress();
+        setMode('panning');
       }
     };
 
     const onPointerMove = (event: PointerEvent) => {
-      if (measurePhase !== 'active') return;
+      if (isHoverPointer(event.pointerType)) {
+        const reenableHover = lastPointerType === 'touch' && mode === 'crosshair' && !crosshairPinned;
+        lastPointerType = event.pointerType;
+        if (reenableHover && !suppressCrosshairUntilPointerUp) {
+          applyModeEffects();
+        }
+      }
 
-      const point = getLocalPoint(event);
-      const anchor = createMeasureAnchor(chart, candleSeries, point.x, point.y);
-      const start = measurePrimitive.getStart();
-      if (!anchor || !start) return;
+      if (longPressTimer !== null && touchPointerStart && event.pointerType === 'touch') {
+        const point = getLocalPoint(event);
+        const dx = point.x - touchPointerStart.x;
+        const dy = point.y - touchPointerStart.y;
+        if (Math.hypot(dx, dy) > TOUCH_PAN_THRESHOLD_PX) {
+          cancelLongPress();
+          setMode('panning');
+        }
+        return;
+      }
 
-      measurePrimitive.setMeasurement(start, anchor);
+      if (mode === 'measuring' && measurePlacing) {
+        const point = getLocalPoint(event);
+        const anchor = createMeasureAnchor(chart, candleSeries, point.x, point.y);
+        const start = measurePrimitive.getStart();
+        if (!anchor || !start) return;
+
+        measurePrimitive.setMeasurement(start, anchor);
+        event.preventDefault();
+        return;
+      }
+
+      if (mode === 'panning') {
+        chart.clearCrosshairPosition();
+        setCrosshairInfo(null);
+      }
+    };
+
+    const onPointerUp = (event: PointerEvent) => {
+      if (event.button !== 0) return;
+
+      if (longPressTimer !== null) {
+        cancelLongPress();
+      }
+
+      if (suppressCrosshairUntilPointerUp) {
+        suppressCrosshairUntilPointerUp = false;
+        applyModeEffects();
+        chart.clearCrosshairPosition();
+        setCrosshairInfo(null);
+        return;
+      }
+
+      if (mode === 'panning') {
+        setMode('crosshair');
+      }
     };
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
-      if (measurePhase !== 'active' && !measurePrimitive.hasMeasurement() && !measureArmedRef.current) {
+
+      if (mode === 'measuring') {
+        exitMeasureMode();
+        event.preventDefault();
+        event.stopPropagation();
         return;
       }
 
-      measurePrimitive.clear();
-      deactivateMeasure();
-      event.preventDefault();
-      event.stopPropagation();
+      if (mode === 'crosshair' && crosshairPinned) {
+        unpinCrosshair();
+        event.preventDefault();
+        event.stopPropagation();
+      }
     };
 
-    container.addEventListener('pointerdown', onPointerDown);
-    container.addEventListener('pointermove', onPointerMove);
+    container.addEventListener('pointerdown', onPointerDown, { capture: true });
+    container.addEventListener('pointermove', onPointerMove, { capture: true });
+    window.addEventListener('pointerup', onPointerUp);
+    window.addEventListener('pointercancel', onPointerUp);
     window.addEventListener('keydown', onKeyDown, true);
 
     const handleResize = () => {
@@ -308,26 +535,26 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
     resizeObserver.observe(container);
 
     return () => {
-      crosshairActive = false;
+      cancelLongPress();
       chart.unsubscribeCrosshairMove(onCrosshairMove);
       resizeObserver.disconnect();
-      container.removeEventListener('pointerdown', onPointerDown);
-      container.removeEventListener('pointermove', onPointerMove);
+      container.removeEventListener('pointerdown', onPointerDown, { capture: true });
+      container.removeEventListener('pointermove', onPointerMove, { capture: true });
+      window.removeEventListener('pointerup', onPointerUp);
+      window.removeEventListener('pointercancel', onPointerUp);
       window.removeEventListener('keydown', onKeyDown, true);
-      container.classList.remove('tv-chart-measure-active');
+      container.classList.remove(
+        'tv-chart-mode-panning',
+        'tv-chart-measure-armed',
+        'tv-chart-measure-active',
+      );
       container.style.cursor = '';
       measureActionsRef.current = null;
       chart.remove();
     };
   }, [data, theme, onReady]);
 
-  useEffect(() => {
-    if (!measureArmed || !containerRef.current) return;
-    containerRef.current.classList.add('tv-chart-measure-armed');
-    return () => {
-      containerRef.current?.classList.remove('tv-chart-measure-armed');
-    };
-  }, [measureArmed]);
+  const isMeasuring = chartMode === 'measuring';
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', display: 'flex', flexDirection: 'column' }}>
@@ -357,6 +584,18 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
             {indicator.label}
           </span>
         ))}
+        {!loading && !error && (
+          <button
+            type="button"
+            className={`tv-measure-btn${isMeasuring ? ' active' : ''}`}
+            onPointerDown={handleMeasureButtonPointerDown}
+            aria-label={isMeasuring ? 'Cancel measure tool' : 'Measure tool'}
+            aria-pressed={isMeasuring}
+            title={isMeasuring ? 'Tap two points on the chart (cancel)' : 'Measure — tap two points on the chart'}
+          >
+            <Icon name="straighten" size="sm" label={isMeasuring ? 'Cancel measure' : 'Measure'} />
+          </button>
+        )}
         {crosshairInfo && (
           <span
             style={{
@@ -402,18 +641,6 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
       )}
       <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
         <div ref={containerRef} className="tv-advanced-chart" style={{ width: '100%', height: '100%' }} />
-        {!loading && !error && (
-          <button
-            type="button"
-            className={`tv-measure-btn${measureArmed ? ' active' : ''}`}
-            onClick={toggleMeasureTool}
-            aria-label={measureArmed ? 'Cancel measure tool' : 'Measure tool'}
-            aria-pressed={measureArmed}
-            title={measureArmed ? 'Tap two points on the chart (cancel)' : 'Measure — tap two points on the chart'}
-          >
-            <Icon name="straighten" size="sm" label={measureArmed ? 'Cancel measure' : 'Measure'} />
-          </button>
-        )}
       </div>
     </div>
   );
