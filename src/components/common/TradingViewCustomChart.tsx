@@ -31,6 +31,8 @@ const RIGHT_OFFSET_BARS = 12;
 const TOUCH_CROSSHAIR_LONG_PRESS_MS = 450;
 /** Movement beyond this cancels long-press and starts panning instead. */
 const TOUCH_PAN_THRESHOLD_PX = 10;
+/** Movement beyond this completes a measure drag on pointer up. */
+const MEASURE_DRAG_THRESHOLD_PX = 6;
 
 type ChartInteractionMode = 'crosshair' | 'panning' | 'measuring';
 
@@ -196,6 +198,8 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
 
     let mode: ChartInteractionMode = 'crosshair';
     let measurePlacing = false;
+    let measureDragged = false;
+    let measurePointerStart: { x: number; y: number } | null = null;
     let suppressCrosshairUntilPointerUp = false;
     let crosshairPinned = false;
     let longPressTimer: ReturnType<typeof setTimeout> | null = null;
@@ -343,6 +347,8 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
     const clearMeasurement = () => {
       measurePrimitive.clear();
       measurePlacing = false;
+      measureDragged = false;
+      measurePointerStart = null;
     };
 
     const exitMeasureMode = () => {
@@ -397,6 +403,8 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
       if (mode === 'crosshair' && event.shiftKey) {
         cancelLongPress();
         startMeasurement(anchor);
+        measurePointerStart = point;
+        measureDragged = false;
         event.preventDefault();
         event.stopPropagation();
         return;
@@ -406,6 +414,8 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
         cancelLongPress();
         if (!measurePlacing) {
           startMeasurement(anchor);
+          measurePointerStart = point;
+          measureDragged = false;
         } else {
           completeMeasurement(anchor);
         }
@@ -470,6 +480,14 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
         const start = measurePrimitive.getStart();
         if (!anchor || !start) return;
 
+        if (measurePointerStart) {
+          const dx = point.x - measurePointerStart.x;
+          const dy = point.y - measurePointerStart.y;
+          if (Math.hypot(dx, dy) > MEASURE_DRAG_THRESHOLD_PX) {
+            measureDragged = true;
+          }
+        }
+
         measurePrimitive.setMeasurement(start, anchor);
         event.preventDefault();
         return;
@@ -481,8 +499,21 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
       }
     };
 
+    const finishMeasureDrag = (event: PointerEvent) => {
+      if (mode !== 'measuring' || !measurePlacing || !measureDragged) return false;
+
+      const point = getLocalPoint(event);
+      const anchor = createMeasureAnchor(chart, candleSeries, point.x, point.y);
+      if (!anchor) return false;
+
+      completeMeasurement(anchor);
+      return true;
+    };
+
     const onPointerUp = (event: PointerEvent) => {
       if (event.button !== 0) return;
+
+      if (finishMeasureDrag(event)) return;
 
       if (longPressTimer !== null) {
         cancelLongPress();
