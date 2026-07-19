@@ -10,6 +10,7 @@ import { useSymbolPreview } from '../../context/SymbolPreviewContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { colors } from '../../utils/formatting';
 import { dismissOverlay } from '../../utils/focus';
+import { usePenBackdropDismiss, usePenCompatibleClick } from '../../utils/penClick';
 
 interface ExpandableTableCardProps {
   label: React.ReactNode;
@@ -42,6 +43,16 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
     hidePreview();
     dismissOverlay(() => setOpen(false));
   }, [hidePreview]);
+
+  const closePenClick = usePenCompatibleClick(close);
+  const toggleSearchPenClick = usePenCompatibleClick(() => {
+    setIsSearchOpen((open) => {
+      if (open) setSearchQuery('');
+      return !open;
+    });
+  });
+  const expandPenClick = usePenCompatibleClick(() => setOpen(true));
+  const backdropPenDismiss = usePenBackdropDismiss(close);
 
   useScrollLock(open);
 
@@ -86,7 +97,7 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
               className="table-expand-btn"
               aria-label={`Expand table — ${expandTitle}`}
               title={`View all ${data.length} rows`}
-              onClick={() => setOpen(true)}
+              {...expandPenClick}
             >
               <Icon name="open_in_full" size="sm" />
             </button>
@@ -103,9 +114,7 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
               className="table-flyover open"
               data-scroll-lock-overlay
               role="presentation"
-              onClick={(event) => {
-                if (event.target === event.currentTarget) close();
-              }}
+              {...backdropPenDismiss}
             >
               <div
                 className="table-flyover-box"
@@ -148,10 +157,7 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
                       className="table-expand-btn"
                       title="Search table"
                       aria-label="Search table"
-                      onClick={() => {
-                        setIsSearchOpen(!isSearchOpen);
-                        if (isSearchOpen) setSearchQuery('');
-                      }}
+                      {...toggleSearchPenClick}
                       style={{
                         color: isSearchOpen ? colors.accent : undefined,
                         borderColor: isSearchOpen ? colors.accent : undefined,
@@ -161,7 +167,7 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
                       <Icon name="search" size="sm" />
                     </button>
                     <CardCopyButton symbols={data.map((x) => x.sym)} />
-                    <button type="button" onClick={close}>
+                    <button type="button" {...closePenClick}>
                       <Icon name="close" size="xs" />
                       CLOSE
                     </button>

@@ -54,7 +54,12 @@ export function createChartInteractionController({
   let crosshairPinned = false;
   let longPressTimer: ReturnType<typeof setTimeout> | null = null;
   let touchPointerStart: { x: number; y: number } | null = null;
+  let chartPointerDown = false;
   let lastPointerType = 'mouse';
+
+  const isInteractiveTarget = (target: EventTarget | null) =>
+    target instanceof Element &&
+    target.closest('button, a, input, textarea, select, label, [role="button"]') !== null;
 
   const closeByTime = new Map(data.map((point, index) => [point.time, data[index - 1]?.close ?? null]));
 
@@ -203,6 +208,7 @@ export function createChartInteractionController({
   const exitMeasureMode = () => {
     clearMeasurement();
     crosshairPinned = false;
+    suppressCrosshairUntilPointerUp = false;
     setMode('crosshair');
     blurActiveElement();
   };
@@ -241,12 +247,15 @@ export function createChartInteractionController({
   const onPointerDown = (event: PointerEvent) => {
     if (event.button !== 0) return;
     if (suppressCrosshairUntilPointerUp) return;
+    if (isInteractiveTarget(event.target)) return;
 
     lastPointerType = event.pointerType;
 
     const point = getLocalPoint(event);
     const anchor = createMeasureAnchor(chart, candleSeries, point.x, point.y);
     if (!anchor) return;
+
+    chartPointerDown = true;
 
     if (mode === 'crosshair' && event.shiftKey) {
       cancelLongPress();
@@ -296,6 +305,12 @@ export function createChartInteractionController({
       return;
     }
 
+    if (mode === 'crosshair' && event.pointerType === 'pen') {
+      cancelLongPress();
+      touchPointerStart = point;
+      return;
+    }
+
     if (mode === 'crosshair') {
       cancelLongPress();
       setMode('panning');
@@ -304,14 +319,17 @@ export function createChartInteractionController({
 
   const onPointerMove = (event: PointerEvent) => {
     if (isHoverPointer(event.pointerType)) {
-      const reenableHover = lastPointerType === 'touch' && mode === 'crosshair' && !crosshairPinned;
+      const reenableHover =
+        (lastPointerType === 'touch' || lastPointerType === 'pen') &&
+        mode === 'crosshair' &&
+        !crosshairPinned;
       lastPointerType = event.pointerType;
       if (reenableHover && !suppressCrosshairUntilPointerUp) {
         applyModeEffects();
       }
     }
 
-    if (longPressTimer !== null && touchPointerStart && event.pointerType === 'touch') {
+    if (touchPointerStart && (event.pointerType === 'touch' || event.pointerType === 'pen')) {
       const point = getLocalPoint(event);
       const dx = point.x - touchPointerStart.x;
       const dy = point.y - touchPointerStart.y;
@@ -361,10 +379,21 @@ export function createChartInteractionController({
   const onPointerUp = (event: PointerEvent) => {
     if (event.button !== 0) return;
 
-    if (finishMeasureDrag(event)) return;
+    const fromChart = chartPointerDown;
+    if (chartPointerDown) chartPointerDown = false;
 
-    if (longPressTimer !== null) {
+    if (fromChart && finishMeasureDrag(event)) {
+      suppressCrosshairUntilPointerUp = false;
+      applyModeEffects();
+      chart.clearCrosshairPosition();
+      onCrosshairInfoChange(null);
+      return;
+    }
+
+    if (fromChart && longPressTimer !== null) {
       cancelLongPress();
+    } else if (fromChart && touchPointerStart !== null) {
+      touchPointerStart = null;
     }
 
     if (suppressCrosshairUntilPointerUp) {
@@ -375,7 +404,7 @@ export function createChartInteractionController({
       return;
     }
 
-    if (mode === 'panning') {
+    if (fromChart && mode === 'panning') {
       setMode('crosshair');
     }
   };

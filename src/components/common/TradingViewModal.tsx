@@ -10,6 +10,7 @@ import { Icon } from './Icon';
 import { TradingViewAdvancedChart } from './TradingViewAdvancedChart';
 import { TradingViewCustomChart } from './TradingViewCustomChart';
 import { ChartOpenMenu } from './ChartOpenMenu';
+import { usePenBackdropDismiss, usePenCompatibleClick } from '../../utils/penClick';
 import { toYahooFinanceSymbol } from '../../services/api';
 
 export function TradingViewModal() {
@@ -79,6 +80,12 @@ export function TradingViewModal() {
     setChartSymbol(symbolInput);
   }, [setChartSymbol, symbolInput]);
 
+  const closePenClick = usePenCompatibleClick(() => closeChart());
+  const backdropPenDismiss = usePenBackdropDismiss(closeChart);
+  const prevPenClick = usePenCompatibleClick(handlePrev);
+  const nextPenClick = usePenCompatibleClick(handleNext);
+  const loadPenClick = usePenCompatibleClick(() => submitSymbol());
+
   if (!chart.open) return null;
 
   const displaySym = hasSymbol
@@ -92,9 +99,7 @@ export function TradingViewModal() {
       id="tv-modal"
       className="tv-modal open"
       data-scroll-lock-overlay
-      onClick={(event) => {
-        if (event.target === event.currentTarget) closeChart();
-      }}
+      {...backdropPenDismiss}
     >
       <div id="tv-modal-box">
         <div id="tv-modal-hdr">
@@ -138,6 +143,7 @@ export function TradingViewModal() {
               <button
                 type="submit"
                 className="btn"
+                {...loadPenClick}
                 style={{
                   background: 'var(--accent)',
                   color: '#ffffff',
@@ -163,7 +169,7 @@ export function TradingViewModal() {
             <div className="tv-modal-nav" style={{ display: 'flex', gap: '6px' }}>
               <button
                 type="button"
-                onClick={handlePrev}
+                {...prevPenClick}
                 disabled={!hasPrev}
                 style={{
                   opacity: hasPrev ? 1 : 0.4,
@@ -179,7 +185,7 @@ export function TradingViewModal() {
               </button>
               <button
                 type="button"
-                onClick={handleNext}
+                {...nextPenClick}
                 disabled={!hasNext}
                 style={{
                   opacity: hasNext ? 1 : 0.4,
@@ -196,7 +202,7 @@ export function TradingViewModal() {
             </div>
           )}
           {hasSymbol && <ChartOpenMenu rawSym={chart.rawSym} onOpenChange={setOpenMenu} />}
-          <button type="button" onClick={closeChart}>
+          <button type="button" {...closePenClick}>
             <Icon name="close" size="xs" />
             CLOSE
           </button>
@@ -261,6 +267,17 @@ export function SymbolLink({
   const { openChart } = useChartModal();
   const { onMouseEnterLink, onMouseLeaveLink, hidePreview } = useSymbolPreview();
 
+  const openSymbol = useCallback(() => {
+    hidePreview();
+    openChart(sym, name, siblings);
+  }, [hidePreview, openChart, sym, name, siblings]);
+
+  const symbolPenClick = usePenCompatibleClick(openSymbol);
+
+  const dismissPreview = useCallback(() => {
+    hidePreview();
+  }, [hidePreview]);
+
   const handleMouseEnter = (event: React.MouseEvent<HTMLButtonElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     onMouseEnterLink(sym, name, rect);
@@ -270,10 +287,8 @@ export function SymbolLink({
     <button
       type="button"
       className="tn-link"
-      onClick={() => {
-        hidePreview();
-        openChart(sym, name, siblings);
-      }}
+      {...symbolPenClick}
+      onPointerDown={dismissPreview}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={onMouseLeaveLink}
       style={{

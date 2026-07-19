@@ -1,8 +1,9 @@
-import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { buildYahooFinanceQuoteUrl, toYahooFinanceSymbol } from '../../services/api';
 import { buildTradingViewChartUrl, toTradingViewSymbol } from '../../utils/tradingView';
 import { blurActiveElement } from '../../utils/focus';
+import { usePenCompatibleClick, usePenPointerUp } from '../../utils/penClick';
 import { Icon } from './Icon';
 
 interface ChartOpenMenuProps {
@@ -54,7 +55,7 @@ export function ChartOpenMenu({ rawSym, onOpenChange }: ChartOpenMenuProps) {
   useEffect(() => {
     if (!open) return;
 
-    const onPointerDown = (event: MouseEvent) => {
+    const onPointerDown = (event: PointerEvent) => {
       const target = event.target as Node;
       if (!rootRef.current?.contains(target) && !menuRef.current?.contains(target)) {
         setMenuOpen(false);
@@ -67,16 +68,33 @@ export function ChartOpenMenu({ rawSym, onOpenChange }: ChartOpenMenuProps) {
       }
     };
 
-    document.addEventListener('mousedown', onPointerDown);
+    document.addEventListener('pointerdown', onPointerDown);
     window.addEventListener('keydown', onKeyDown);
     return () => {
-      document.removeEventListener('mousedown', onPointerDown);
+      document.removeEventListener('pointerdown', onPointerDown);
       window.removeEventListener('keydown', onKeyDown);
     };
   }, [open]);
 
   const tvUrl = buildTradingViewChartUrl(toTradingViewSymbol(rawSym));
   const yahooUrl = buildYahooFinanceQuoteUrl(toYahooFinanceSymbol(rawSym));
+
+  const toggleMenu = useCallback(() => setMenuOpen(!open), [open]);
+  const triggerPenClick = usePenCompatibleClick(toggleMenu);
+
+  const openTvLink = useCallback(() => {
+    setMenuOpen(false);
+    window.open(tvUrl, '_blank', 'noopener,noreferrer');
+  }, [tvUrl]);
+
+  const openYahooLink = useCallback(() => {
+    setMenuOpen(false);
+    window.open(yahooUrl, '_blank', 'noopener,noreferrer');
+  }, [yahooUrl]);
+
+  const tvPenUp = usePenPointerUp(openTvLink);
+  const yahooPenUp = usePenPointerUp(openYahooLink);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
 
   return (
     <div ref={rootRef} className="chart-open-menu">
@@ -85,7 +103,7 @@ export function ChartOpenMenu({ rawSym, onOpenChange }: ChartOpenMenuProps) {
         className="chart-open-menu-trigger"
         aria-expanded={open}
         aria-haspopup="menu"
-        onClick={() => setMenuOpen(!open)}
+        {...triggerPenClick}
       >
         OPEN
         <Icon name="expand_more" size="xs" />
@@ -103,7 +121,8 @@ export function ChartOpenMenu({ rawSym, onOpenChange }: ChartOpenMenuProps) {
               target="_blank"
               rel="noopener noreferrer"
               role="menuitem"
-              onClick={() => setMenuOpen(false)}
+              onClick={closeMenu}
+              onPointerUp={tvPenUp}
             >
               TradingView
             </a>
@@ -112,7 +131,8 @@ export function ChartOpenMenu({ rawSym, onOpenChange }: ChartOpenMenuProps) {
               target="_blank"
               rel="noopener noreferrer"
               role="menuitem"
-              onClick={() => setMenuOpen(false)}
+              onClick={closeMenu}
+              onPointerUp={yahooPenUp}
             >
               Yahoo Finance
             </a>

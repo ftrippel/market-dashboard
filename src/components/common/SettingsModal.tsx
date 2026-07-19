@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useSettings, type HoverPreviewPlacement } from '../../context/SettingsContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { dismissOverlay } from '../../utils/focus';
+import { usePenBackdropDismiss, usePenCheckboxToggle, usePenCompatibleClick, usePenSelectActivate } from '../../utils/penClick';
 import { Icon } from './Icon';
 
 interface SettingsModalProps {
@@ -28,6 +29,13 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     dismissOverlay(onClose);
   }, [onClose]);
 
+  const closePenClick = usePenCompatibleClick(close);
+  const backdropPenDismiss = usePenBackdropDismiss(close);
+  const hoverPreviewPenToggle = usePenCheckboxToggle(setEnableHoverPreview);
+  const customChartsPenToggle = usePenCheckboxToggle(setUseCustomCharts);
+  const hoverPlacementPenActivate = usePenSelectActivate();
+  const sparklineModePenActivate = usePenSelectActivate();
+
   useEffect(() => {
     if (!open) return;
 
@@ -49,9 +57,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     <div
       className="tv-modal open"
       data-scroll-lock-overlay
-      onClick={(event) => {
-        if (event.target === event.currentTarget) close();
-      }}
+      {...backdropPenDismiss}
       style={{ zIndex: 10100 }}
     >
       <div
@@ -93,7 +99,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
           </div>
           <button
             type="button"
-            onClick={close}
+            {...closePenClick}
             style={{
               background: 'none',
               border: 'none',
@@ -125,6 +131,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               type="checkbox"
               checked={enableHoverPreview}
               onChange={(e) => setEnableHoverPreview(e.target.checked)}
+              onPointerUp={hoverPreviewPenToggle}
               style={{
                 width: '18px',
                 height: '18px',
@@ -153,6 +160,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               <select
                 value={hoverPreviewPlacement}
                 onChange={(e) => setHoverPreviewPlacement(e.target.value as HoverPreviewPlacement)}
+                onPointerUp={hoverPlacementPenActivate}
                 disabled={!enableHoverPreview}
                 style={{
                   background: 'var(--bg2)',
@@ -193,6 +201,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               type="checkbox"
               checked={useCustomCharts}
               onChange={(e) => setUseCustomCharts(e.target.checked)}
+              onPointerUp={customChartsPenToggle}
               style={{
                 width: '18px',
                 height: '18px',
@@ -224,6 +233,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               <select
                 value={sparklineMode}
                 onChange={(e) => setSparklineMode(e.target.value as any)}
+                onPointerUp={sparklineModePenActivate}
                 style={{
                   background: 'var(--bg2)',
                   color: 'var(--text)',
@@ -259,7 +269,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
         >
           <button
             type="button"
-            onClick={close}
+            {...closePenClick}
             className="btn"
             style={{
               background: 'var(--accent)',

@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedNumberInput, Icon, Section, Toast } from '../../components/common';
+import { usePenCompatibleClick } from '../../utils/penClick';
 import { colors, formatUsCurrency, formatUsInteger } from '../../utils/formatting';
 
 type Direction = 'long' | 'short';
@@ -44,28 +45,6 @@ export function PositionCalculator() {
   useEffect(() => {
     localStorage.setItem('agy_calc_riskPct', riskPct.toString());
   }, [riskPct]);
-
-  const handleCopy = () => {
-    if (!calc) return;
-    const lines = [
-      `Notes: ${notes || '—'}`,
-      `Direction: ${direction.toUpperCase()}`,
-      `Shares: ${formatUsInteger(calc.shares)}`,
-      `Entry Price: ${formatUsCurrency(entry, 2)}`,
-      `Stop Loss: ${formatUsCurrency(stop, 2)}`,
-      `Max Risk: ${formatUsCurrency(Math.round(calc.rAmt))} (${(riskPct || 0).toFixed(2)}%)`,
-      `Position Value: ${formatUsCurrency(Math.round(calc.posVal))}`,
-      `R:R Targets:`,
-      ...calc.rrTargets.map((t) => `  ${t.r}x R: ${formatUsCurrency(t.tgt, 2)}`),
-    ];
-    navigator.clipboard.writeText(lines.join('\n'))
-      .then(() => {
-        setToastMessage('Trade details copied to clipboard!');
-      })
-      .catch((err) => {
-        console.error('Failed to copy trade details:', err);
-      });
-  };
 
   const calc = useMemo(() => {
     const safeEquity = equity || 0;
@@ -187,6 +166,34 @@ export function PositionCalculator() {
     return { shares, rAmt, posVal, rPts, pctEq, levels, rrTargets, totalPnl, totalSharesRemoved, totalPctRemoved };
   }, [direction, stops, equity, riskPct, entry, stop]);
 
+  const handleCopy = useCallback(() => {
+    const lines = [
+      `Notes: ${notes || '—'}`,
+      `Direction: ${direction.toUpperCase()}`,
+      `Shares: ${formatUsInteger(calc.shares)}`,
+      `Entry Price: ${formatUsCurrency(entry, 2)}`,
+      `Stop Loss: ${formatUsCurrency(stop, 2)}`,
+      `Max Risk: ${formatUsCurrency(Math.round(calc.rAmt))} (${(riskPct || 0).toFixed(2)}%)`,
+      `Position Value: ${formatUsCurrency(Math.round(calc.posVal))}`,
+      `R:R Targets:`,
+      ...calc.rrTargets.map((t) => `  ${t.r}x R: ${formatUsCurrency(t.tgt, 2)}`),
+    ];
+    navigator.clipboard.writeText(lines.join('\n'))
+      .then(() => {
+        setToastMessage('Trade details copied to clipboard!');
+      })
+      .catch((err) => {
+        console.error('Failed to copy trade details:', err);
+      });
+  }, [calc, direction, entry, notes, riskPct, stop]);
+
+  const longPenClick = usePenCompatibleClick(() => setDirection('long'));
+  const shortPenClick = usePenCompatibleClick(() => setDirection('short'));
+  const copyPenClick = usePenCompatibleClick(handleCopy);
+  const stop1PenClick = usePenCompatibleClick(() => setStops(1));
+  const stop2PenClick = usePenCompatibleClick(() => setStops(2));
+  const stop3PenClick = usePenCompatibleClick(() => setStops(3));
+
   // RISK-BASED · STAGGERED STOPS
 
   return (
@@ -201,14 +208,14 @@ export function PositionCalculator() {
             <button
               type="button"
               className={`dir-b long${direction === 'long' ? ' on' : ''}`}
-              onClick={() => setDirection('long')}
+              {...longPenClick}
             >
               <Icon name="arrow_upward" size="xs" /> LONG
             </button>
             <button
               type="button"
               className={`dir-b short${direction === 'short' ? ' on' : ''}`}
-              onClick={() => setDirection('short')}
+              {...shortPenClick}
             >
               <Icon name="arrow_downward" size="xs" /> SHORT
             </button>
@@ -273,7 +280,7 @@ export function PositionCalculator() {
           </div>
           <button
             type="button"
-            onClick={handleCopy}
+            {...copyPenClick}
             className="btn"
             disabled={calc.shares === 0}
             style={{
@@ -292,13 +299,13 @@ export function PositionCalculator() {
               <Icon name="chevron_right" size="xs" className="icon--label" />
               Staggered Stop Levels
             </span>
-            <button type="button" className={`s-tab${stops === 1 ? ' on' : ''}`} onClick={() => setStops(1)}>
+            <button type="button" className={`s-tab${stops === 1 ? ' on' : ''}`} {...stop1PenClick}>
               1-STOP
             </button>
-            <button type="button" className={`s-tab${stops === 2 ? ' on' : ''}`} onClick={() => setStops(2)}>
+            <button type="button" className={`s-tab${stops === 2 ? ' on' : ''}`} {...stop2PenClick}>
               2-STOP
             </button>
-            <button type="button" className={`s-tab${stops === 3 ? ' on' : ''}`} onClick={() => setStops(3)}>
+            <button type="button" className={`s-tab${stops === 3 ? ' on' : ''}`} {...stop3PenClick}>
               3-STOP
             </button>
           </div>

@@ -74,7 +74,6 @@ export function SymbolPreviewOverlay() {
       left: `${left}px`,
       width: `${overlayWidth}px`,
       height: `${overlayHeight}px`,
-      zIndex: 10000,
       display: 'flex',
       flexDirection: 'column',
       transformOrigin: origin,

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { colors } from '../../utils/formatting';
+import { usePenCompatibleClick } from '../../utils/penClick';
 import { Icon } from './Icon';
 import { CardSearchContext } from './CardSearchContext';
 
@@ -10,30 +11,27 @@ interface CardCopyButtonProps {
 export const CardCopyButton: React.FC<CardCopyButtonProps> = ({ symbols }) => {
   const [copied, setCopied] = useState(false);
 
-  const handleCopy = async (e: React.MouseEvent) => {
+  const handleCopy = useCallback(async (e: React.SyntheticEvent) => {
     e.stopPropagation();
     try {
       const csv = symbols.filter(Boolean).join(',');
       await navigator.clipboard.writeText(csv);
       setCopied(true);
-      setTimeout(() => setCopied(false), 1500);
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy symbols:', err);
     }
-  };
+  }, [symbols]);
+
+  const copyPenClick = usePenCompatibleClick(handleCopy);
 
   return (
     <button
       type="button"
-      className="table-expand-btn"
+      className={`table-expand-btn${copied ? ' is-copied' : ''}`}
       title="Copy symbols as CSV"
       aria-label="Copy symbols as CSV"
-      onClick={handleCopy}
-      style={{
-        color: copied ? colors.green : undefined,
-        borderColor: copied ? colors.green : undefined,
-        background: copied ? 'var(--green-dim-bg)' : undefined,
-      }}
+      {...copyPenClick}
     >
       <Icon name={copied ? 'check' : 'content_copy'} size="sm" />
     </button>
@@ -53,6 +51,13 @@ interface CardProps {
 export const Card: React.FC<CardProps> = ({ label, children, style, headerAction, symbols }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+
+  const toggleSearchPenClick = usePenCompatibleClick(() => {
+    setIsSearchOpen((open) => {
+      if (open) setSearchQuery('');
+      return !open;
+    });
+  });
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
@@ -117,15 +122,12 @@ export const Card: React.FC<CardProps> = ({ label, children, style, headerAction
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             {symbols && symbols.length > 0 && (
               <>
-                <button
+                    <button
                   type="button"
                   className="table-expand-btn"
                   title="Search section"
                   aria-label="Search section"
-                  onClick={() => {
-                    setIsSearchOpen(!isSearchOpen);
-                    if (isSearchOpen) setSearchQuery('');
-                  }}
+                  {...toggleSearchPenClick}
                   style={{
                     color: isSearchOpen ? colors.accent : undefined,
                     borderColor: isSearchOpen ? colors.accent : undefined,

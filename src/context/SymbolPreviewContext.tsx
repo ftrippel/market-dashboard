@@ -1,6 +1,7 @@
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { toTradingViewSymbol } from '../utils/tradingView';
 import { useSettings } from './SettingsContext';
+import { useChartModal } from './ChartModalContext';
 
 interface PreviewState {
   open: boolean;
@@ -32,6 +33,10 @@ const SymbolPreviewContext = createContext<SymbolPreviewContextValue | null>(nul
 export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
   const [preview, setPreview] = useState<PreviewState>(closedState);
   const { enableHoverPreview } = useSettings();
+  const { chart } = useChartModal();
+  const chartOpenRef = useRef(chart.open);
+
+  chartOpenRef.current = chart.open;
 
   const showTimeoutRef = useRef<any>(null);
   const hideTimeoutRef = useRef<any>(null);
@@ -48,7 +53,7 @@ export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
   };
 
   const onMouseEnterLink = useCallback((rawSym: string, name: string, rect: DOMRect) => {
-    if (!enableHoverPreview) return;
+    if (!enableHoverPreview || chartOpenRef.current) return;
 
     if (hideTimeoutRef.current) {
       window.clearTimeout(hideTimeoutRef.current);
@@ -65,6 +70,7 @@ export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
       }
 
       showTimeoutRef.current = window.setTimeout(() => {
+        if (chartOpenRef.current) return;
         const tvSym = toTradingViewSymbol(rawSym);
         setPreview({
           open: true,
@@ -118,6 +124,10 @@ export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
     clearTimeouts();
     setPreview(closedState);
   }, []);
+
+  useEffect(() => {
+    if (chart.open) hidePreview();
+  }, [chart.open, hidePreview]);
 
   return (
     <SymbolPreviewContext.Provider

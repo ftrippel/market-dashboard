@@ -10,6 +10,7 @@ import {
 } from '../../utils/chartInteractionController';
 import { colors } from '../../utils/formatting';
 import { MeasureToolPrimitive } from '../../utils/measureToolPrimitive';
+import { usePenCompatibleClick } from '../../utils/penClick';
 import { Icon } from './Icon';
 
 interface TradingViewCustomChartProps {
@@ -49,14 +50,11 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
   const isYield = isYieldSymbol(symbol);
   const priceDecimals = isYield ? 3 : 2;
 
-  const handleMeasureButtonPointerDown = useCallback(
-    (event: React.PointerEvent<HTMLButtonElement>) => {
-      if (event.button !== 0) return;
-      event.preventDefault();
-      interactionUi?.toggleMeasureMode();
-    },
-    [interactionUi],
-  );
+  const toggleMeasure = useCallback(() => {
+    interactionUi?.toggleMeasureMode();
+  }, [interactionUi]);
+
+  const measurePenClick = usePenCompatibleClick(toggleMeasure);
 
   useEffect(() => {
     let active = true;
@@ -199,8 +197,7 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', display: 'flex', flexDirection: 'column' }}>
-      <div
-        style={{
+      <div className="tv-chart-toolbar" style={{
           display: 'flex',
           gap: '14px',
           padding: '6px 10px',
@@ -229,7 +226,7 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
           <button
             type="button"
             className={`tv-measure-btn${isMeasuring ? ' active' : ''}`}
-            onPointerDown={handleMeasureButtonPointerDown}
+            {...measurePenClick}
             aria-label={isMeasuring ? 'Cancel measure tool' : 'Measure tool'}
             aria-pressed={isMeasuring}
             title={isMeasuring ? 'Tap two points on the chart (cancel)' : 'Measure — tap two points on the chart'}

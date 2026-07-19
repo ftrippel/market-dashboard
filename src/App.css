@@ -317,6 +317,11 @@ body::before {
   display: flex;
 }
 
+#tv-modal-box,
+#settings-modal-box {
+  touch-action: manipulation;
+}
+
 #tv-modal-box {
   width: min(1000px, 95vw);
   height: min(640px, 90vh);
@@ -335,9 +340,16 @@ body::before {
   border-bottom: 1px solid var(--border);
   gap: 10px;
   position: relative;
-  z-index: 2;
+  z-index: 5;
   flex-shrink: 0;
   border-radius: 4px 4px 0 0;
+  touch-action: manipulation;
+}
+
+.tv-chart-toolbar {
+  position: relative;
+  z-index: 3;
+  touch-action: manipulation;
 }
 
 #tv-modal-title {
@@ -384,6 +396,7 @@ body::before {
   overflow: hidden;
   background: var(--tv-chart-bg);
   border-radius: 0 0 4px 4px;
+  z-index: 1;
 }
 
 .tv-frame-loading {
@@ -571,6 +584,12 @@ body::before {
   }
 }
 
+.table-expand-btn.is-copied {
+  color: var(--green);
+  border-color: var(--green);
+  background: var(--green-dim-bg);
+}
+
 .table-flyover {
   display: none;
   position: fixed;
@@ -599,18 +618,13 @@ body::before {
 .table-flyover-box {
   width: min(1200px, calc(100vw - 32px));
   height: min(900px, calc(100dvh - 32px));
-  touch-action: auto;
+  touch-action: manipulation;
   background: var(--bg);
   border: 1px solid var(--border2);
   border-radius: 4px;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-.table-flyover-box--holdings {
-  width: min(720px, 96vw);
-  max-height: min(560px, 92vh);
 }
 
 .table-flyover-hdr {
@@ -620,6 +634,14 @@ body::before {
   background: var(--bg2);
   border-bottom: 1px solid var(--border);
   gap: 10px;
+  position: relative;
+  z-index: 2;
+  touch-action: manipulation;
+}
+
+.table-flyover-box--holdings {
+  width: min(720px, 96vw);
+  max-height: min(560px, 92vh);
 }
 
 .table-flyover-title {
@@ -1012,6 +1034,7 @@ body::before {
 
 /* TradingView Preview Overlay */
 .tv-preview-overlay {
+  z-index: 9985;
   background: var(--bg2);
   border: 1px solid var(--border2);
   border-radius: 6px;
@@ -1105,6 +1128,7 @@ body::before {
   z-index: 10001;
   overflow: hidden;
   pointer-events: auto;
+  touch-action: manipulation;
 }
 
 #tv-frame-wrap.menu-open {
@@ -1169,5 +1193,4 @@ body::before {
     background: var(--accent-subtle-bg);
   }
 }
-
 

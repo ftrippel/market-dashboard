@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { colors, formatDataTimestamp } from '../../utils/formatting';
 import { useTheme } from '../../context/ThemeContext';
 import { useChartModal } from '../../context/ChartModalContext';
+import { usePenCompatibleClick } from '../../utils/penClick';
 import { Icon, XIcon } from './Icon';
 
 interface HeaderProps {
@@ -31,6 +32,11 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { theme, toggleTheme } = useTheme();
   const { openFreeChart } = useChartModal();
+  const themePenClick = usePenCompatibleClick(() => toggleTheme());
+  const livePenClick = usePenCompatibleClick(() => onToggleLive());
+  const chartPenClick = usePenCompatibleClick(() => openFreeChart());
+  const snapPenClick = usePenCompatibleClick(() => onSnap?.());
+  const settingsPenClick = usePenCompatibleClick(() => onOpenSettings?.());
   const [time, setTime] = React.useState<string>('—');
   const [date, setDate] = React.useState<string>('—');
 
@@ -96,7 +102,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           type="button"
           className="btn btn-theme"
-          onClick={toggleTheme}
+          {...themePenClick}
           title={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
           aria-label={theme === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}
         >
@@ -105,7 +111,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           type="button"
           className="btn btn-x"
-          onClick={onToggleLive}
+          {...livePenClick}
           title={liveEnabled ? 'Disable live data refresh' : 'Enable live data refresh'}
           style={liveEnabled ? { borderColor: colors.green, color: colors.green, background: colors.greenDimBg } : undefined}
         >
@@ -126,31 +132,31 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           type="button"
           className="btn btn-x"
-          onClick={openFreeChart}
+          {...chartPenClick}
           title="Open chart for any symbol (C)"
         >
           <Icon name="show_chart" size="sm" />
           CHART
         </button>
-        <button type="button" className="btn btn-x" onClick={onSnap}>
+        <button type="button" className="btn btn-x" {...snapPenClick}>
           <Icon name="photo_camera" size="sm" />
           SNAP
         </button>
         <button
           type="button"
           className="btn btn-theme"
-          onClick={onOpenSettings}
+          {...settingsPenClick}
           title="Open settings"
           aria-label="Open settings"
         >
           <Icon name="settings" size="sm" />
         </button>
         {/*
-        <button type="button" className="btn btn-x" onClick={onShareX}>
+        <button type="button" className="btn btn-x" {...sharePenClick}>
           <XIcon size={13} />
           SHARE
         </button>
-        <button type="button" className="btn btn-x" onClick={onCopy}>
+        <button type="button" className="btn btn-x" {...copyPenClick}>
           <Icon name="content_copy" size="sm" />
           COPY
         </button>

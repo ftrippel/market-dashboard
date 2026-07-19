@@ -8,6 +8,7 @@ import { useChartModal } from '../../context/ChartModalContext';
 import { useSymbolPreview } from '../../context/SymbolPreviewContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { dismissOverlay } from '../../utils/focus';
+import { usePenBackdropDismiss, usePenCompatibleClick } from '../../utils/penClick';
 import { stripExchangeSuffix } from '../../utils/symbols';
 import { SymbolLink } from './TradingViewModal';
 
@@ -64,15 +65,15 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
   }, [close, chart.open]);
 
   const totalWeight = holdings.reduce((sum, holding) => sum + holding.w, 0);
+  const closePenClick = usePenCompatibleClick(close);
+  const backdropPenDismiss = usePenBackdropDismiss(close);
 
   return createPortal(
     <div
       className="table-flyover open"
       data-scroll-lock-overlay
       role="presentation"
-      onClick={(event) => {
-        if (event.target === event.currentTarget) close();
-      }}
+      {...backdropPenDismiss}
     >
       <div
         className="table-flyover-box table-flyover-box--holdings"
@@ -86,7 +87,7 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
             Top 10 Holdings — {displayName} · {etfSym}
           </div>
           <CardCopyButton symbols={holdings.map((holding) => stripExchangeSuffix(holding.s))} />
-          <button type="button" onClick={close}>
+          <button type="button" {...closePenClick}>
             <Icon name="close" size="xs" />
             CLOSE
           </button>

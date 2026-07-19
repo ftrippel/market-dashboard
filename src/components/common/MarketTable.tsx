@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { getDisplayName, getSymbolMeta } from '../../data/symbolMaps';
 import { colors, formatPrice, formatHoverTimestamp } from '../../utils/formatting';
 import type { Holding, MarketData, MarketTableOptions } from '../../types';
+import { usePenCompatibleClick } from '../../utils/penClick';
 import { Sparkline } from './Sparkline';
 import { Sparkbar } from './Sparkbar';
 import { Sparkdots } from './Sparkdots';
@@ -80,13 +81,14 @@ function SortableHeader({
   const active = sortKey === activeKey;
   const justify =
     align === 'left' ? 'flex-start' : align === 'center' ? 'center' : 'flex-end';
+  const sortPenClick = usePenCompatibleClick(() => onSort(sortKey));
 
   return (
     <th style={{ ...thStyle, textAlign: align, padding: 0 }}>
       <button
         type="button"
         className={`th-sort${active ? ' active' : ''}`}
-        onClick={() => onSort(sortKey)}
+        {...sortPenClick}
         aria-sort={active ? (order === 'asc' ? 'ascending' : 'descending') : 'none'}
         style={{ justifyContent: justify }}
       >
@@ -121,11 +123,13 @@ function TrendCell({ value }: { value?: boolean }) {
 }
 
 function HoldingsButton({ onOpen }: { onOpen: () => void }) {
+  const openPenClick = usePenCompatibleClick(onOpen);
+
   return (
     <button
       type="button"
       className="table-expand-btn"
-      onClick={onOpen}
+      {...openPenClick}
       aria-label="View top 10 holdings"
       title="View top 10 holdings"
     >
