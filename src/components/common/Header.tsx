@@ -110,10 +110,9 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
         <button
           type="button"
-          className="btn btn-x"
+          className={`btn btn-x${liveEnabled ? ' is-live-on' : ''}`}
           {...livePenClick}
           title={liveEnabled ? 'Disable live data refresh' : 'Enable live data refresh'}
-          style={liveEnabled ? { borderColor: colors.green, color: colors.green, background: colors.greenDimBg } : undefined}
         >
           <span
             style={{

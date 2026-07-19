@@ -265,12 +265,10 @@ body::before {
   white-space: nowrap;
 }
 
-@media (hover: hover) {
-  .btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-hover-bg);
-  }
+.btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-hover-bg);
 }
 
 .btn-x {
@@ -279,12 +277,17 @@ body::before {
   color: var(--btn-x-color);
 }
 
-@media (hover: hover) {
-  .btn-x:hover {
-    border-color: var(--btn-x-hover-border);
-    color: var(--btn-x-hover-color);
-    background: var(--btn-x-hover-bg);
-  }
+.btn-x:hover,
+.btn.btn-x:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-subtle-bg);
+}
+
+.btn-x.is-live-on {
+  border-color: var(--green);
+  color: var(--green);
+  background: var(--green-dim-bg);
 }
 
 .btn-theme {
@@ -293,11 +296,9 @@ body::before {
   padding-inline: 10px;
 }
 
-@media (hover: hover) {
-  .tn-link:hover {
-    color: var(--accent) !important;
-    border-bottom-color: var(--accent) !important;
-  }
+.tn-link:hover {
+  color: var(--accent) !important;
+  border-bottom-color: var(--accent) !important;
 }
 
 /* TradingView modal */
@@ -381,12 +382,11 @@ body::before {
   text-transform: uppercase;
 }
 
-@media (hover: hover) {
-  #tv-modal-hdr button:hover,
-  .table-flyover-hdr button:hover {
-    border-color: var(--red);
-    color: var(--red);
-  }
+#tv-modal-hdr button:hover,
+.table-flyover-hdr button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-subtle-bg);
 }
 
 #tv-frame-wrap {
@@ -459,11 +459,9 @@ body::before {
   touch-action: manipulation;
 }
 
-@media (hover: hover) {
-  .tv-measure-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-  }
+.tv-measure-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .tv-measure-btn.active {
@@ -576,12 +574,10 @@ body::before {
   transition: color .15s, border-color .15s, background .15s;
 }
 
-@media (hover: hover) {
-  .table-expand-btn:hover {
-    color: var(--accent);
-    border-color: var(--accent);
-    background: var(--accent-subtle-bg);
-  }
+.table-expand-btn:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-subtle-bg);
 }
 
 .table-expand-btn.is-copied {
@@ -694,11 +690,9 @@ body::before {
   transition: color .15s, background .15s;
 }
 
-@media (hover: hover) {
-  .th-sort:hover {
-    color: var(--accent);
-    background: var(--accent-subtle-bg);
-  }
+.th-sort:hover {
+  color: var(--accent);
+  background: var(--accent-subtle-bg);
 }
 
 .th-sort.active {
@@ -774,6 +768,11 @@ body::before {
 .dir-b.short.on {
   background: var(--red-dim-bg);
   color: var(--red);
+}
+
+.dir-b:hover:not(.on) {
+  color: var(--text);
+  background: var(--bg4);
 }
 
 .fg {
@@ -897,6 +896,12 @@ body::before {
   border-color: var(--accent);
   color: var(--accent);
   background: var(--accent-hover-bg);
+}
+
+.s-tab:hover:not(.on) {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-subtle-bg);
 }
 
 .stops-body {
@@ -1185,12 +1190,3 @@ body::before {
   visibility: visible;
   opacity: 1;
 }
-
-@media (hover: hover) {
-  .table-flyover-hdr button.table-expand-btn:hover {
-    border-color: var(--accent);
-    color: var(--accent);
-    background: var(--accent-subtle-bg);
-  }
-}
-
