@@ -1,10 +1,11 @@
-import React, { useEffect, useId } from 'react';
+import React, { useCallback, useEffect, useId } from 'react';
 import { colors } from '../../utils/formatting';
 import type { Holding } from '../../types';
 import { Icon } from './Icon';
 import { CardCopyButton } from './Card';
 import { useChartModal } from '../../context/ChartModalContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import { dismissOverlay } from '../../utils/focus';
 import { stripExchangeSuffix } from '../../utils/symbols';
 import { SymbolLink } from './TradingViewModal';
 
@@ -41,18 +42,22 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
   const { chart } = useChartModal();
   const siblings = holdings.map((h) => ({ sym: h.s, name: h.n }));
 
+  const close = useCallback(() => {
+    dismissOverlay(onClose);
+  }, [onClose]);
+
   useScrollLock(true);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         if (chart.open) return;
-        onClose();
+        close();
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onClose, chart.open]);
+  }, [close, chart.open]);
 
   const totalWeight = holdings.reduce((sum, holding) => sum + holding.w, 0);
 
@@ -61,7 +66,7 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
       className="table-flyover open"
       role="presentation"
       onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
+        if (event.target === event.currentTarget) close();
       }}
     >
       <div
@@ -76,7 +81,7 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
             Top 10 Holdings — {displayName} · {etfSym}
           </div>
           <CardCopyButton symbols={holdings.map((holding) => stripExchangeSuffix(holding.s))} />
-          <button type="button" onClick={onClose}>
+          <button type="button" onClick={close}>
             <Icon name="close" size="xs" />
             CLOSE
           </button>

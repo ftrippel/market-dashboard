@@ -2,6 +2,7 @@ import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from
 import { createPortal } from 'react-dom';
 import { buildYahooFinanceQuoteUrl, toYahooFinanceSymbol } from '../../services/api';
 import { buildTradingViewChartUrl, toTradingViewSymbol } from '../../utils/tradingView';
+import { blurActiveElement } from '../../utils/focus';
 import { Icon } from './Icon';
 
 interface ChartOpenMenuProps {
@@ -16,6 +17,7 @@ export function ChartOpenMenu({ rawSym, onOpenChange }: ChartOpenMenuProps) {
   const menuRef = useRef<HTMLDivElement>(null);
 
   const setMenuOpen = (next: boolean) => {
+    if (!next) blurActiveElement();
     setOpen(next);
     onOpenChange?.(next);
   };

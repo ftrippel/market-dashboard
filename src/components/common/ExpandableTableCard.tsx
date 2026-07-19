@@ -1,4 +1,4 @@
-import React, { useEffect, useId, useState } from 'react';
+import React, { useCallback, useEffect, useId, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { Holding, MarketData, MarketTableOptions } from '../../types';
 import { Card, CardCopyButton } from './Card';
@@ -8,6 +8,7 @@ import { MarketTable } from './MarketTable';
 import { useChartModal } from '../../context/ChartModalContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { colors } from '../../utils/formatting';
+import { dismissOverlay } from '../../utils/focus';
 
 interface ExpandableTableCardProps {
   label: React.ReactNode;
@@ -35,6 +36,10 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
   const canExpand = data.length > previewCount;
   const { chart } = useChartModal();
 
+  const close = useCallback(() => {
+    dismissOverlay(() => setOpen(false));
+  }, []);
+
   useScrollLock(open);
 
   useEffect(() => {
@@ -42,13 +47,13 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
         if (chart.open) return;
-        setOpen(false);
+        close();
       }
     };
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [open, chart.open]);
+  }, [open, chart.open, close]);
 
   useEffect(() => {
     if (!open) {
@@ -95,7 +100,7 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
               className="table-flyover open"
               role="presentation"
               onClick={(event) => {
-                if (event.target === event.currentTarget) setOpen(false);
+                if (event.target === event.currentTarget) close();
               }}
             >
               <div
@@ -152,7 +157,7 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
                       <Icon name="search" size="sm" />
                     </button>
                     <CardCopyButton symbols={data.map((x) => x.sym)} />
-                    <button type="button" onClick={() => setOpen(false)}>
+                    <button type="button" onClick={close}>
                       <Icon name="close" size="xs" />
                       CLOSE
                     </button>

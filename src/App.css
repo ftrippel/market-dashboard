@@ -97,6 +97,31 @@
   padding: 0;
 }
 
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus:not(:focus-visible),
+input[type="button"]:focus:not(:focus-visible),
+input[type="submit"]:focus:not(:focus-visible),
+input[type="reset"]:focus:not(:focus-visible),
+[role="button"]:focus:not(:focus-visible) {
+  outline: none;
+}
+
+button:focus-visible,
+input[type="button"]:focus-visible,
+input[type="submit"]:focus-visible,
+input[type="reset"]:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 html {
   scroll-behavior: smooth;
   scrollbar-gutter: stable;
@@ -239,10 +264,12 @@ body::before {
   white-space: nowrap;
 }
 
-.btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-hover-bg);
+@media (hover: hover) {
+  .btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-hover-bg);
+  }
 }
 
 .btn-x {
@@ -251,10 +278,12 @@ body::before {
   color: var(--btn-x-color);
 }
 
-.btn-x:hover {
-  border-color: var(--btn-x-hover-border);
-  color: var(--btn-x-hover-color);
-  background: var(--btn-x-hover-bg);
+@media (hover: hover) {
+  .btn-x:hover {
+    border-color: var(--btn-x-hover-border);
+    color: var(--btn-x-hover-color);
+    background: var(--btn-x-hover-bg);
+  }
 }
 
 .btn-theme {
@@ -263,9 +292,11 @@ body::before {
   padding-inline: 10px;
 }
 
-.tn-link:hover {
-  color: var(--accent) !important;
-  border-bottom-color: var(--accent) !important;
+@media (hover: hover) {
+  .tn-link:hover {
+    color: var(--accent) !important;
+    border-bottom-color: var(--accent) !important;
+  }
 }
 
 /* TradingView modal */
@@ -337,10 +368,12 @@ body::before {
   text-transform: uppercase;
 }
 
-#tv-modal-hdr button:hover,
-.table-flyover-hdr button:hover {
-  border-color: var(--red);
-  color: var(--red);
+@media (hover: hover) {
+  #tv-modal-hdr button:hover,
+  .table-flyover-hdr button:hover {
+    border-color: var(--red);
+    color: var(--red);
+  }
 }
 
 #tv-frame-wrap {
@@ -405,9 +438,11 @@ body::before {
   cursor: pointer;
 }
 
-.tv-measure-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+@media (hover: hover) {
+  .tv-measure-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
 }
 
 .tv-measure-btn.active {
@@ -520,10 +555,12 @@ body::before {
   transition: color .15s, border-color .15s, background .15s;
 }
 
-.table-expand-btn:hover {
-  color: var(--accent);
-  border-color: var(--accent);
-  background: var(--accent-subtle-bg);
+@media (hover: hover) {
+  .table-expand-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--accent-subtle-bg);
+  }
 }
 
 .table-flyover {
@@ -627,9 +664,11 @@ body::before {
   transition: color .15s, background .15s;
 }
 
-.th-sort:hover {
-  color: var(--accent);
-  background: var(--accent-subtle-bg);
+@media (hover: hover) {
+  .th-sort:hover {
+    color: var(--accent);
+    background: var(--accent-subtle-bg);
+  }
 }
 
 .th-sort.active {
@@ -1115,10 +1154,12 @@ body::before {
   opacity: 1;
 }
 
-.table-flyover-hdr button.table-expand-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-subtle-bg);
+@media (hover: hover) {
+  .table-flyover-hdr button.table-expand-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-subtle-bg);
+  }
 }
 
 

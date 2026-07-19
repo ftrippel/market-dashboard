@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useSettings, type HoverPreviewPlacement } from '../../context/SettingsContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import { dismissOverlay } from '../../utils/focus';
 import { Icon } from './Icon';
 
 interface SettingsModalProps {
@@ -22,12 +23,16 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
 
   useScrollLock(open);
 
+  const close = useCallback(() => {
+    dismissOverlay(onClose);
+  }, [onClose]);
+
   useEffect(() => {
     if (!open) return;
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose();
+        close();
       }
     };
 
@@ -35,7 +40,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [open, onClose]);
+  }, [open, close]);
 
   if (!open) return null;
 
@@ -43,7 +48,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     <div
       className="tv-modal open"
       onClick={(event) => {
-        if (event.target === event.currentTarget) onClose();
+        if (event.target === event.currentTarget) close();
       }}
       style={{ zIndex: 10100 }}
     >
@@ -86,7 +91,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={close}
             style={{
               background: 'none',
               border: 'none',
@@ -252,7 +257,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
         >
           <button
             type="button"
-            onClick={onClose}
+            onClick={close}
             className="btn"
             style={{
               background: 'var(--accent)',

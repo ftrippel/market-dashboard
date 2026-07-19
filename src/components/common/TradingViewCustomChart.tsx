@@ -3,6 +3,7 @@ import { createChart, ColorType, CandlestickSeries, LineSeries, CrosshairMode, t
 import { fetchYahooFinanceOhlcHistory, type DailyOhlcPoint } from '../../services/api';
 import { buildIndicatorSeries, calculateEMA, calculateSMA } from '../../utils/chartIndicators';
 import { colors } from '../../utils/formatting';
+import { blurActiveElement } from '../../utils/focus';
 import {
   createMeasureAnchor,
   MeasureToolPrimitive,
@@ -229,6 +230,7 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
     const deactivateMeasure = () => {
       clearMeasurement();
       setMeasureArmedRef.current(false);
+      blurActiveElement();
     };
 
     measureActionsRef.current = {
@@ -281,7 +283,9 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return;
-      if (measurePhase !== 'active' && !measurePrimitive.hasMeasurement()) return;
+      if (measurePhase !== 'active' && !measurePrimitive.hasMeasurement() && !measureArmedRef.current) {
+        return;
+      }
 
       measurePrimitive.clear();
       deactivateMeasure();

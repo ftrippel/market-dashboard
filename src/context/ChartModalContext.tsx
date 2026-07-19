@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useScrollLock } from '../hooks/useScrollLock';
+import { blurActiveElement } from '../utils/focus';
 import { toTradingViewSymbol } from '../utils/tradingView';
 
 interface SiblingSymbol {
@@ -75,6 +76,7 @@ export function ChartModalProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const closeChart = useCallback(() => {
+    blurActiveElement();
     setChart(closedState);
   }, []);
 
