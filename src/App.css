@@ -131,6 +131,7 @@ html.scroll-locked,
 html.scroll-locked body {
   overflow: hidden;
   overscroll-behavior: none;
+  scroll-behavior: auto;
 }
 
 body {

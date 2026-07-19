@@ -1,5 +1,7 @@
 import { useEffect } from 'react';
 
+const SCROLL_LOCK_TARGET_ID = 'root';
+
 const SCROLLABLE_SELECTOR =
   '[data-scroll-lock-scrollable], .table-flyover-body, .table-scroll';
 
@@ -19,7 +21,17 @@ let savedStyles: {
   htmlOverflow: string;
   bodyOverflow: string;
   bodyPaddingRight: string;
+  targetPosition: string;
+  targetTop: string;
+  targetLeft: string;
+  targetRight: string;
+  targetWidth: string;
+  scrollY: number;
 } | null = null;
+
+function getScrollLockTarget(): HTMLElement {
+  return document.getElementById(SCROLL_LOCK_TARGET_ID) ?? document.body;
+}
 
 function isInsideScrollable(target: EventTarget | null): boolean {
   return target instanceof Element && target.closest(SCROLLABLE_SELECTOR) !== null;
@@ -76,15 +88,34 @@ function detachListeners(): void {
   document.removeEventListener('keydown', preventKeyScroll, { capture: true });
 }
 
+function restoreScrollPosition(scrollY: number): void {
+  const html = document.documentElement;
+  const previousScrollBehavior = html.style.scrollBehavior;
+
+  html.style.scrollBehavior = 'auto';
+  html.scrollTop = scrollY;
+  document.body.scrollTop = scrollY;
+  window.scrollTo(0, scrollY);
+  html.style.scrollBehavior = previousScrollBehavior;
+}
+
 function lockBodyScroll(): void {
   if (lockCount === 0) {
     const html = document.documentElement;
     const { body } = document;
+    const target = getScrollLockTarget();
+    const scrollY = window.scrollY;
 
     savedStyles = {
       htmlOverflow: html.style.overflow,
       bodyOverflow: body.style.overflow,
       bodyPaddingRight: body.style.paddingRight,
+      targetPosition: target.style.position,
+      targetTop: target.style.top,
+      targetLeft: target.style.left,
+      targetRight: target.style.right,
+      targetWidth: target.style.width,
+      scrollY,
     };
 
     const scrollbarWidth = window.innerWidth - html.clientWidth;
@@ -92,6 +123,11 @@ function lockBodyScroll(): void {
     html.classList.add('scroll-locked');
     html.style.overflow = 'hidden';
     body.style.overflow = 'hidden';
+    target.style.position = 'fixed';
+    target.style.top = `-${scrollY}px`;
+    target.style.left = '0';
+    target.style.right = '0';
+    target.style.width = '100%';
     if (scrollbarWidth > 0) {
       body.style.paddingRight = `${scrollbarWidth}px`;
     }
@@ -108,16 +144,24 @@ function unlockBodyScroll(): void {
 
   const html = document.documentElement;
   const { body } = document;
+  const target = getScrollLockTarget();
+  const scrollY = savedStyles?.scrollY ?? 0;
 
   if (savedStyles) {
     html.style.overflow = savedStyles.htmlOverflow;
     body.style.overflow = savedStyles.bodyOverflow;
     body.style.paddingRight = savedStyles.bodyPaddingRight;
+    target.style.position = savedStyles.targetPosition;
+    target.style.top = savedStyles.targetTop;
+    target.style.left = savedStyles.targetLeft;
+    target.style.right = savedStyles.targetRight;
+    target.style.width = savedStyles.targetWidth;
     savedStyles = null;
   }
 
   html.classList.remove('scroll-locked');
   detachListeners();
+  restoreScrollPosition(scrollY);
 }
 
 /** Lock page scroll while overlays/modals are open (ref-counted for nested overlays). */

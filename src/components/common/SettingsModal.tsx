@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useSettings, type HoverPreviewPlacement } from '../../context/SettingsContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { dismissOverlay } from '../../utils/focus';
@@ -44,7 +45,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div
       className="tv-modal open"
       onClick={(event) => {
@@ -274,6 +275,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

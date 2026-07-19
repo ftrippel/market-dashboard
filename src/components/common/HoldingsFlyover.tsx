@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useId } from 'react';
+import { createPortal } from 'react-dom';
 import { colors } from '../../utils/formatting';
 import type { Holding } from '../../types';
 import { Icon } from './Icon';
@@ -64,7 +65,7 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
 
   const totalWeight = holdings.reduce((sum, holding) => sum + holding.w, 0);
 
-  return (
+  return createPortal(
     <div
       className="table-flyover open"
       role="presentation"
@@ -140,6 +141,7 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
