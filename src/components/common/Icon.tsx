@@ -18,6 +18,7 @@ export type MaterialIconName =
   | 'search'
   | 'settings'
   | 'show_chart'
+  | 'straighten'
   | 'swap_vert'
   | 'unfold_more';
 

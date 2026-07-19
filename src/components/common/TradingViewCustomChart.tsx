@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { createChart, ColorType, CandlestickSeries, LineSeries, CrosshairMode, type MouseEventParams } from 'lightweight-charts';
 import { fetchYahooFinanceOhlcHistory, type DailyOhlcPoint } from '../../services/api';
 import { buildIndicatorSeries, calculateEMA, calculateSMA } from '../../utils/chartIndicators';
@@ -7,6 +7,7 @@ import {
   createMeasureAnchor,
   MeasureToolPrimitive,
 } from '../../utils/measureToolPrimitive';
+import { Icon } from './Icon';
 
 interface TradingViewCustomChartProps {
   symbol: string;
@@ -43,12 +44,33 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
   onReady,
 }: TradingViewCustomChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const measureArmedRef = useRef(false);
+  const setMeasureArmedRef = useRef<(armed: boolean) => void>(() => {});
+  const measureActionsRef = useRef<{ clear: () => void; deactivate: () => void } | null>(null);
   const [data, setData] = useState<DailyOhlcPoint[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [crosshairInfo, setCrosshairInfo] = useState<CrosshairInfo | null>(null);
+  const [measureArmed, setMeasureArmed] = useState(false);
   const isYield = symbol === 'US10Y' || symbol === 'US30Y';
   const priceDecimals = isYield ? 3 : 2;
+
+  setMeasureArmedRef.current = setMeasureArmed;
+
+  useEffect(() => {
+    measureArmedRef.current = measureArmed;
+  }, [measureArmed]);
+
+  const toggleMeasureTool = useCallback(() => {
+    setMeasureArmed((armed) => {
+      if (armed) {
+        measureActionsRef.current?.deactivate();
+        return false;
+      }
+      measureActionsRef.current?.clear();
+      return true;
+    });
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -56,6 +78,7 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
     setError(null);
     setData(null);
     setCrosshairInfo(null);
+    setMeasureArmed(false);
 
     fetchYahooFinanceOhlcHistory(symbol)
       .then((history) => {
@@ -196,9 +219,21 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
       };
     };
 
-    const deactivateMeasure = () => {
+    const clearMeasurement = () => {
+      measurePrimitive.clear();
       measurePhase = 'idle';
       container.style.cursor = '';
+      container.classList.remove('tv-chart-measure-active');
+    };
+
+    const deactivateMeasure = () => {
+      clearMeasurement();
+      setMeasureArmedRef.current(false);
+    };
+
+    measureActionsRef.current = {
+      clear: clearMeasurement,
+      deactivate: deactivateMeasure,
     };
 
     const onPointerDown = (event: PointerEvent) => {
@@ -208,10 +243,13 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
       const anchor = createMeasureAnchor(chart, candleSeries, point.x, point.y);
       if (!anchor) return;
 
-      if (measurePhase === 'idle' && event.shiftKey) {
+      const measureInput = event.shiftKey || measureArmedRef.current;
+
+      if (measurePhase === 'idle' && measureInput) {
         measurePhase = 'active';
         measurePrimitive.setMeasurement(anchor, anchor);
         container.style.cursor = 'crosshair';
+        container.classList.add('tv-chart-measure-active');
         event.preventDefault();
         event.stopPropagation();
         return;
@@ -272,10 +310,20 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
       container.removeEventListener('pointerdown', onPointerDown);
       container.removeEventListener('pointermove', onPointerMove);
       window.removeEventListener('keydown', onKeyDown, true);
+      container.classList.remove('tv-chart-measure-active');
       container.style.cursor = '';
+      measureActionsRef.current = null;
       chart.remove();
     };
   }, [data, theme, onReady]);
+
+  useEffect(() => {
+    if (!measureArmed || !containerRef.current) return;
+    containerRef.current.classList.add('tv-chart-measure-armed');
+    return () => {
+      containerRef.current?.classList.remove('tv-chart-measure-armed');
+    };
+  }, [measureArmed]);
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', display: 'flex', flexDirection: 'column' }}>
@@ -348,7 +396,21 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
           {error}
         </div>
       )}
-      <div ref={containerRef} className="tv-advanced-chart" style={{ flex: 1, minHeight: 0 }} />
+      <div style={{ position: 'relative', flex: 1, minHeight: 0 }}>
+        <div ref={containerRef} className="tv-advanced-chart" style={{ width: '100%', height: '100%' }} />
+        {!loading && !error && (
+          <button
+            type="button"
+            className={`tv-measure-btn${measureArmed ? ' active' : ''}`}
+            onClick={toggleMeasureTool}
+            aria-label={measureArmed ? 'Cancel measure tool' : 'Measure tool'}
+            aria-pressed={measureArmed}
+            title={measureArmed ? 'Tap two points on the chart (cancel)' : 'Measure — tap two points on the chart'}
+          >
+            <Icon name="straighten" size="sm" label={measureArmed ? 'Cancel measure' : 'Measure'} />
+          </button>
+        )}
+      </div>
     </div>
   );
 });

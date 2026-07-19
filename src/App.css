@@ -381,10 +381,39 @@ body::before {
   transition: opacity .15s ease;
 }
 
-.tv-advanced-chart {
-  height: 100%;
-  width: 100%;
-  transition: opacity .15s ease;
+.tv-advanced-chart.tv-chart-measure-armed,
+.tv-advanced-chart.tv-chart-measure-active {
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.tv-measure-btn {
+  position: absolute;
+  left: 10px;
+  bottom: 36px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  background: var(--bg2);
+  color: var(--text2);
+  cursor: pointer;
+}
+
+.tv-measure-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tv-measure-btn.active {
+  border-color: var(--accent);
+  background: var(--accent-subtle-bg);
+  color: var(--accent);
 }
 
 .quote-bar {
