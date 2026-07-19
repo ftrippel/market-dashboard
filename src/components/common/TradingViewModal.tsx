@@ -91,6 +91,7 @@ export function TradingViewModal() {
     <div
       id="tv-modal"
       className="tv-modal open"
+      data-scroll-lock-overlay
       onClick={(event) => {
         if (event.target === event.currentTarget) closeChart();
       }}

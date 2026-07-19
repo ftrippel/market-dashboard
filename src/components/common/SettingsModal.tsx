@@ -48,6 +48,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
   return createPortal(
     <div
       className="tv-modal open"
+      data-scroll-lock-overlay
       onClick={(event) => {
         if (event.target === event.currentTarget) close();
       }}

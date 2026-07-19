@@ -101,6 +101,7 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
           <CardSearchContext.Provider value={{ searchQuery, setSearchQuery }}>
             <div
               className="table-flyover open"
+              data-scroll-lock-overlay
               role="presentation"
               onClick={(event) => {
                 if (event.target === event.currentTarget) close();

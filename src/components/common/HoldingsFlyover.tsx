@@ -68,6 +68,7 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
   return createPortal(
     <div
       className="table-flyover open"
+      data-scroll-lock-overlay
       role="presentation"
       onClick={(event) => {
         if (event.target === event.currentTarget) close();

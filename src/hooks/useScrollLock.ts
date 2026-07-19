@@ -1,9 +1,12 @@
 import { useEffect } from 'react';
 
+/** Freeze #root (not body) so portaled `position: fixed` overlays stay viewport-relative on iOS. */
 const SCROLL_LOCK_TARGET_ID = 'root';
 
-const SCROLLABLE_SELECTOR =
-  '[data-scroll-lock-scrollable], .table-flyover-body, .table-scroll';
+/** Full-screen overlays portaled to `document.body` must set this attribute. */
+const OVERLAY_SELECTOR = '[data-scroll-lock-overlay]';
+
+const SCROLLABLE_SELECTOR = '.table-flyover-body, .table-scroll';
 
 const SCROLL_KEYS = new Set([
   'ArrowUp',
@@ -38,7 +41,7 @@ function isInsideScrollable(target: EventTarget | null): boolean {
 }
 
 function hasOpenOverlay(): boolean {
-  return document.querySelector('.tv-modal.open, .table-flyover.open') !== null;
+  return document.querySelector(OVERLAY_SELECTOR) !== null;
 }
 
 function preventWheel(event: WheelEvent): void {
@@ -99,7 +102,7 @@ function restoreScrollPosition(scrollY: number): void {
   html.style.scrollBehavior = previousScrollBehavior;
 }
 
-function lockBodyScroll(): void {
+function lockPageScroll(): void {
   if (lockCount === 0) {
     const html = document.documentElement;
     const { body } = document;
@@ -137,7 +140,7 @@ function lockBodyScroll(): void {
   lockCount += 1;
 }
 
-function unlockBodyScroll(): void {
+function unlockPageScroll(): void {
   if (lockCount <= 0) return;
   lockCount -= 1;
   if (lockCount > 0) return;
@@ -164,11 +167,14 @@ function unlockBodyScroll(): void {
   restoreScrollPosition(scrollY);
 }
 
-/** Lock page scroll while overlays/modals are open (ref-counted for nested overlays). */
+/**
+ * Lock page scroll while overlays are open (ref-counted for nested overlays).
+ * Overlays must be portaled to `document.body` and marked with `data-scroll-lock-overlay`.
+ */
 export function useScrollLock(enabled: boolean): void {
   useEffect(() => {
     if (!enabled) return;
-    lockBodyScroll();
-    return () => unlockBodyScroll();
+    lockPageScroll();
+    return () => unlockPageScroll();
   }, [enabled]);
 }
