@@ -6,6 +6,7 @@ import { CardSearchContext } from './CardSearchContext';
 import { Icon } from './Icon';
 import { MarketTable } from './MarketTable';
 import { useChartModal } from '../../context/ChartModalContext';
+import { useSymbolPreview } from '../../context/SymbolPreviewContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { colors } from '../../utils/formatting';
 import { dismissOverlay } from '../../utils/focus';
@@ -35,10 +36,12 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
   const titleId = useId();
   const canExpand = data.length > previewCount;
   const { chart } = useChartModal();
+  const { hidePreview } = useSymbolPreview();
 
   const close = useCallback(() => {
+    hidePreview();
     dismissOverlay(() => setOpen(false));
-  }, []);
+  }, [hidePreview]);
 
   useScrollLock(open);
 

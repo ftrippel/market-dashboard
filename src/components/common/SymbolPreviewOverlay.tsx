@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useSymbolPreview } from '../../context/SymbolPreviewContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useSettings } from '../../context/SettingsContext';
@@ -82,7 +83,7 @@ export function SymbolPreviewOverlay() {
 
   if (!preview.open) return null;
 
-  return (
+  return createPortal(
     <div
       ref={overlayRef}
       className="tv-preview-overlay"
@@ -110,6 +111,7 @@ export function SymbolPreviewOverlay() {
       <div className="tv-preview-footer">
 
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

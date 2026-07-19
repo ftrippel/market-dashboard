@@ -4,6 +4,7 @@ import type { Holding } from '../../types';
 import { Icon } from './Icon';
 import { CardCopyButton } from './Card';
 import { useChartModal } from '../../context/ChartModalContext';
+import { useSymbolPreview } from '../../context/SymbolPreviewContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { dismissOverlay } from '../../utils/focus';
 import { stripExchangeSuffix } from '../../utils/symbols';
@@ -40,11 +41,13 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
 }) => {
   const titleId = useId();
   const { chart } = useChartModal();
+  const { hidePreview } = useSymbolPreview();
   const siblings = holdings.map((h) => ({ sym: h.s, name: h.n }));
 
   const close = useCallback(() => {
+    hidePreview();
     dismissOverlay(onClose);
-  }, [onClose]);
+  }, [hidePreview, onClose]);
 
   useScrollLock(true);
 
