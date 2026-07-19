@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { buildYahooFinanceQuoteUrl, toYahooFinanceSymbol } from '../../services/api';
 import { buildTradingViewChartUrl, toTradingViewSymbol } from '../../utils/tradingView';
 import { blurActiveElement } from '../../utils/focus';
+import { useOverlayDismiss } from '../../utils/overlayStack';
 import { usePenCompatibleClick, usePenPointerUp } from '../../utils/penClick';
 import { Icon } from './Icon';
 
@@ -22,6 +23,10 @@ export function ChartOpenMenu({ rawSym, onOpenChange }: ChartOpenMenuProps) {
     setOpen(next);
     onOpenChange?.(next);
   };
+
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+
+  useOverlayDismiss(open, closeMenu);
 
   useEffect(() => {
     setOpen(false);
@@ -62,17 +67,9 @@ export function ChartOpenMenu({ rawSym, onOpenChange }: ChartOpenMenuProps) {
       }
     };
 
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setMenuOpen(false);
-      }
-    };
-
     document.addEventListener('pointerdown', onPointerDown);
-    window.addEventListener('keydown', onKeyDown);
     return () => {
       document.removeEventListener('pointerdown', onPointerDown);
-      window.removeEventListener('keydown', onKeyDown);
     };
   }, [open]);
 
@@ -94,7 +91,6 @@ export function ChartOpenMenu({ rawSym, onOpenChange }: ChartOpenMenuProps) {
 
   const tvPenUp = usePenPointerUp(openTvLink);
   const yahooPenUp = usePenPointerUp(openYahooLink);
-  const closeMenu = useCallback(() => setMenuOpen(false), []);
 
   return (
     <div ref={rootRef} className="chart-open-menu">

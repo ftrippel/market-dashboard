@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useScrollLock } from '../hooks/useScrollLock';
 import { blurActiveElement, isTypingTarget } from '../utils/focus';
+import { useOverlayDismiss } from '../utils/overlayStack';
 import { toTradingViewSymbol } from '../utils/tradingView';
 
 interface SiblingSymbol {
@@ -80,6 +81,8 @@ export function ChartModalProvider({ children }: { children: ReactNode }) {
     setChart(closedState);
   }, []);
 
+  useOverlayDismiss(chart.open, closeChart);
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'c' && event.key !== 'C') return;
@@ -100,11 +103,6 @@ export function ChartModalProvider({ children }: { children: ReactNode }) {
     if (!chart.open) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        closeChart();
-        return;
-      }
-
       if (!chart.siblings || chart.siblings.length <= 1) return;
 
       const currentIndex = chart.siblings.findIndex((s) => s.sym === chart.rawSym);
@@ -128,7 +126,7 @@ export function ChartModalProvider({ children }: { children: ReactNode }) {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [chart.open, chart.siblings, chart.rawSym, openChart, closeChart]);
+  }, [chart.open, chart.siblings, chart.rawSym, openChart]);
 
   const value = useMemo(
     () => ({ chart, openChart, openFreeChart, setChartSymbol, closeChart }),

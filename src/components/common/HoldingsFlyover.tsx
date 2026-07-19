@@ -1,13 +1,13 @@
-import React, { useCallback, useEffect, useId } from 'react';
+import React, { useCallback, useId } from 'react';
 import { createPortal } from 'react-dom';
 import { colors } from '../../utils/formatting';
 import type { Holding } from '../../types';
 import { Icon } from './Icon';
 import { CardCopyButton } from './Card';
-import { useChartModal } from '../../context/ChartModalContext';
 import { useSymbolPreview } from '../../context/SymbolPreviewContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { dismissOverlay } from '../../utils/focus';
+import { useOverlayDismiss } from '../../utils/overlayStack';
 import { usePenBackdropDismiss, usePenCompatibleClick } from '../../utils/penClick';
 import { stripExchangeSuffix } from '../../utils/symbols';
 import { SymbolLink } from './TradingViewModal';
@@ -42,7 +42,6 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
   onClose,
 }) => {
   const titleId = useId();
-  const { chart } = useChartModal();
   const { hidePreview } = useSymbolPreview();
   const siblings = holdings.map((h) => ({ sym: h.s, name: h.n }));
 
@@ -52,17 +51,7 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
   }, [hidePreview, onClose]);
 
   useScrollLock(true);
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        if (chart.open) return;
-        close();
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [close, chart.open]);
+  useOverlayDismiss(true, close);
 
   const totalWeight = holdings.reduce((sum, holding) => sum + holding.w, 0);
   const closePenClick = usePenCompatibleClick(close);

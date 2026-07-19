@@ -1,8 +1,9 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useSettings, type HoverPreviewPlacement } from '../../context/SettingsContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { dismissOverlay } from '../../utils/focus';
+import { useOverlayDismiss } from '../../utils/overlayStack';
 import { usePenBackdropDismiss, usePenCheckboxToggle, usePenCompatibleClick, usePenSelectActivate } from '../../utils/penClick';
 import { Icon } from './Icon';
 
@@ -29,27 +30,14 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     dismissOverlay(onClose);
   }, [onClose]);
 
+  useOverlayDismiss(open, close);
+
   const closePenClick = usePenCompatibleClick(close);
   const backdropPenDismiss = usePenBackdropDismiss(close);
   const hoverPreviewPenToggle = usePenCheckboxToggle(setEnableHoverPreview);
   const customChartsPenToggle = usePenCheckboxToggle(setUseCustomCharts);
   const hoverPlacementPenActivate = usePenSelectActivate();
   const sparklineModePenActivate = usePenSelectActivate();
-
-  useEffect(() => {
-    if (!open) return;
-
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        close();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [open, close]);
 
   if (!open) return null;
 

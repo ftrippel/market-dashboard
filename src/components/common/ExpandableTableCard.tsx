@@ -5,11 +5,11 @@ import { Card, CardCopyButton } from './Card';
 import { CardSearchContext } from './CardSearchContext';
 import { Icon } from './Icon';
 import { MarketTable } from './MarketTable';
-import { useChartModal } from '../../context/ChartModalContext';
 import { useSymbolPreview } from '../../context/SymbolPreviewContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { colors } from '../../utils/formatting';
 import { dismissOverlay } from '../../utils/focus';
+import { useOverlayDismiss } from '../../utils/overlayStack';
 import { usePenBackdropDismiss, usePenCompatibleClick } from '../../utils/penClick';
 
 interface ExpandableTableCardProps {
@@ -36,13 +36,17 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const titleId = useId();
   const canExpand = data.length > previewCount;
-  const { chart } = useChartModal();
   const { hidePreview } = useSymbolPreview();
 
   const close = useCallback(() => {
     hidePreview();
     dismissOverlay(() => setOpen(false));
   }, [hidePreview]);
+
+  const closeSearch = useCallback(() => {
+    setIsSearchOpen(false);
+    setSearchQuery('');
+  }, []);
 
   const closePenClick = usePenCompatibleClick(close);
   const toggleSearchPenClick = usePenCompatibleClick(() => {
@@ -55,19 +59,8 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
   const backdropPenDismiss = usePenBackdropDismiss(close);
 
   useScrollLock(open);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        if (chart.open) return;
-        close();
-      }
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [open, chart.open, close]);
+  useOverlayDismiss(open, close);
+  useOverlayDismiss(open && isSearchOpen, closeSearch);
 
   useEffect(() => {
     if (!open) {
@@ -75,14 +68,6 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
       setSearchQuery('');
     }
   }, [open]);
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      e.stopPropagation();
-      setIsSearchOpen(false);
-      setSearchQuery('');
-    }
-  };
 
   return (
     <>
@@ -131,7 +116,6 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
                         placeholder="Search..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        onKeyDown={handleKeyDown}
                         style={{
                           background: colors.bg,
                           border: `1px solid ${colors.border}`,

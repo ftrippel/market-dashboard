@@ -1,4 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { useOverlayDismiss } from '../utils/overlayStack';
 import { toTradingViewSymbol } from '../utils/tradingView';
 import { useSettings } from './SettingsContext';
 import { useChartModal } from './ChartModalContext';
@@ -128,6 +129,8 @@ export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (chart.open) hidePreview();
   }, [chart.open, hidePreview]);
+
+  useOverlayDismiss(preview.open, hidePreview);
 
   return (
     <SymbolPreviewContext.Provider
