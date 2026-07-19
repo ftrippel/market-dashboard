@@ -123,18 +123,18 @@ export const Header: React.FC<HeaderProps> = ({
           />
           <span>{liveEnabled ? 'LIVE ON' : 'LIVE'}</span>
         </button>
-        <button type="button" className="btn btn-x" onClick={onSnap}>
-          <Icon name="photo_camera" size="sm" />
-          SNAP
-        </button>
         <button
           type="button"
           className="btn btn-x"
           onClick={openFreeChart}
-          title="Open chart for any symbol"
+          title="Open chart for any symbol (C)"
         >
           <Icon name="show_chart" size="sm" />
           CHART
+        </button>
+        <button type="button" className="btn btn-x" onClick={onSnap}>
+          <Icon name="photo_camera" size="sm" />
+          SNAP
         </button>
         <button
           type="button"

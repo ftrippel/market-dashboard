@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useScrollLock } from '../hooks/useScrollLock';
-import { blurActiveElement } from '../utils/focus';
+import { blurActiveElement, isTypingTarget } from '../utils/focus';
 import { toTradingViewSymbol } from '../utils/tradingView';
 
 interface SiblingSymbol {
@@ -79,6 +79,22 @@ export function ChartModalProvider({ children }: { children: ReactNode }) {
     blurActiveElement();
     setChart(closedState);
   }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'c' && event.key !== 'C') return;
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+      if (event.repeat) return;
+      if (isTypingTarget()) return;
+      if (chart.open) return;
+
+      event.preventDefault();
+      openFreeChart();
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [chart.open, openFreeChart]);
 
   useEffect(() => {
     if (!chart.open) return;
