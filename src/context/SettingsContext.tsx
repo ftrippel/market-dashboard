@@ -27,7 +27,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const [hoverPreviewPlacement, setHoverPreviewPlacementState] = useState<HoverPreviewPlacement>(() => {
     const stored = localStorage.getItem('hoverPreviewPlacement') as HoverPreviewPlacement | null;
     if (stored === 'above-below' || stored === 'left-right') return stored;
-    return 'above-below';
+    return config.tradingView.hoverPreviewPlacement;
   });
 
   const [sparklineMode, setSparklineModeState] = useState<SparklineMode>(() => {

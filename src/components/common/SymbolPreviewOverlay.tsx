@@ -48,7 +48,7 @@ export function SymbolPreviewOverlay() {
       left = Math.max(10, Math.min(left, window.innerWidth - overlayWidth - 10));
       origin = placeLeft ? 'center right' : 'center left';
     } else {
-      // above-below (default)
+      // above-below
       // Calculate horizontal center
       const linkCenter = rect.left + rect.width / 2;
       left = linkCenter - overlayWidth / 2;
