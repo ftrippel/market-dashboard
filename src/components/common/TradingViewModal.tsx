@@ -10,7 +10,7 @@ import { Icon } from './Icon';
 import { TradingViewAdvancedChart } from './TradingViewAdvancedChart';
 import { TradingViewCustomChart } from './TradingViewCustomChart';
 import { ChartOpenMenu } from './ChartOpenMenu';
-import { usePenBackdropDismiss, usePenCompatibleClick } from '../../utils/penClick';
+import { usePenCompatibleClick } from '../../utils/penClick';
 import { toYahooFinanceSymbol } from '../../services/api';
 
 export function TradingViewModal() {
@@ -66,7 +66,6 @@ export function TradingViewModal() {
   }, [setChartSymbol, symbolInput]);
 
   const closePenClick = usePenCompatibleClick(() => closeChart());
-  const backdropPenDismiss = usePenBackdropDismiss(closeChart);
   const prevPenClick = usePenCompatibleClick(handlePrev);
   const nextPenClick = usePenCompatibleClick(handleNext);
   const loadPenClick = usePenCompatibleClick(() => submitSymbol());
@@ -84,7 +83,6 @@ export function TradingViewModal() {
       id="tv-modal"
       className="tv-modal open"
       data-scroll-lock-overlay
-      {...backdropPenDismiss}
     >
       <div id="tv-modal-box">
         <div id="tv-modal-hdr">

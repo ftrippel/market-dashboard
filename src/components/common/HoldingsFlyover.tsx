@@ -8,7 +8,7 @@ import { useSymbolPreview } from '../../context/SymbolPreviewContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { dismissOverlay } from '../../utils/focus';
 import { useOverlayDismiss } from '../../utils/overlayStack';
-import { usePenBackdropDismiss, usePenCompatibleClick } from '../../utils/penClick';
+import { usePenCompatibleClick } from '../../utils/penClick';
 import { stripExchangeSuffix } from '../../utils/symbols';
 import { SymbolLink } from './TradingViewModal';
 
@@ -55,14 +55,12 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
 
   const totalWeight = holdings.reduce((sum, holding) => sum + holding.w, 0);
   const closePenClick = usePenCompatibleClick(close);
-  const backdropPenDismiss = usePenBackdropDismiss(close);
 
   return createPortal(
     <div
       className="table-flyover open"
       data-scroll-lock-overlay
       role="presentation"
-      {...backdropPenDismiss}
     >
       <div
         className="table-flyover-box table-flyover-box--holdings"

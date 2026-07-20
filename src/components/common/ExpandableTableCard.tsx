@@ -10,7 +10,7 @@ import { useScrollLock } from '../../hooks/useScrollLock';
 import { colors } from '../../utils/formatting';
 import { dismissOverlay } from '../../utils/focus';
 import { useOverlayDismiss } from '../../utils/overlayStack';
-import { usePenBackdropDismiss, usePenCompatibleClick } from '../../utils/penClick';
+import { usePenCompatibleClick } from '../../utils/penClick';
 
 interface ExpandableTableCardProps {
   label: React.ReactNode;
@@ -56,7 +56,6 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
     });
   });
   const expandPenClick = usePenCompatibleClick(() => setOpen(true));
-  const backdropPenDismiss = usePenBackdropDismiss(close);
 
   useScrollLock(open);
   useOverlayDismiss(open, close);
@@ -99,7 +98,6 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
               className="table-flyover open"
               data-scroll-lock-overlay
               role="presentation"
-              {...backdropPenDismiss}
             >
               <div
                 className="table-flyover-box"

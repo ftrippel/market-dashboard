@@ -4,7 +4,7 @@ import { useSettings, type HoverPreviewPlacement } from '../../context/SettingsC
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { dismissOverlay } from '../../utils/focus';
 import { useOverlayDismiss } from '../../utils/overlayStack';
-import { usePenBackdropDismiss, usePenCheckboxToggle, usePenCompatibleClick, usePenSelectActivate } from '../../utils/penClick';
+import { usePenCheckboxToggle, usePenCompatibleClick, usePenSelectActivate } from '../../utils/penClick';
 import { Icon } from './Icon';
 
 interface SettingsModalProps {
@@ -33,7 +33,6 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
   useOverlayDismiss(open, close);
 
   const closePenClick = usePenCompatibleClick(close);
-  const backdropPenDismiss = usePenBackdropDismiss(close);
   const hoverPreviewPenToggle = usePenCheckboxToggle(setEnableHoverPreview);
   const customChartsPenToggle = usePenCheckboxToggle(setUseCustomCharts);
   const hoverPlacementPenActivate = usePenSelectActivate();
@@ -45,7 +44,6 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     <div
       className="tv-modal open"
       data-scroll-lock-overlay
-      {...backdropPenDismiss}
       style={{ zIndex: 10100 }}
     >
       <div
