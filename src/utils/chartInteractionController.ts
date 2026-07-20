@@ -11,6 +11,17 @@ export interface CrosshairInfo {
   changePct: number | null;
 }
 
+export function buildLastTradeCrosshairInfo(data: DailyOhlcPoint[]): CrosshairInfo | null {
+  const last = data.at(-1);
+  if (!last) return null;
+
+  const prevClose = data.at(-2)?.close ?? null;
+  const changePct =
+    prevClose !== null && prevClose !== 0 ? ((last.close - prevClose) / prevClose) * 100 : null;
+
+  return { date: last.time, close: last.close, changePct };
+}
+
 /** Long-press duration before the crosshair pins on touch. */
 const TOUCH_CROSSHAIR_LONG_PRESS_MS = 450;
 /** Movement beyond this cancels long-press and starts panning instead. */

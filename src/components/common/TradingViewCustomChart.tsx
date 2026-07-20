@@ -1,9 +1,10 @@
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isYieldSymbol } from '../../data/symbolMaps';
 import { createChart, ColorType, CandlestickSeries, LineSeries, CrosshairMode } from 'lightweight-charts';
 import { fetchYahooFinanceOhlcHistory, type DailyOhlcPoint } from '../../services/api';
 import { buildIndicatorSeries, calculateEMA, calculateSMA } from '../../utils/chartIndicators';
 import {
+  buildLastTradeCrosshairInfo,
   createChartInteractionController,
   type ChartInteractionUi,
   type CrosshairInfo,
@@ -194,6 +195,11 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
   }, [data, theme, onReady]);
 
   const isMeasuring = interactionUi?.mode === 'measuring';
+  const lastTradeInfo = useMemo(
+    () => (data ? buildLastTradeCrosshairInfo(data) : null),
+    [data],
+  );
+  const displayInfo = crosshairInfo ?? lastTradeInfo;
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', display: 'flex', flexDirection: 'column' }}>
@@ -234,7 +240,7 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
             <Icon name="straighten" size="sm" label={isMeasuring ? 'Cancel measure' : 'Measure'} />
           </button>
         )}
-        {crosshairInfo && (
+        {displayInfo && (
           <span
             style={{
               marginLeft: 'auto',
@@ -245,24 +251,24 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
               whiteSpace: 'nowrap',
             }}
           >
-            <span style={{ color: theme === 'dark' ? '#e6edf3' : '#131722' }}>{crosshairInfo.date}</span>
+            <span style={{ color: theme === 'dark' ? '#e6edf3' : '#131722' }}>{displayInfo.date}</span>
             <span style={{ color: theme === 'dark' ? '#9aa5b4' : '#686d78' }}>
-              {crosshairInfo.close.toFixed(priceDecimals)}
+              {displayInfo.close.toFixed(priceDecimals)}
             </span>
             <span
               style={{
                 color:
-                  crosshairInfo.changePct === null
+                  displayInfo.changePct === null
                     ? colors.text3
-                    : crosshairInfo.changePct > 0
+                    : displayInfo.changePct > 0
                       ? colors.green
-                      : crosshairInfo.changePct < 0
+                      : displayInfo.changePct < 0
                         ? colors.red
                         : colors.text3,
                 fontWeight: 600,
               }}
             >
-              {formatCrosshairChange(crosshairInfo.changePct)}
+              {formatCrosshairChange(displayInfo.changePct)}
             </span>
           </span>
         )}
