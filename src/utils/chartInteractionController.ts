@@ -1,5 +1,5 @@
 import { CrosshairMode, type IChartApi, type ISeriesApi, type MouseEventParams } from 'lightweight-charts';
-import type { DailyOhlcPoint } from '../services/api';
+import type { DailyHistoryPoint, DailyOhlcPoint } from '../services/api';
 import { blurActiveElement } from './focus';
 import { createMeasureAnchor, type MeasureToolPrimitive } from './measureToolPrimitive';
 
@@ -20,6 +20,23 @@ export function buildLastTradeCrosshairInfo(data: DailyOhlcPoint[]): CrosshairIn
     prevClose !== null && prevClose !== 0 ? ((last.close - prevClose) / prevClose) * 100 : null;
 
   return { date: last.time, close: last.close, changePct };
+}
+
+export function buildLastTradeCrosshairInfoFromHistory(data: DailyHistoryPoint[]): CrosshairInfo | null {
+  const last = data.at(-1);
+  if (!last) return null;
+
+  const prevValue = data.at(-2)?.value ?? null;
+  const changePct =
+    prevValue !== null && prevValue !== 0 ? ((last.value - prevValue) / prevValue) * 100 : null;
+
+  return { date: last.time, close: last.value, changePct };
+}
+
+export function formatCrosshairChange(changePct: number | null): string {
+  if (changePct === null) return '—';
+  const sign = changePct > 0 ? '+' : '';
+  return `${sign}${changePct.toFixed(2)}%`;
 }
 
 /** Long-press duration before the crosshair pins on touch. */

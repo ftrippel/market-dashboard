@@ -6,6 +6,7 @@ import { buildIndicatorSeries, calculateEMA, calculateSMA } from '../../utils/ch
 import {
   buildLastTradeCrosshairInfo,
   createChartInteractionController,
+  formatCrosshairChange,
   type ChartInteractionUi,
   type CrosshairInfo,
 } from '../../utils/chartInteractionController';
@@ -30,12 +31,6 @@ const INDICATORS = [
 const DEFAULT_VISIBLE_BARS = 126;
 /** Empty bars to the right of the latest candle. */
 const RIGHT_OFFSET_BARS = 12;
-
-function formatCrosshairChange(changePct: number | null): string {
-  if (changePct === null) return '—';
-  const sign = changePct > 0 ? '+' : '';
-  return `${sign}${changePct.toFixed(2)}%`;
-}
 
 export const TradingViewCustomChart = memo(function TradingViewCustomChart({
   symbol,
