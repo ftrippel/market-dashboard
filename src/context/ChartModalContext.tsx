@@ -103,16 +103,30 @@ export function ChartModalProvider({ children }: { children: ReactNode }) {
     if (!chart.open) return;
 
     const onKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+      if (isTypingTarget()) return;
+      if (chart.freeSymbol) return;
       if (!chart.siblings || chart.siblings.length <= 1) return;
 
       const currentIndex = chart.siblings.findIndex((s) => s.sym === chart.rawSym);
       if (currentIndex === -1) return;
 
       let nextIndex = currentIndex;
-      if (event.key === 'ArrowRight' || event.key === 'ArrowDown') {
+      const isNext =
+        event.key === 'ArrowRight' ||
+        event.key === 'ArrowDown' ||
+        event.key === 'n' ||
+        event.key === 'N';
+      const isPrev =
+        event.key === 'ArrowLeft' ||
+        event.key === 'ArrowUp' ||
+        event.key === 'p' ||
+        event.key === 'P';
+
+      if (isNext) {
         if (currentIndex >= chart.siblings.length - 1) return;
         nextIndex = currentIndex + 1;
-      } else if (event.key === 'ArrowLeft' || event.key === 'ArrowUp') {
+      } else if (isPrev) {
         if (currentIndex <= 0) return;
         nextIndex = currentIndex - 1;
       } else {
@@ -126,7 +140,7 @@ export function ChartModalProvider({ children }: { children: ReactNode }) {
 
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [chart.open, chart.siblings, chart.rawSym, openChart]);
+  }, [chart.open, chart.freeSymbol, chart.siblings, chart.rawSym, openChart]);
 
   const value = useMemo(
     () => ({ chart, openChart, openFreeChart, setChartSymbol, closeChart }),
