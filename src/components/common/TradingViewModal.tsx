@@ -10,8 +10,8 @@ import { Icon } from './Icon';
 import { TradingViewAdvancedChart } from './TradingViewAdvancedChart';
 import { TradingViewCustomChart } from './TradingViewCustomChart';
 import { ChartOpenMenu } from './ChartOpenMenu';
+import { getSymbolMeta } from '../../data/symbolMaps';
 import { usePenCompatibleClick } from '../../utils/penClick';
-import { toYahooFinanceSymbol } from '../../services/api';
 
 export function TradingViewModal() {
   const { chart, openChart, closeChart, setChartSymbol } = useChartModal();
@@ -74,7 +74,7 @@ export function TradingViewModal() {
 
   const displaySym = hasSymbol
     ? useCustomCharts
-      ? toYahooFinanceSymbol(chart.rawSym)
+      ? getSymbolMeta(chart.rawSym).sym
       : chart.tvSym
     : '';
 

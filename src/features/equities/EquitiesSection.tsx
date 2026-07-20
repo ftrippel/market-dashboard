@@ -63,7 +63,7 @@ export function EquitiesSection() {
 
       <ExpandableTableCard
         label={<CardLabel>Thematic ETFs</CardLabel>}
-        expandTitle={`All Thematic Sectors (${store.thematic.length})`}
+        expandTitle={`Thematic ETFs (${store.thematic.length})`}
         data={store.thematic}
         holdings={store.holdings}
         style={{ marginBottom: '9px' }}
@@ -78,7 +78,7 @@ export function EquitiesSection() {
 
       <ExpandableTableCard
         label={<CardLabel>Country ETFs</CardLabel>}
-        expandTitle={`All Country ETFs (${store.country.length})`}
+        expandTitle={`Country ETFs (${store.country.length})`}
         data={store.country}
         holdings={store.holdings}
         tableProps={{
