@@ -1,0 +1,198 @@
+Name, DisplaySym, Yahoo Symbol, TradingView Symbol, TradingView Symbol Potential
+10-Year Treasury, US10Y, ^TNX, NASDAQ:IEF, TVC:US10Y
+2-Year Treasury, US02Y, US2Y, NASDAQ:SHY, TVC:US02Y
+30-Year Treasury, US30Y, ^TYX, NASDAQ:TLT, TVC:US30Y
+AdvisorShares US Cannabis, MSOS, MSOS, , MSOS
+ALPS Clean Energy, ACES, ACES, , ACES
+Aluminum, ALI1!, ALI1!, AMEX:JJU, COMEX:ALI1!
+Amplify Blockchain Tech, BLOK, BLOK, , BLOK
+Amplify Online Retail, IBUY, IBUY, , IBUY
+Argentina, ARGT, ARGT, , ARGT
+ARK Genomic Revolution, ARKG, ARKG, , ARKG
+ARK Innovation, ARKK, ARKK, , ARKK
+Australia, EWA, EWA, , EWA
+Austria, EWO, EWO, , EWO
+Belgium, EWK, EWK, , EWK
+Brazil, EWZ, EWZ, , EWZ
+, BTC, BTC-USD, COINBASE:BTCUSD, COINBASE:BTCUSD
+CAC 40, CAC, ^FCHI, OANDA:FR40EUR, TVC:CAC40
+Canada, EWC, EWC, , EWC
+CBOE VIX, CBOE:VIX, ^VIX, VIX, TVC:VIX
+Chile, ECH, ECH, , ECH
+China, MCHI, MCHI, , MCHI
+China S&P ETF, GXC, GXC, , GXC
+CoinShares BTC & Ether, BTF, BTF, , BTF
+CoinShares Crypto Miners, WGMI, WGMI, , WGMI
+Comm Svcs EW, RSPC, RSPC, , RSPC
+Comm. Services, XLC, XLC, , XLC
+Cons Discr EW, RSPD, RSPD, , RSPD
+Cons Staples EW, RSPS, RSPS, , RSPS
+Consumer Discret., XLY, XLY, , XLY
+Consumer Staples, XLP, XLP, , XLP
+Copper, HG1!, HG=F, CAPITALCOM:COPPER, COMEX:HG1!
+Core MSCI Europe, IEUR, IEUR, , IEUR
+CSI 300, CSI300, 000300.SS, SZSE:399300, SZSE:399300
+DAX, DAX, ^GDAXI, OANDA:DE30EUR, TVC:DAX
+Defiance Quantum, QTUM, QTUM, , QTUM
+Dow Jones Futures, YM1!, YM=F, OANDA:US30USD, CBOT:YM1!
+Emerging Markets, EEM, EEM, , EEM
+Energy, XLE, XLE, , XLE
+Energy EW, RSPG, RSPG, , RSPG
+ETFMG Prime Cybersecurity, HACK, HACK, , HACK
+, ETH, ETH-USD, COINBASE:ETHUSD, COINBASE:ETHUSD
+Europe, IEV, IEV, , IEV
+Europe Financials, EUFN, EUFN, , EUFN
+Eurozone, EZU, EZU, , EZU
+Financials, XLF, XLF, , XLF
+Financials EW, RSPF, RSPF, , RSPF
+First Trust Cloud Computing, SKYY, SKYY, , SKYY
+First Trust Cybersecurity, CIBR, CIBR, , CIBR
+First Trust DJ Internet, FDN, FDN, , FDN
+France, EWQ, EWQ, , EWQ
+FTSE 100, UKX, ^FTSE, OANDA:UK100GBP, TVC:UKX
+Germany, EWG, EWG, , EWG
+Global X AI & Robotics, BOTZ, BOTZ, , BOTZ
+Global X AI & Technology, AIQ, AIQ, , AIQ
+Global X Autonomous & EV, DRIV, DRIV, , DRIV
+Global X Cloud Computing, CLOU, CLOU, , CLOU
+Global X Copper Miners, COPX, COPX, , COPX
+Global X FinTech, FINX, FINX, , FINX
+Global X Lithium & Battery, LIT, LIT, , LIT
+Global X U.S. Infrastructure, PAVE, PAVE, , PAVE
+Global X Uranium, URA, URA, , URA
+Global X Video Games & Esports, HERO, HERO, , HERO
+Gold, GC1!, GC=F, OANDA:XAUUSD, COMEX:GC1!
+Greece, GREK, GREK, , GREK
+Hang Seng, HSI, ^HSI, FXOPEN:HSI, TVC:HSI
+Health Care, XLV, XLV, , XLV
+Health Care EW, RSPH, RSPH, , RSPH
+Hong Kong, EWH, EWH, , EWH
+India, INDA, INDA, , INDA
+Indonesia, EIDO, EIDO, , EIDO
+Industrials, XLI, XLI, , XLI
+Industrials EW, RSPN, RSPN, , RSPN
+Innovator IBD 50, FFTY, FFTY, , FFTY
+Innovator IBD Breakout, BOUT, BOUT, , BOUT
+Invesco DB Agriculture, DBA, DBA, , DBA
+Invesco DB Commodity, DBC, DBC, , DBC
+Invesco DB USD Bullish, UUP, UUP, , UUP
+Invesco QQQ, QQQ, QQQ, , QQQ
+Invesco Solar, TAN, TAN, , TAN
+Invesco Water Resources, PHO, PHO, , PHO
+Invesco WilderHill Clean E, PBW, PBW, , PBW
+iSh Aerospace & Defense, ITA, ITA, , ITA
+iSh Global Clean Energy, ICLN, ICLN, , ICLN
+iSh S&P 400 MidCap Growth, IJK, IJK, , IJK
+iSh S&P 400 MidCap Value, IJJ, IJJ, , IJJ
+iSh S&P 500 Growth, IVW, IVW, , IVW
+iSh S&P 500 Value, IVE, IVE, , IVE
+iSh S&P 600 SmCap Growth, IJT, IJT, , IJT
+iSh S&P 600 SmCap Value, IJS, IJS, , IJS
+iSh Semiconductor, SOXX, SOXX, , SOXX
+iShares 0-1 Yr Treasury, SHV, SHV, , SHV
+iShares 20+ Yr Treasury, TLT, TLT, , TLT
+iShares 3-7 Yr Treasury, IEI, IEI, , IEI
+iShares 7-10 Yr Treasury, IEF, IEF, , IEF
+iShares China Large Cap, FXI, FXI, , FXI
+iShares Core US Agg Bond, AGG, AGG, , AGG
+iShares Expanded Tech-SW, IGV, IGV, , IGV
+iShares Genomics Immuno, IDNA, IDNA, , IDNA
+iShares Global Energy, IXC, IXC, , IXC
+iShares HY Corporate Bond, HYG, HYG, , HYG
+iShares IG Corporate Bond, LQD, LQD, , LQD
+iShares Russell 2000, IWM, IWM, , IWM
+iShares Russell 2000 Gr, IWO, IWO, , IWO
+iShares Self-Driving EV, IDRV, IDRV, , IDRV
+iShares Silver, SLV, SLV, , SLV
+iShares US Broker-Dealers, IAI, IAI, , IAI
+iShares US Home Const, ITB, ITB, , ITB
+iShares US Medical Devices, IHI, IHI, , IHI
+iShares US Real Estate, IYR, IYR, , IYR
+iShares US Transportation, IYT, IYT, , IYT
+Italy, EWI, EWI, , EWI
+Japan, EWJ, EWJ, , EWJ
+KOSPI, KOSPI, ^KS11, AMEX:EWY, TVC:KOSPI
+KraneShares China Internet, KWEB, KWEB, , KWEB
+Malaysia, EWM, EWM, , EWM
+Materials, XLB, XLB, , XLB
+Materials EW, RSPM, RSPM, , RSPM
+Mexico, EWW, EWW, , EWW
+MSCI ACWI, ACWI, ACWI, , ACWI
+MSCI EAFE, EFA, EFA, , EFA
+Nasdaq Futures, NQ1!, NQ=F, OANDA:NAS100USD, CME:NQ1!
+Natural Gas, NG1!, NG=F, OANDA:NATGASUSD, NYMEX:NG1!
+Netherlands, EWN, EWN, , EWN
+Nifty 50, NIFTY, ^NSEI, AMEX:INDA, TVC:NIFTY
+Nikkei 225, N225, ^N225, OANDA:JP225USD, TVC:NI225
+Palladium, PA1!, PA=F, OANDA:XPDUSD, COMEX:PA1!
+Philippines, EPHE, EPHE, , EPHE
+Platinum, PL1!, PL=F, OANDA:XPTUSD, COMEX:PL1!
+Procure Space, UFO, UFO, , UFO
+Real Estate, XLRE, XLRE, , XLRE
+Real Estate EW, RSPR, RSPR, , RSPR
+Renaissance IPO, IPO, IPO, , IPO
+ROBO Global Robotics, ROBO, ROBO, , ROBO
+Russell 2000 Futures, RTY1!, RTY=F, OANDA:US2000USD, CME:RTY1!
+S&P 500 EW, RSP, RSP, , RSP
+S&P 500 Futures, ES1!, ES=F, OANDA:SPX500USD, CME:ES1!
+Saudi Arabia, KSA, KSA, , KSA
+Shanghai Comp., SHCOMP, 000001.SS, SSE:000001, SSE:000001
+Silver, SI1!, SI=F, OANDA:XAGUSD, COMEX:SI1!
+Singapore, EWS, EWS, , EWS
+, SOL, SOL-USD, COINBASE:SOLUSD, COINBASE:SOLUSD
+South Africa, EZA, EZA, , EZA
+South Korea, EWY, EWY, , EWY
+Spain, EWP, EWP, , EWP
+SPDR Biotech, XBI, XBI, , XBI
+SPDR Dow Jones, DIA, DIA, , DIA
+SPDR Gold, GLD, GLD, , GLD
+SPDR S&P 500, SPY, SPY, , SPY
+SPDR S&P Aero & Defense, XAR, XAR, , XAR
+SPDR S&P Bank, KBE, KBE, , KBE
+SPDR S&P Health Care Svcs, XHS, XHS, , XHS
+SPDR S&P Homebuilders, XHB, XHB, , XHB
+SPDR S&P Insurance, KIE, KIE, , KIE
+SPDR S&P Metals & Mining, XME, XME, , XME
+SPDR S&P NA Natural Res, NANR, NANR, , NANR
+SPDR S&P Oil & Gas E&P, XOP, XOP, , XOP
+SPDR S&P Regional Banking, KRE, KRE, , KRE
+SPDR S&P Retail, XRT, XRT, , XRT
+SPDR S&P Semiconductor, XSD, XSD, , XSD
+SPDR S&P Software & Svcs, XSW, XSW, , XSW
+Sprott Plat & Palladium, SPPP, SPPP, , SPPP
+Sweden, EWD, EWD, , EWD
+Switzerland, EWL, EWL, , EWL
+Taiwan, EWT, EWT, , EWT
+Technology, XLK, XLK, , XLK
+Technology EW, RSPT, RSPT, , RSPT
+Teucrium Wheat, WEAT, WEAT, , WEAT
+Thailand, THD, THD, , THD
+Turkey, TUR, TUR, , TUR
+United Kingdom, EWU, EWU, , EWU
+United States Natural Gas, UNG, UNG, , UNG
+United States Oil Fund, USO, USO, , USO
+US Dollar Index, DXY, DX-Y.NYB, CAPITALCOM:DXY, TVC:DXY
+US Global Jets, JETS, JETS, , JETS
+Utilities, XLU, XLU, , XLU
+Utilities EW, RSPU, RSPU, , RSPU
+VanEck Agribusiness, MOO, MOO, , MOO
+VanEck Biotech, BBH, BBH, , BBH
+VanEck EM Local Ccy Bond, EMLC, EMLC, , EMLC
+VanEck Gold Miners, GDX, GDX, , GDX
+VanEck Jr Gold Miners, GDXJ, GDXJ, , GDXJ
+VanEck Merk Gold, OUNZ, OUNZ, , OUNZ
+VanEck Oil Services, OIH, OIH, , OIH
+VanEck Pharmaceutical, PPH, PPH, , PPH
+VanEck Rare Earth Metals, REMX, REMX, , REMX
+VanEck Semiconductor, SMH, SMH, , SMH
+VanEck Social Sentiment, BUZZ, BUZZ, , BUZZ
+VanEck Uranium & Nuclear, NLR, NLR, , NLR
+VanEck Video Gaming & eSports, ESPO, ESPO, , ESPO
+Vanguard Growth, VUG, VUG, , VUG
+Vanguard Int Treasury, VGIT, VGIT, , VGIT
+Vanguard Mega Cap Growth, MGK, MGK, , MGK
+Vanguard Value, VTV, VTV, , VTV
+Vietnam, VNM, VNM, , VNM
+WTI Crude Oil, CL1!, CL=F, OANDA:WTICOUSD, NYMEX:CL1!
+, XRP, XRP-USD, COINBASE:XRPUSD, COINBASE:XRPUSD
+Xtrackers CSI 300 China, ASHR, ASHR, , ASHR
