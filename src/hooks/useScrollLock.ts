@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-/** Freeze #root (not body) so portaled `position: fixed` overlays stay viewport-relative on iOS. */
+/** Freeze #root (not body) so portaled overlays stay viewport-relative on iOS Safari — see device.ts. */
 const SCROLL_LOCK_TARGET_ID = 'root';
 
 /** Full-screen overlays portaled to `document.body` must set this attribute. */

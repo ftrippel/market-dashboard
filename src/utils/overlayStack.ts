@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { isCoarsePointerDevice } from './device';
 import { isTypingTarget } from './focus';
 
 type DismissHandler = () => void;
@@ -18,13 +19,9 @@ let keydownListening = false;
 let ignoringPopstateCount = 0;
 let mobileBackInitialized = false;
 
-function isMobileBackNavigation(): boolean {
-  return window.matchMedia('(hover: none) and (pointer: coarse)').matches;
-}
-
-/** Install the root history guard so the first back press can be intercepted on mobile. */
+/** Install the root history guard so the first back press can be intercepted on touch devices. */
 export function initMobileBackNavigation() {
-  if (!isMobileBackNavigation() || mobileBackInitialized) return;
+  if (!isCoarsePointerDevice() || mobileBackInitialized) return;
   mobileBackInitialized = true;
 
   if ('scrollRestoration' in history) {
@@ -91,7 +88,7 @@ function unregisterEntry(id: symbol) {
   stopKeydownListeningIfEmpty();
 
   // Back button consumed the root guard; re-arm it while nested overlays remain open.
-  if (removed.closedByBack && stack.length > 0 && isMobileBackNavigation()) {
+  if (removed.closedByBack && stack.length > 0 && isCoarsePointerDevice()) {
     history.pushState(ROOT_GUARD_STATE, '');
   }
 }

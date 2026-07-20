@@ -1,6 +1,5 @@
 import { useCallback, useRef, type MouseEvent, type PointerEvent, type SyntheticEvent } from 'react';
-
-const isPenPrimaryTap = (event: PointerEvent) => event.pointerType === 'pen' && event.button === 0;
+import { isPenPrimaryTap } from './device';
 
 export function usePenPointerUp<E extends HTMLElement = HTMLElement>(
   handler: (event: PointerEvent<E>) => void,

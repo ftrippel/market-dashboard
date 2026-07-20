@@ -1,5 +1,11 @@
 import { CrosshairMode, type IChartApi, type ISeriesApi, type MouseEventParams } from 'lightweight-charts';
 import type { DailyHistoryPoint, DailyOhlcPoint } from '../services/api';
+import {
+  isHoverPointer,
+  isPenPointer,
+  isTouchLikePointer,
+  isTouchPointer,
+} from './device';
 import { blurActiveElement } from './focus';
 import { createMeasureAnchor, type MeasureToolPrimitive } from './measureToolPrimitive';
 
@@ -91,10 +97,8 @@ export function createChartInteractionController({
 
   const closeByTime = new Map(data.map((point, index) => [point.time, data[index - 1]?.close ?? null]));
 
-  const isHoverPointer = (pointerType: string) => pointerType === 'pen' || pointerType === 'mouse';
-
   const canShowHoverCrosshair = () =>
-    isHoverPointer(lastPointerType) || (lastPointerType === 'touch' && crosshairPinned);
+    isHoverPointer(lastPointerType) || (isTouchPointer(lastPointerType) && crosshairPinned);
 
   const cancelLongPress = () => {
     if (longPressTimer !== null) {
@@ -212,7 +216,7 @@ export function createChartInteractionController({
   const onCrosshairMove = (param: MouseEventParams) => {
     if (suppressCrosshairUntilPointerUp) return;
     if (mode !== 'crosshair') return;
-    if (lastPointerType === 'touch' && !crosshairPinned) return;
+    if (isTouchPointer(lastPointerType) && !crosshairPinned) return;
     updateCrosshairInfoFromParam(param);
   };
 
@@ -309,7 +313,7 @@ export function createChartInteractionController({
       return;
     }
 
-    if (mode === 'crosshair' && event.pointerType === 'touch') {
+    if (mode === 'crosshair' && isTouchPointer(event.pointerType)) {
       if (crosshairPinned) {
         unpinCrosshair();
         event.preventDefault();
@@ -333,7 +337,7 @@ export function createChartInteractionController({
       return;
     }
 
-    if (mode === 'crosshair' && event.pointerType === 'pen') {
+    if (mode === 'crosshair' && isPenPointer(event.pointerType)) {
       cancelLongPress();
       touchPointerStart = point;
       return;
@@ -348,7 +352,7 @@ export function createChartInteractionController({
   const onPointerMove = (event: PointerEvent) => {
     if (isHoverPointer(event.pointerType)) {
       const reenableHover =
-        (lastPointerType === 'touch' || lastPointerType === 'pen') &&
+        isTouchLikePointer(lastPointerType) &&
         mode === 'crosshair' &&
         !crosshairPinned;
       lastPointerType = event.pointerType;
@@ -357,7 +361,7 @@ export function createChartInteractionController({
       }
     }
 
-    if (touchPointerStart && (event.pointerType === 'touch' || event.pointerType === 'pen')) {
+    if (touchPointerStart && isTouchLikePointer(event.pointerType)) {
       const point = getLocalPoint(event);
       const dx = point.x - touchPointerStart.x;
       const dy = point.y - touchPointerStart.y;
