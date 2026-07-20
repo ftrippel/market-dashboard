@@ -10,7 +10,6 @@ declare module '../../config/symbolMaps.json' {
         displaySym?: string;
         sym?: string;
         tradingView?: string;
-        flag?: string;
         isYield?: boolean;
         source?: 'yahoo' | 'fred';
         massive?: string;

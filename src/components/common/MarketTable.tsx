@@ -272,7 +272,6 @@ export const MarketTable: React.FC<MarketTableProps> = ({
         {visible.map((item) => {
           const meta = getSymbolMeta(item.sym);
           const displayName = resolveDisplayName(item);
-          const flag = item.flag || meta.flag;
           const isBenchmark = benchmarkSym && item.sym === benchmarkSym;
           const symHoldings = holdings[item.sym];
 
@@ -287,7 +286,7 @@ export const MarketTable: React.FC<MarketTableProps> = ({
               }}
             >
                 <td style={{ ...tdStyle, textAlign: 'left' }}>
-                  <SymbolLink sym={item.sym} name={displayName} flag={flag} siblings={siblings} />
+                  <SymbolLink sym={item.sym} name={displayName} siblings={siblings} />
                   <span style={{ color: colors.text3, fontSize: '10px', display: 'block', letterSpacing: '0.5px' }}>
                     {meta.sym || item.sym}
                   </span>

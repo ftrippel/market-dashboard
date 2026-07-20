@@ -236,13 +236,11 @@ export function TradingViewModal() {
 export function SymbolLink({
   sym,
   name,
-  flag,
   label,
   siblings,
 }: {
   sym: string;
   name: string;
-  flag?: string;
   label?: string;
   siblings?: Array<{ sym: string; name: string }>;
 }) {
@@ -288,7 +286,6 @@ export function SymbolLink({
           : 'none',
       }}
     >
-      {flag ? `${flag} ` : ''}
       {label ?? name}
     </button>
   );

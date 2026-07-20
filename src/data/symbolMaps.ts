@@ -6,7 +6,6 @@ export interface SymbolMapEntry {
   displaySym?: string;
   sym?: string;
   tradingView?: string;
-  flag?: string;
   isYield?: boolean;
   source?: 'yahoo' | 'fred';
   massive?: string;
@@ -37,7 +36,6 @@ for (const [yahoo, entry] of Object.entries(symbolMaps.symbols)) {
 export interface SymbolMeta {
   name: string;
   sym: string;
-  flag?: string;
   isYield?: boolean;
 }
 
@@ -74,7 +72,6 @@ export function getSymbolMeta(dashboardSym: string): SymbolMeta {
   return {
     name: entry.name ?? dashboardSym,
     sym: entry.sym ?? effectiveDashboardSym,
-    flag: entry.flag,
     isYield: entry.isYield,
   };
 }

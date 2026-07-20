@@ -91,8 +91,7 @@
       "tradingView": "AMEX:JJU"
     },
     "ARGT": {
-      "name": "Argentina",
-      "flag": "🇦🇷"
+      "name": "Argentina"
     },
     "ARKG": {
       "name": "ARK Genomic Revolution"
@@ -158,8 +157,7 @@
       "tradingView": "CAPITALCOM:DXY"
     },
     "ECH": {
-      "name": "Chile",
-      "flag": "🇨🇱"
+      "name": "Chile"
     },
     "EEM": {
       "name": "Emerging Markets"
@@ -168,15 +166,13 @@
       "name": "MSCI EAFE"
     },
     "EIDO": {
-      "name": "Indonesia",
-      "flag": "🇮🇩"
+      "name": "Indonesia"
     },
     "EMLC": {
       "name": "VanEck EM Local Ccy Bond"
     },
     "EPHE": {
-      "name": "Philippines",
-      "flag": "🇵🇭"
+      "name": "Philippines"
     },
     "ES=F": {
       "displaySym": "ES1!",
@@ -195,88 +191,67 @@
       "name": "Europe Financials"
     },
     "EWA": {
-      "name": "Australia",
-      "flag": "🇦🇺"
+      "name": "Australia"
     },
     "EWC": {
-      "name": "Canada",
-      "flag": "🇨🇦"
+      "name": "Canada"
     },
     "EWD": {
-      "name": "Sweden",
-      "flag": "🇸🇪"
+      "name": "Sweden"
     },
     "EWG": {
-      "name": "Germany",
-      "flag": "🇩🇪"
+      "name": "Germany"
     },
     "EWH": {
-      "name": "Hong Kong",
-      "flag": "🇭🇰"
+      "name": "Hong Kong"
     },
     "EWI": {
-      "name": "Italy",
-      "flag": "🇮🇹"
+      "name": "Italy"
     },
     "EWJ": {
-      "name": "Japan",
-      "flag": "🇯🇵"
+      "name": "Japan"
     },
     "EWK": {
-      "name": "Belgium",
-      "flag": "🇧🇪"
+      "name": "Belgium"
     },
     "EWL": {
-      "name": "Switzerland",
-      "flag": "🇨🇭"
+      "name": "Switzerland"
     },
     "EWM": {
-      "name": "Malaysia",
-      "flag": "🇲🇾"
+      "name": "Malaysia"
     },
     "EWN": {
-      "name": "Netherlands",
-      "flag": "🇳🇱"
+      "name": "Netherlands"
     },
     "EWO": {
-      "name": "Austria",
-      "flag": "🇦🇹"
+      "name": "Austria"
     },
     "EWP": {
-      "name": "Spain",
-      "flag": "🇪🇸"
+      "name": "Spain"
     },
     "EWQ": {
-      "name": "France",
-      "flag": "🇫🇷"
+      "name": "France"
     },
     "EWS": {
-      "name": "Singapore",
-      "flag": "🇸🇬"
+      "name": "Singapore"
     },
     "EWT": {
-      "name": "Taiwan",
-      "flag": "🇹🇼"
+      "name": "Taiwan"
     },
     "EWU": {
-      "name": "United Kingdom",
-      "flag": "🇬🇧"
+      "name": "United Kingdom"
     },
     "EWW": {
-      "name": "Mexico",
-      "flag": "🇲🇽"
+      "name": "Mexico"
     },
     "EWY": {
-      "name": "South Korea",
-      "flag": "🇰🇷"
+      "name": "South Korea"
     },
     "EWZ": {
-      "name": "Brazil",
-      "flag": "🇧🇷"
+      "name": "Brazil"
     },
     "EZA": {
-      "name": "South Africa",
-      "flag": "🇿🇦"
+      "name": "South Africa"
     },
     "EZU": {
       "name": "Eurozone"
@@ -308,12 +283,10 @@
       "name": "SPDR Gold"
     },
     "GREK": {
-      "name": "Greece",
-      "flag": "🇬🇷"
+      "name": "Greece"
     },
     "GXC": {
-      "name": "China S&P ETF",
-      "flag": "🇨🇳"
+      "name": "China S&P ETF"
     },
     "HACK": {
       "name": "ETFMG Prime Cybersecurity"
@@ -375,8 +348,7 @@
       "name": "iSh S&P 600 SmCap Growth"
     },
     "INDA": {
-      "name": "India",
-      "flag": "🇮🇳"
+      "name": "India"
     },
     "IPO": {
       "name": "Renaissance IPO"
@@ -421,8 +393,7 @@
       "name": "SPDR S&P Regional Banking"
     },
     "KSA": {
-      "name": "Saudi Arabia",
-      "flag": "🇸🇦"
+      "name": "Saudi Arabia"
     },
     "KWEB": {
       "name": "KraneShares China Internet"
@@ -434,8 +405,7 @@
       "name": "iShares IG Corporate Bond"
     },
     "MCHI": {
-      "name": "China",
-      "flag": "🇨🇳"
+      "name": "China"
     },
     "MGK": {
       "name": "Vanguard Mega Cap Growth"
@@ -578,15 +548,13 @@
       "name": "Invesco Solar"
     },
     "THD": {
-      "name": "Thailand",
-      "flag": "🇹🇭"
+      "name": "Thailand"
     },
     "TLT": {
       "name": "iShares 20+ Yr Treasury"
     },
     "TUR": {
-      "name": "Turkey",
-      "flag": "🇹🇷"
+      "name": "Turkey"
     },
     "UFO": {
       "name": "Procure Space"
@@ -614,8 +582,7 @@
       "name": "Vanguard Int Treasury"
     },
     "VNM": {
-      "name": "Vietnam",
-      "flag": "🇻🇳"
+      "name": "Vietnam"
     },
     "VTV": {
       "name": "Vanguard Value"

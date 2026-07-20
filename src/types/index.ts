@@ -5,7 +5,6 @@
 export interface MarketData {
   sym: string;
   name?: string;
-  flag?: string;
   price?: number;
   d1: number;
   w1: number;
