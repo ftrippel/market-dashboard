@@ -40,8 +40,6 @@ const ChartModalContext = createContext<ChartModalContextValue | null>(null);
 export function ChartModalProvider({ children }: { children: ReactNode }) {
   const [chart, setChart] = useState<ChartState>(closedState);
 
-  useScrollLock(chart.open);
-
   const openChart = useCallback((rawSym: string, name: string, siblings?: SiblingSymbol[]) => {
     const tvSym = toTradingViewSymbol(rawSym);
     setChart({
@@ -82,6 +80,7 @@ export function ChartModalProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useOverlayDismiss(chart.open, closeChart);
+  useScrollLock(chart.open);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {

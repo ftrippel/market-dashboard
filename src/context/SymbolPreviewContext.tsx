@@ -1,11 +1,20 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from 'react';
 import { isTypingTarget } from '../utils/focus';
 import { hasOpenOverlays } from '../utils/overlayStack';
 import { toTradingViewSymbol } from '../utils/tradingView';
 import { useSettings } from './SettingsContext';
 import { useChartModal } from './ChartModalContext';
 
-interface PreviewState {
+export interface PreviewState {
   open: boolean;
   rawSym: string;
   name: string;
@@ -13,8 +22,7 @@ interface PreviewState {
   anchorRect: DOMRect | null;
 }
 
-interface SymbolPreviewContextValue {
-  preview: PreviewState;
+interface SymbolPreviewActions {
   onMouseEnterLink: (rawSym: string, name: string, rect: DOMRect) => void;
   onMouseLeaveLink: () => void;
   onMouseEnterPreview: () => void;
@@ -30,7 +38,8 @@ const closedState: PreviewState = {
   anchorRect: null,
 };
 
-const SymbolPreviewContext = createContext<SymbolPreviewContextValue | null>(null);
+const SymbolPreviewStateContext = createContext<PreviewState | null>(null);
+const SymbolPreviewActionsContext = createContext<SymbolPreviewActions | null>(null);
 
 export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
   const [preview, setPreview] = useState<PreviewState>(closedState);
@@ -127,6 +136,17 @@ export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
     setPreview(closedState);
   }, []);
 
+  const actions = useMemo(
+    () => ({
+      onMouseEnterLink,
+      onMouseLeaveLink,
+      onMouseEnterPreview,
+      onMouseLeavePreview,
+      hidePreview,
+    }),
+    [onMouseEnterLink, onMouseLeaveLink, onMouseEnterPreview, onMouseLeavePreview, hidePreview],
+  );
+
   useEffect(() => {
     if (chart.open) hidePreview();
   }, [chart.open, hidePreview]);
@@ -149,25 +169,32 @@ export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
   }, [preview.open, hidePreview]);
 
   return (
-    <SymbolPreviewContext.Provider
-      value={{
-        preview,
-        onMouseEnterLink,
-        onMouseLeaveLink,
-        onMouseEnterPreview,
-        onMouseLeavePreview,
-        hidePreview,
-      }}
-    >
-      {children}
-    </SymbolPreviewContext.Provider>
+    <SymbolPreviewActionsContext.Provider value={actions}>
+      <SymbolPreviewStateContext.Provider value={preview}>{children}</SymbolPreviewStateContext.Provider>
+    </SymbolPreviewActionsContext.Provider>
   );
 }
 
-export function useSymbolPreview() {
-  const ctx = useContext(SymbolPreviewContext);
-  if (!ctx) {
-    throw new Error('useSymbolPreview must be used within SymbolPreviewProvider');
+export function useSymbolPreviewState(): PreviewState {
+  const state = useContext(SymbolPreviewStateContext);
+  if (!state) {
+    throw new Error('useSymbolPreviewState must be used within SymbolPreviewProvider');
   }
-  return ctx;
+  return state;
+}
+
+export function useSymbolPreviewActions(): SymbolPreviewActions {
+  const actions = useContext(SymbolPreviewActionsContext);
+  if (!actions) {
+    throw new Error('useSymbolPreviewActions must be used within SymbolPreviewProvider');
+  }
+  return actions;
+}
+
+/** Prefer useSymbolPreviewState / useSymbolPreviewActions to avoid unnecessary re-renders. */
+export function useSymbolPreview() {
+  return {
+    preview: useSymbolPreviewState(),
+    ...useSymbolPreviewActions(),
+  };
 }

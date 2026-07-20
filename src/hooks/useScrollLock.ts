@@ -21,6 +21,7 @@ const SCROLL_KEYS = new Set([
 ]);
 
 let lockCount = 0;
+let lastLockedScrollY = 0;
 let savedStyles: {
   htmlOverflow: string;
   bodyOverflow: string;
@@ -103,12 +104,32 @@ function restoreScrollPosition(scrollY: number): void {
   html.style.scrollBehavior = previousScrollBehavior;
 }
 
+/** Saved page scroll while lock is active; falls back to the last lock or current scroll position. */
+export function getSavedScrollPosition(): number {
+  if (savedStyles) return savedStyles.scrollY;
+  return lastLockedScrollY || window.scrollY || document.documentElement.scrollTop;
+}
+
+/** Re-apply scroll after history/focus side effects (notably iOS Safari after history.back()). */
+export function stabilizeScrollPosition(scrollY: number): void {
+  lastLockedScrollY = scrollY;
+  restoreScrollPosition(scrollY);
+  requestAnimationFrame(() => {
+    restoreScrollPosition(scrollY);
+    requestAnimationFrame(() => restoreScrollPosition(scrollY));
+  });
+  window.setTimeout(() => restoreScrollPosition(scrollY), 0);
+  // iOS Safari can restore history scroll position slightly after popstate.
+  window.setTimeout(() => restoreScrollPosition(scrollY), 50);
+}
+
 function lockPageScroll(): void {
   if (lockCount === 0) {
     const html = document.documentElement;
     const { body } = document;
     const target = getScrollLockTarget();
     const scrollY = window.scrollY;
+    lastLockedScrollY = scrollY;
 
     savedStyles = {
       htmlOverflow: html.style.overflow,
@@ -165,7 +186,7 @@ function unlockPageScroll(): void {
 
   html.classList.remove('scroll-locked');
   detachListeners();
-  restoreScrollPosition(scrollY);
+  stabilizeScrollPosition(scrollY);
 }
 
 /**

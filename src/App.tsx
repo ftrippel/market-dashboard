@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, useEffect } from 'react';
+import { memo, useCallback, useRef, useState, useEffect } from 'react';
 import { fetchYahooFinancePrice } from './services/api';
 import { Header, Toast, TradingViewModal, SymbolPreviewOverlay, SettingsModal } from './components/common';
 import { ChartModalProvider } from './context/ChartModalContext';
@@ -167,7 +167,6 @@ function DashboardContent() {
         onClose={() => setToastMessage(null)}
       />
       <TradingViewModal />
-      <SymbolPreviewOverlay />
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
 
       <div className="wrap" ref={wrapRef}>
@@ -218,13 +217,16 @@ function DashboardContent() {
   );
 }
 
+const MemoizedDashboardContent = memo(DashboardContent);
+
 function App() {
   return (
     <ThemeProvider>
       <SettingsProvider>
         <ChartModalProvider>
           <SymbolPreviewProvider>
-            <DashboardContent />
+            <MemoizedDashboardContent />
+            <SymbolPreviewOverlay />
           </SymbolPreviewProvider>
         </ChartModalProvider>
       </SettingsProvider>

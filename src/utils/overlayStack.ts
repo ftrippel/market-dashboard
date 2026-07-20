@@ -3,7 +3,6 @@ import { isTypingTarget } from './focus';
 
 type DismissHandler = () => void;
 
-const OVERLAY_HISTORY_STATE = { __overlay: true } as const;
 const ROOT_GUARD_STATE = { __rootGuard: true } as const;
 const LEAVE_CONFIRM_MESSAGE = 'Go back to the previous page?';
 
@@ -11,7 +10,6 @@ interface StackEntry {
   id: symbol;
   dismiss: DismissHandler;
   ignoreWhenTyping?: boolean;
-  historyPushed?: boolean;
   closedByBack?: boolean;
 }
 
@@ -28,6 +26,10 @@ function isMobileBackNavigation(): boolean {
 export function initMobileBackNavigation() {
   if (!isMobileBackNavigation() || mobileBackInitialized) return;
   mobileBackInitialized = true;
+
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
 
   history.pushState(ROOT_GUARD_STATE, '');
   window.addEventListener('popstate', onPopState);
@@ -88,9 +90,9 @@ function unregisterEntry(id: symbol) {
   stack.splice(index, 1);
   stopKeydownListeningIfEmpty();
 
-  if (removed.historyPushed && !removed.closedByBack) {
-    ignoringPopstateCount++;
-    history.back();
+  // Back button consumed the root guard; re-arm it while nested overlays remain open.
+  if (removed.closedByBack && stack.length > 0 && isMobileBackNavigation()) {
+    history.pushState(ROOT_GUARD_STATE, '');
   }
 }
 
@@ -110,11 +112,6 @@ export function pushOverlayDismiss(
     dismiss,
     ignoreWhenTyping: options?.ignoreWhenTyping,
   };
-
-  if (isMobileBackNavigation()) {
-    history.pushState(OVERLAY_HISTORY_STATE, '');
-    entry.historyPushed = true;
-  }
 
   stack.push(entry);
   ensureKeydownListening();

@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useChartModal } from '../../context/ChartModalContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useSettings } from '../../context/SettingsContext';
-import { useSymbolPreview } from '../../context/SymbolPreviewContext';
+import { useSymbolPreviewActions } from '../../context/SymbolPreviewContext';
 import { colors } from '../../utils/formatting';
 import { config } from '../../config';
 import { Icon } from './Icon';
@@ -245,7 +245,7 @@ export function SymbolLink({
   siblings?: Array<{ sym: string; name: string }>;
 }) {
   const { openChart } = useChartModal();
-  const { onMouseEnterLink, onMouseLeaveLink, hidePreview } = useSymbolPreview();
+  const { onMouseEnterLink, onMouseLeaveLink, hidePreview } = useSymbolPreviewActions();
 
   const openSymbol = useCallback(() => {
     hidePreview();

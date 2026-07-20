@@ -24,8 +24,6 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     setUseCustomCharts,
   } = useSettings();
 
-  useScrollLock(open);
-
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
 
@@ -34,6 +32,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
   }, []);
 
   useOverlayDismiss(open, close);
+  useScrollLock(open);
 
   const closePenClick = usePenCompatibleClick(close);
   const hoverPreviewPenToggle = usePenCheckboxToggle(setEnableHoverPreview);

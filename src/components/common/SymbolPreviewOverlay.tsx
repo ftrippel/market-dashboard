@@ -1,12 +1,13 @@
 import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { useSymbolPreview } from '../../context/SymbolPreviewContext';
+import { useSymbolPreviewActions, useSymbolPreviewState } from '../../context/SymbolPreviewContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useSettings } from '../../context/SettingsContext';
 import { TradingViewMiniChart } from './TradingViewMiniChart';
 
 export function SymbolPreviewOverlay() {
-  const { preview, onMouseEnterPreview, onMouseLeavePreview } = useSymbolPreview();
+  const preview = useSymbolPreviewState();
+  const { onMouseEnterPreview, onMouseLeavePreview } = useSymbolPreviewActions();
   const { theme } = useTheme();
   const { hoverPreviewPlacement } = useSettings();
   const [style, setStyle] = useState<React.CSSProperties>({ display: 'none' });

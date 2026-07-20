@@ -4,7 +4,7 @@ import { colors } from '../../utils/formatting';
 import type { Holding } from '../../types';
 import { Icon } from './Icon';
 import { CardCopyButton } from './Card';
-import { useSymbolPreview } from '../../context/SymbolPreviewContext';
+import { useSymbolPreviewActions } from '../../context/SymbolPreviewContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { dismissOverlay } from '../../utils/focus';
 import { useOverlayDismiss } from '../../utils/overlayStack';
@@ -42,7 +42,7 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
   onClose,
 }) => {
   const titleId = useId();
-  const { hidePreview } = useSymbolPreview();
+  const { hidePreview } = useSymbolPreviewActions();
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
   const siblings = holdings.map((h) => ({ sym: h.s, name: h.n }));
@@ -52,8 +52,8 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
     dismissOverlay(() => onCloseRef.current());
   }, [hidePreview]);
 
-  useScrollLock(true);
   useOverlayDismiss(true, close);
+  useScrollLock(true);
 
   const totalWeight = holdings.reduce((sum, holding) => sum + holding.w, 0);
   const closePenClick = usePenCompatibleClick(close);

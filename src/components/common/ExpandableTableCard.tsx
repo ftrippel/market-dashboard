@@ -5,7 +5,7 @@ import { Card, CardCopyButton } from './Card';
 import { CardSearchContext } from './CardSearchContext';
 import { Icon } from './Icon';
 import { MarketTable } from './MarketTable';
-import { useSymbolPreview } from '../../context/SymbolPreviewContext';
+import { useSymbolPreviewActions } from '../../context/SymbolPreviewContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { colors } from '../../utils/formatting';
 import { dismissOverlay } from '../../utils/focus';
@@ -36,7 +36,7 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const titleId = useId();
   const canExpand = data.length > previewCount;
-  const { hidePreview } = useSymbolPreview();
+  const { hidePreview } = useSymbolPreviewActions();
 
   const close = useCallback(() => {
     hidePreview();
@@ -57,9 +57,9 @@ export const ExpandableTableCard: React.FC<ExpandableTableCardProps> = ({
   });
   const expandPenClick = usePenCompatibleClick(() => setOpen(true));
 
-  useScrollLock(open);
   useOverlayDismiss(open, close);
   useOverlayDismiss(open && isSearchOpen, closeSearch);
+  useScrollLock(open);
 
   useEffect(() => {
     if (!open) {
