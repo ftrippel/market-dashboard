@@ -97,8 +97,7 @@ export function TradingViewModal() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
-                flex: 1,
-                minWidth: 0,
+                flex: '1 0 auto',
               }}
             >
               <input

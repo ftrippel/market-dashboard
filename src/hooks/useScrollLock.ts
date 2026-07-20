@@ -6,7 +6,8 @@ const SCROLL_LOCK_TARGET_ID = 'root';
 /** Full-screen overlays portaled to `document.body` must set this attribute. */
 const OVERLAY_SELECTOR = '[data-scroll-lock-overlay]';
 
-const SCROLLABLE_SELECTOR = '.table-flyover-body, .table-scroll';
+const SCROLLABLE_SELECTOR =
+  '.table-flyover-body, .table-scroll, .tv-chart-toolbar, #tv-modal-hdr, .table-flyover-hdr';
 
 const SCROLL_KEYS = new Set([
   'ArrowUp',

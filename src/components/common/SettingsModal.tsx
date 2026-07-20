@@ -59,26 +59,13 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
           boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.4)',
         }}
       >
-        <div
-          id="tv-modal-hdr"
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: '10px 14px',
-            background: 'var(--bg2)',
-            borderBottom: '1px solid var(--border)',
-            gap: '10px',
-          }}
-        >
+        <div id="tv-modal-hdr" style={{ padding: '10px 14px' }}>
           <div
             id="tv-modal-title"
             style={{
               fontSize: '11px',
               fontWeight: 600,
-              color: 'var(--accent)',
               letterSpacing: '1px',
-              textTransform: 'uppercase',
-              flex: 1,
             }}
           >
             Dashboard Settings

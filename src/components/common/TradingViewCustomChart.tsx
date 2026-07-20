@@ -205,6 +205,7 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
     <div style={{ width: '100%', height: '100%', position: 'relative', display: 'flex', flexDirection: 'column' }}>
       <div className="tv-chart-toolbar" style={{
           display: 'flex',
+          alignItems: 'center',
           gap: '14px',
           padding: '6px 10px',
           fontSize: '10px',
@@ -212,11 +213,10 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
           color: theme === 'dark' ? '#9aa5b4' : '#686d78',
           borderBottom: `1px solid ${theme === 'dark' ? '#2a2e39' : '#d1d4dc'}`,
           background: theme === 'dark' ? '#131722' : '#ffffff',
-          flexShrink: 0,
         }}
       >
         {INDICATORS.map((indicator) => (
-          <span key={indicator.label} style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+          <span key={indicator.label} className="tv-chart-toolbar-item" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
             <span
               style={{
                 width: '10px',
@@ -242,13 +242,12 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
         )}
         {displayInfo && (
           <span
+            className="tv-chart-toolbar-data"
             style={{
-              marginLeft: 'auto',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '10px',
               fontSize: '10px',
-              whiteSpace: 'nowrap',
             }}
           >
             <span style={{ color: theme === 'dark' ? '#e6edf3' : '#131722' }}>{displayInfo.date}</span>

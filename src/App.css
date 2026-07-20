@@ -344,13 +344,48 @@ body::before {
   z-index: 5;
   flex-shrink: 0;
   border-radius: 4px 4px 0 0;
-  touch-action: manipulation;
+}
+
+.overlay-hscroll,
+.tv-chart-toolbar,
+#tv-modal-hdr,
+.table-flyover-hdr {
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  touch-action: pan-x;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.overlay-hscroll::-webkit-scrollbar,
+.tv-chart-toolbar::-webkit-scrollbar,
+#tv-modal-hdr::-webkit-scrollbar,
+.table-flyover-hdr::-webkit-scrollbar {
+  display: none;
+}
+
+#tv-modal-hdr > *:not(#tv-modal-title),
+.table-flyover-hdr > *:not(.table-flyover-title) {
+  flex-shrink: 0;
 }
 
 .tv-chart-toolbar {
   position: relative;
   z-index: 3;
-  touch-action: manipulation;
+  flex-shrink: 0;
+}
+
+.tv-chart-toolbar-item,
+.tv-chart-toolbar-data {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.tv-chart-toolbar-data {
+  margin-left: auto;
 }
 
 #tv-modal-title {
@@ -358,10 +393,7 @@ body::before {
   color: var(--accent);
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex: 1 0 auto;
   white-space: nowrap;
 }
 
@@ -632,7 +664,7 @@ body::before {
   gap: 10px;
   position: relative;
   z-index: 2;
-  touch-action: manipulation;
+  flex-shrink: 0;
 }
 
 .table-flyover-box--holdings {
@@ -645,10 +677,7 @@ body::before {
   color: var(--accent);
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  flex: 1;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex: 1 0 auto;
   white-space: nowrap;
 }
 
