@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { getDisplayName, getSymbolMeta } from '../../data/symbolMaps';
 import { colors, formatPrice, formatHoverTimestamp } from '../../utils/formatting';
 import type { Holding, MarketData, MarketTableOptions } from '../../types';
@@ -162,6 +162,7 @@ export const MarketTable: React.FC<MarketTableProps> = ({
     displayName: string;
     holdings: Holding[];
   } | null>(null);
+  const closeHoldingsFlyout = useCallback(() => setHoldingsFlyout(null), []);
   const [sort, setSort] = useState<{ key: SortKey; order: SortOrder }>({
     key: (sortBy as SortKey) || 'w1',
     order: sortOrder,
@@ -364,7 +365,7 @@ export const MarketTable: React.FC<MarketTableProps> = ({
         etfSym={holdingsFlyout.sym}
         displayName={holdingsFlyout.displayName}
         holdings={holdingsFlyout.holdings}
-        onClose={() => setHoldingsFlyout(null)}
+        onClose={closeHoldingsFlyout}
       />
     )}
     </>

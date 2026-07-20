@@ -1,4 +1,4 @@
-import React, { useCallback, useId } from 'react';
+import React, { useCallback, useId, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { colors } from '../../utils/formatting';
 import type { Holding } from '../../types';
@@ -43,12 +43,14 @@ export const HoldingsFlyover: React.FC<HoldingsFlyoverProps> = ({
 }) => {
   const titleId = useId();
   const { hidePreview } = useSymbolPreview();
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
   const siblings = holdings.map((h) => ({ sym: h.s, name: h.n }));
 
   const close = useCallback(() => {
     hidePreview();
-    dismissOverlay(onClose);
-  }, [hidePreview, onClose]);
+    dismissOverlay(() => onCloseRef.current());
+  }, [hidePreview]);
 
   useScrollLock(true);
   useOverlayDismiss(true, close);

@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
-import { useOverlayDismiss } from '../utils/overlayStack';
+import { isTypingTarget } from '../utils/focus';
+import { hasOpenOverlays } from '../utils/overlayStack';
 import { toTradingViewSymbol } from '../utils/tradingView';
 import { useSettings } from './SettingsContext';
 import { useChartModal } from './ChartModalContext';
@@ -130,7 +131,22 @@ export function SymbolPreviewProvider({ children }: { children: ReactNode }) {
     if (chart.open) hidePreview();
   }, [chart.open, hidePreview]);
 
-  useOverlayDismiss(preview.open, hidePreview);
+  useEffect(() => {
+    if (!preview.open) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Escape') return;
+      if (event.defaultPrevented) return;
+      if (isTypingTarget()) return;
+      if (hasOpenOverlays()) return;
+
+      event.preventDefault();
+      hidePreview();
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [preview.open, hidePreview]);
 
   return (
     <SymbolPreviewContext.Provider

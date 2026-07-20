@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { isTypingTarget } from './focus';
 
 type DismissHandler = () => void;
@@ -17,7 +17,7 @@ interface StackEntry {
 
 const stack: StackEntry[] = [];
 let keydownListening = false;
-let ignoringPopstate = false;
+let ignoringPopstateCount = 0;
 let mobileBackInitialized = false;
 
 function isMobileBackNavigation(): boolean {
@@ -46,8 +46,8 @@ function onKeyDown(event: KeyboardEvent) {
 }
 
 function onPopState() {
-  if (ignoringPopstate) {
-    ignoringPopstate = false;
+  if (ignoringPopstateCount > 0) {
+    ignoringPopstateCount--;
     return;
   }
 
@@ -59,7 +59,7 @@ function onPopState() {
   }
 
   if (window.confirm(LEAVE_CONFIRM_MESSAGE)) {
-    ignoringPopstate = true;
+    ignoringPopstateCount++;
     history.back();
     return;
   }
@@ -89,9 +89,14 @@ function unregisterEntry(id: symbol) {
   stopKeydownListeningIfEmpty();
 
   if (removed.historyPushed && !removed.closedByBack) {
-    ignoringPopstate = true;
+    ignoringPopstateCount++;
     history.back();
   }
+}
+
+/** Whether any modal overlay is currently registered (excludes ephemeral UI like hover previews). */
+export function hasOpenOverlays(): boolean {
+  return stack.length > 0;
 }
 
 /** Push a dismiss handler onto the overlay stack. Returns an unregister function. */
@@ -125,10 +130,12 @@ export function useOverlayDismiss(
   dismiss: DismissHandler,
   options?: { ignoreWhenTyping?: boolean },
 ) {
+  const dismissRef = useRef(dismiss);
+  dismissRef.current = dismiss;
   const ignoreWhenTyping = options?.ignoreWhenTyping;
 
   useEffect(() => {
     if (!active) return;
-    return pushOverlayDismiss(dismiss, { ignoreWhenTyping });
-  }, [active, dismiss, ignoreWhenTyping]);
+    return pushOverlayDismiss(() => dismissRef.current(), { ignoreWhenTyping });
+  }, [active, ignoreWhenTyping]);
 }

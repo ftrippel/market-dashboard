@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useSettings, type HoverPreviewPlacement } from '../../context/SettingsContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
@@ -26,9 +26,12 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
 
   useScrollLock(open);
 
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   const close = useCallback(() => {
-    dismissOverlay(onClose);
-  }, [onClose]);
+    dismissOverlay(() => onCloseRef.current());
+  }, []);
 
   useOverlayDismiss(open, close);
 
