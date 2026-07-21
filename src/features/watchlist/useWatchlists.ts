@@ -7,25 +7,39 @@ import {
   createWatchlist,
   loadWatchlistStorage,
   normalizeSymbol,
-  saveWatchlistStorage,
+  persistWatchlistStorage,
 } from './watchlistStorage';
+import { touchSettingsModified } from '../../services/settingsEvents';
 import type { Watchlist, WatchlistItem, WatchlistStorage } from './types';
 
 export function useWatchlists() {
   const [storage, setStorage] = useState<WatchlistStorage>(() => loadWatchlistStorage());
   const hasHydratedWatchlists = useRef(false);
   const skipNextPersistRef = useRef(false);
+  const prevWatchlistsJsonRef = useRef('');
 
   useEffect(() => {
     if (!hasHydratedWatchlists.current) {
       hasHydratedWatchlists.current = true;
+      prevWatchlistsJsonRef.current = JSON.stringify(storage.watchlists);
       return;
     }
     if (skipNextPersistRef.current) {
       skipNextPersistRef.current = false;
+      prevWatchlistsJsonRef.current = JSON.stringify(storage.watchlists);
+      persistWatchlistStorage(storage);
       return;
     }
-    saveWatchlistStorage(storage);
+
+    const watchlistsJson = JSON.stringify(storage.watchlists);
+    persistWatchlistStorage(storage);
+
+    if (watchlistsJson === prevWatchlistsJsonRef.current) {
+      return;
+    }
+
+    prevWatchlistsJsonRef.current = watchlistsJson;
+    touchSettingsModified('watchlists');
   }, [storage]);
 
   useEffect(() => {

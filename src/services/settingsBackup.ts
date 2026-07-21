@@ -89,12 +89,27 @@ export function exportWatchlistsSettings(): WatchlistStorage {
   return loadWatchlistStorage();
 }
 
-export function countWatchlistItems(storage: WatchlistStorage): number {
-  return storage.watchlists.reduce((sum, watchlist) => sum + watchlist.items.length, 0);
+export interface WatchlistsSyncPayload {
+  watchlists: Watchlist[];
 }
 
-export function watchlistsContentEqual(a: WatchlistStorage, b: WatchlistStorage): boolean {
+export function exportWatchlistsForSync(): WatchlistsSyncPayload {
+  return { watchlists: loadWatchlistStorage().watchlists };
+}
+
+export function countWatchlistItems(watchlists: Watchlist[]): number {
+  return watchlists.reduce((sum, watchlist) => sum + watchlist.items.length, 0);
+}
+
+export function watchlistsContentEqual(a: Watchlist[], b: Watchlist[]): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
+}
+
+function resolveLocalActiveId(watchlists: Watchlist[], preferredActiveId: string): string {
+  if (watchlists.some((watchlist) => watchlist.id === preferredActiveId)) {
+    return preferredActiveId;
+  }
+  return watchlists[0]?.id ?? preferredActiveId;
 }
 
 export function exportDashboardSettings(): DashboardSettingsExport {
@@ -144,6 +159,22 @@ export function applyWatchlistsSettings(
   options: { source: 'local' | 'remote'; updatedAt?: string },
 ): void {
   persistWatchlistStorage(data);
+
+  if (options.source === 'remote') {
+    setSettingsLastModified('watchlists', options.updatedAt ?? new Date().toISOString());
+    dispatchRemoteApplied('watchlists');
+  }
+}
+
+export function applyWatchlistsFromSync(
+  data: WatchlistsSyncPayload,
+  options: { source: 'local' | 'remote'; updatedAt?: string },
+): void {
+  const local = loadWatchlistStorage();
+  persistWatchlistStorage({
+    watchlists: data.watchlists,
+    activeId: resolveLocalActiveId(data.watchlists, local.activeId),
+  });
 
   if (options.source === 'remote') {
     setSettingsLastModified('watchlists', options.updatedAt ?? new Date().toISOString());
@@ -315,6 +346,26 @@ export function parseCalculatorSettings(value: unknown): CalculatorSettings | nu
   const riskPct = Number(value.riskPct);
   if (!Number.isFinite(equity) || !Number.isFinite(riskPct)) return null;
   return { equity, riskPct };
+}
+
+export function parseWatchlistsSyncPayload(value: unknown): WatchlistsSyncPayload | null {
+  if (!isRecord(value) || !Array.isArray(value.watchlists)) return null;
+
+  const watchlists: Watchlist[] = [];
+  for (const entry of value.watchlists) {
+    if (!isRecord(entry) || typeof entry.id !== 'string' || typeof entry.name !== 'string') {
+      continue;
+    }
+    const items = Array.isArray(entry.items)
+      ? entry.items
+          .map(parseWatchlistItem)
+          .filter((item): item is WatchlistItem => item !== null)
+      : [];
+    watchlists.push({ id: entry.id, name: entry.name, items });
+  }
+
+  if (watchlists.length === 0) return null;
+  return { watchlists };
 }
 
 export function parseWatchlistsSettings(value: unknown): WatchlistStorage | null {

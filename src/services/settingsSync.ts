@@ -9,20 +9,20 @@ import {
 import {
   applyCalculatorSettings,
   applyPreferencesSettings,
-  applyWatchlistsSettings,
+  applyWatchlistsFromSync,
   countWatchlistItems,
   exportCalculatorSettings,
   exportPreferencesSettings,
-  exportWatchlistsSettings,
+  exportWatchlistsForSync,
   parseCalculatorSettings,
   parsePreferencesSettings,
-  parseWatchlistsSettings,
+  parseWatchlistsSyncPayload,
   watchlistsContentEqual,
   type CalculatorSettings,
   type DashboardSettingsExport,
   type PreferencesSettings,
 } from './settingsBackup';
-import type { WatchlistStorage } from '../features/watchlist/types';
+import type { Watchlist } from '../features/watchlist/types';
 import {
   getSettingsLastModified,
   setSettingsLastModified,
@@ -91,7 +91,7 @@ function hasNeverSynced(domain: SettingsDomain): boolean {
   return getSettingsLastModified(domain) === EPOCH_ISO;
 }
 
-function shouldPreferLocalWatchlists(local: WatchlistStorage, remote: WatchlistStorage | null): boolean {
+function shouldPreferLocalWatchlists(local: Watchlist[], remote: Watchlist[] | null): boolean {
   const localItems = countWatchlistItems(local);
   const remoteItems = remote ? countWatchlistItems(remote) : 0;
   return localItems > remoteItems;
@@ -99,9 +99,9 @@ function shouldPreferLocalWatchlists(local: WatchlistStorage, remote: WatchlistS
 
 function remoteContentDiffers(domain: SettingsDomain, data: unknown): boolean {
   if (domain === 'watchlists') {
-    const remote = parseWatchlistsSettings(data);
+    const remote = parseWatchlistsSyncPayload(data);
     if (!remote) return false;
-    return !watchlistsContentEqual(exportWatchlistsSettings(), remote);
+    return !watchlistsContentEqual(exportWatchlistsForSync().watchlists, remote.watchlists);
   }
 
   if (domain === 'preferences') {
@@ -150,16 +150,16 @@ function applyRemoteDomain(
     return true;
   }
 
-  const parsed = parseWatchlistsSettings(data);
+  const parsed = parseWatchlistsSyncPayload(data);
   if (!parsed) return false;
-  applyWatchlistsSettings(parsed, { source: 'remote', updatedAt });
+  applyWatchlistsFromSync(parsed, { source: 'remote', updatedAt });
   return true;
 }
 
 function exportDomain(domain: SettingsDomain): unknown {
   if (domain === 'preferences') return exportPreferencesSettings();
   if (domain === 'calculator') return exportCalculatorSettings();
-  return exportWatchlistsSettings();
+  return exportWatchlistsForSync();
 }
 
 export async function uploadDomain(userId: string, domain: SettingsDomain): Promise<void> {
@@ -191,9 +191,9 @@ async function reconcileDomain(userId: string, domain: SettingsDomain): Promise<
   }
 
   if (domain === 'watchlists') {
-    const local = exportWatchlistsSettings();
-    const remoteParsed = parseWatchlistsSettings(remote.data);
-    if (shouldPreferLocalWatchlists(local, remoteParsed)) {
+    const local = exportWatchlistsForSync().watchlists;
+    const remoteParsed = parseWatchlistsSyncPayload(remote.data);
+    if (shouldPreferLocalWatchlists(local, remoteParsed?.watchlists ?? null)) {
       await uploadDomain(userId, domain);
       return 'uploaded';
     }
@@ -249,7 +249,7 @@ async function migrateLegacyDashboardDoc(userId: string): Promise<boolean> {
       updatedAt: legacy.updatedAt ?? serverTimestamp(),
     }),
     setDoc(settingsDocRef(userId, 'watchlists'), {
-      data: settings.watchlists,
+      data: { watchlists: settings.watchlists.watchlists },
       updatedAt: legacy.updatedAt ?? serverTimestamp(),
     }),
   ]);
@@ -283,9 +283,9 @@ export function applyRemoteIfNewer(
   if (!remoteContentDiffers(domain, data)) return false;
 
   if (domain === 'watchlists') {
-    const remote = parseWatchlistsSettings(data);
-    const local = exportWatchlistsSettings();
-    if (remote && shouldPreferLocalWatchlists(local, remote)) {
+    const remote = parseWatchlistsSyncPayload(data);
+    const local = exportWatchlistsForSync().watchlists;
+    if (remote && shouldPreferLocalWatchlists(local, remote.watchlists)) {
       return false;
     }
   }
