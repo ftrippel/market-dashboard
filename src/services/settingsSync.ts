@@ -92,6 +92,7 @@ function timestampToIso(value: Timestamp | string | undefined): string | null {
 function parseBuildNumberAsInt(value: string | null | undefined): number | null {
   if (!value) return null;
   const parsed = Number.parseInt(value, 10);
+  // Only numeric build labels can be compared for ordering.
   return Number.isFinite(parsed) ? parsed : null;
 }
 
@@ -340,7 +341,8 @@ async function adoptDomainFromCloud(
     try {
       await uploadDomain(userId, domain);
       return 'uploaded';
-    } catch {
+    } catch (error) {
+      console.warn(`Cloud sync bootstrap upload failed for "${domain}". Retrying by pulling remote.`, error);
       // Another client may have created the doc between fetch and upload; pull if it now exists.
       const latestRemote = await fetchRemoteDomain(userId, domain);
       if (latestRemote) {
@@ -451,6 +453,7 @@ export function applyRemoteSnapshot(
 ): boolean {
   const remoteMetadata = metadata ?? getCurrentMetadata(domain);
   if (isRemoteApplyPaused(domain)) {
+    // Returning false here means "queued for deferred apply", not "unchanged".
     pendingRemoteSnapshots.set(domain, { data, updatedAt, metadata: remoteMetadata });
     return false;
   }

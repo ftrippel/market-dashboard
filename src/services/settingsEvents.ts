@@ -18,6 +18,7 @@ export const CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN: Record<SettingsDomain, numbe
   calculator: 2,
   watchlists: 2,
 };
+// Expected to be numeric for cross-build ordering; non-numeric values are treated as unordered.
 export const CURRENT_SYNC_BUILD_NUMBER = import.meta.env.VITE_BUILD_NUMBER ?? 'dev';
 
 /** Never synced with cloud yet for this domain. */
