@@ -9,6 +9,7 @@ import { MacroDivider, MacroSection } from './features/macro/MacroSection';
 import { EquitiesSection } from './features/equities/EquitiesSection';
 import { BreadthSection } from './features/breadth/BreadthSection';
 import { PositionCalculator } from './features/calculator/PositionCalculator';
+import { WatchlistSection } from './features/watchlist/WatchlistSection';
 import { useMarketStore } from './store/marketStore';
 import { useMarketData } from './hooks/useMarketData';
 import {
@@ -198,6 +199,8 @@ function DashboardContent() {
         <EquitiesSection />
         <MacroDivider />
         <BreadthSection breadth={store.breadth} />
+        <MacroDivider />
+        <WatchlistSection />
         <MacroDivider />
         <PositionCalculator />
 

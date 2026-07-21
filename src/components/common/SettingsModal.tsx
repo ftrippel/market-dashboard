@@ -1,7 +1,11 @@
-import { useCallback, useRef } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useSettings, type HoverPreviewPlacement } from '../../context/SettingsContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
+import {
+  downloadDashboardSettings,
+  importDashboardSettingsFromFile,
+} from '../../services/settingsBackup';
 import { dismissOverlay } from '../../utils/focus';
 import { useOverlayDismiss } from '../../utils/overlayStack';
 import { usePenCheckboxToggle, usePenCompatibleClick, usePenSelectActivate } from '../../utils/penClick';
@@ -39,6 +43,42 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
   const customChartsPenToggle = usePenCheckboxToggle(setUseCustomCharts);
   const hoverPlacementPenActivate = usePenSelectActivate();
   const sparklineModePenActivate = usePenSelectActivate();
+  const importInputRef = useRef<HTMLInputElement>(null);
+  const [importError, setImportError] = useState<string | null>(null);
+
+  const handleExport = useCallback(() => {
+    setImportError(null);
+    downloadDashboardSettings();
+  }, []);
+
+  const handleImportClick = useCallback(() => {
+    setImportError(null);
+    importInputRef.current?.click();
+  }, []);
+
+  const handleImportFile = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    if (
+      !window.confirm(
+        'Import settings? This will replace your current dashboard settings and watchlists.',
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await importDashboardSettingsFromFile(file);
+      window.location.reload();
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : 'Import failed.');
+    }
+  }, []);
+
+  const exportPenClick = usePenCompatibleClick(handleExport);
+  const importPenClick = usePenCompatibleClick(handleImportClick);
 
   if (!open) return null;
 
@@ -230,6 +270,37 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
               Choose the visualization style for 5-day price changes in the market tables, or disable it completely.
             </p>
+          </div>
+
+          <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+              Backup &amp; Restore
+            </span>
+            <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+              Export or import all dashboard settings and watchlists as a JSON file.
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+              <button type="button" className="btn" {...exportPenClick}>
+                Export JSON
+              </button>
+              <button type="button" className="btn" {...importPenClick}>
+                Import JSON
+              </button>
+              <input
+                ref={importInputRef}
+                type="file"
+                accept="application/json,.json"
+                onChange={handleImportFile}
+                style={{ display: 'none' }}
+              />
+            </div>
+            {importError && (
+              <p style={{ margin: 0, fontSize: '11px', color: 'var(--red)', lineHeight: '1.4' }}>
+                {importError}
+              </p>
+            )}
           </div>
         </div>
 

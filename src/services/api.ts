@@ -235,3 +235,95 @@ function roundToDecimals(val: number, decimals: number): number {
   return Math.round(val * p) / p;
 }
 
+function pctChange(newVal: number, oldVal: number, decimals = 2): number {
+  if (!oldVal || oldVal === 0) return 0;
+  return roundToDecimals(((newVal - oldVal) / Math.abs(oldVal)) * 100, decimals);
+}
+
+export interface YahooMarketMetrics {
+  price: number;
+  d1: number;
+  w1: number;
+  hi52: number;
+  ytd: number;
+  spark: number[];
+  updatedAt?: number;
+}
+
+function computeMetricsFromChartResult(
+  sym: string,
+  result: NonNullable<Awaited<ReturnType<typeof fetchYahooFinanceChartResult>>>,
+): YahooMarketMetrics | null {
+  const timestamps = result.timestamp;
+  const quote = result.indicators?.quote?.[0];
+  if (!timestamps?.length || !quote) return null;
+
+  const closes: number[] = [];
+  const highs: number[] = [];
+  const years: number[] = [];
+  const isYield = isYieldSymbol(sym);
+
+  for (let i = 0; i < timestamps.length; i++) {
+    let close = quote.close?.[i];
+    let high = quote.high?.[i];
+    if (close == null || high == null) continue;
+
+    if (isYield) {
+      close = scaleYieldValue(close);
+      high = scaleYieldValue(high);
+    }
+
+    closes.push(close);
+    highs.push(high);
+    years.push(new Date(timestamps[i] * 1000).getUTCFullYear());
+  }
+
+  if (closes.length < 2) return null;
+
+  const price = closes[closes.length - 1];
+  const hi52Price = Math.max(...highs);
+  const thisYear = new Date().getUTCFullYear();
+  const ytdStartIdx = years.findIndex((year) => year === thisYear);
+  const ytdStart = ytdStartIdx >= 0 ? closes[ytdStartIdx] : null;
+
+  let d1: number;
+  let w1: number;
+  let hi52: number;
+  let ytd: number;
+
+  if (isYield) {
+    d1 = closes.length >= 2 ? roundToDecimals((closes[closes.length - 1] - closes[closes.length - 2]) * 100, 1) : 0;
+    w1 = closes.length >= 6 ? roundToDecimals((closes[closes.length - 1] - closes[closes.length - 6]) * 100, 1) : 0;
+    hi52 = roundToDecimals((price - hi52Price) * 100, 1);
+    ytd = ytdStart != null ? roundToDecimals((price - ytdStart) * 100, 1) : 0;
+  } else {
+    d1 = closes.length >= 2 ? pctChange(closes[closes.length - 1], closes[closes.length - 2]) : 0;
+    w1 = closes.length >= 6 ? pctChange(closes[closes.length - 1], closes[closes.length - 6]) : 0;
+    hi52 = pctChange(price, hi52Price);
+    ytd = ytdStart != null ? pctChange(price, ytdStart) : 0;
+  }
+
+  const spark: number[] = [];
+  for (let i = Math.max(1, closes.length - 5); i < closes.length; i++) {
+    spark.push(
+      isYield
+        ? roundToDecimals((closes[i] - closes[i - 1]) * 100, 2)
+        : roundToDecimals(pctChange(closes[i], closes[i - 1]), 2),
+    );
+  }
+  while (spark.length < 5) {
+    spark.unshift(0);
+  }
+
+  const meta = result.meta as { regularMarketTime?: number } | undefined;
+  const updatedAt = meta?.regularMarketTime ? meta.regularMarketTime * 1000 : undefined;
+
+  return { price, d1, w1, hi52, ytd, spark, updatedAt };
+}
+
+export async function fetchYahooFinanceMarketMetrics(sym: string): Promise<YahooMarketMetrics | null> {
+  const result = await fetchYahooFinanceChartResult(sym, '1y');
+  if (!result) return null;
+  return computeMetricsFromChartResult(sym, result);
+}
+

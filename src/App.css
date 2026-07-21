@@ -1219,3 +1219,372 @@ body::before {
   visibility: visible;
   opacity: 1;
 }
+
+/* Watchlist */
+.watchlist-toolbar {
+  padding: 12px 14px 14px;
+}
+
+.watchlist-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.watchlist-tab-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.watchlist-tab-wrap.is-dragging {
+  opacity: 0.45;
+}
+
+.watchlist-tab-wrap--draggable {
+  cursor: grab;
+}
+
+.watchlist-tab-wrap--draggable.is-dragging {
+  cursor: grabbing;
+}
+
+.watchlist-tab-wrap.drag-over {
+  outline: 1px dashed var(--accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.watchlist-tab {
+  padding: 4px 11px;
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  background: var(--bg3);
+  color: var(--text2);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border .15s, color .15s, background .15s;
+}
+
+.watchlist-tab-wrap--draggable .watchlist-tab {
+  cursor: grab;
+}
+
+.watchlist-tab-wrap--draggable.is-dragging .watchlist-tab {
+  cursor: grabbing;
+}
+
+.watchlist-tab.on {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-hover-bg);
+}
+
+.watchlist-tab--new {
+  border-style: dashed;
+  color: var(--text3);
+}
+
+.watchlist-tab--new:hover,
+.watchlist-tab:hover:not(.on) {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-subtle-bg);
+}
+
+.watchlist-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.watchlist-delete-btn {
+  font-size: 10px;
+  color: var(--red);
+  border-color: var(--border2);
+  background: var(--bg3);
+}
+
+.watchlist-delete-btn:hover {
+  color: var(--red);
+  border-color: var(--red);
+  background: var(--red-dim-bg);
+}
+
+.watchlist-title-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: text;
+  font: inherit;
+}
+
+.watchlist-title-btn .card-label {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.watchlist-title-btn:hover .card-label {
+  color: var(--accent);
+}
+
+.watchlist-title-rename,
+.watchlist-tab-rename {
+  padding: 4px 8px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  min-width: 100px;
+}
+
+.watchlist-title-rename {
+  font-size: 10px;
+}
+
+.watchlist-create-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.watchlist-create-input {
+  width: 140px;
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.watchlist-create-btn {
+  padding: 4px 10px;
+  font-size: 10px;
+}
+
+.watchlist-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.watchlist-search-wrap {
+  position: relative;
+}
+
+.watchlist-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text3);
+  pointer-events: none;
+}
+
+.watchlist-search {
+  padding-left: 32px;
+  font-size: 12px;
+}
+
+.watchlist-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.watchlist-chip {
+  padding: 3px 9px;
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  background: var(--bg3);
+  color: var(--text2);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9.5px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: border .15s, color .15s, background .15s;
+}
+
+.watchlist-chip.on {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-hover-bg);
+}
+
+.watchlist-chip:hover:not(.on) {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-subtle-bg);
+}
+
+.watchlist-add {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.watchlist-add-fields {
+  display: grid;
+  grid-template-columns: minmax(96px, 0.75fr) minmax(140px, 1.25fr) minmax(140px, 1fr);
+  gap: 10px;
+  width: 100%;
+  align-items: end;
+}
+
+.watchlist-add-field--tags .watchlist-item-tags--editable {
+  min-height: 28px;
+  min-width: 0;
+  padding: 4px 6px;
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  background: var(--bg3);
+}
+
+.watchlist-add-field {
+  margin-bottom: 0;
+  min-width: 0;
+}
+
+.watchlist-add-btn {
+  padding: 8px 16px;
+  font-size: 10px;
+}
+
+.watchlist-add-error {
+  font-size: 10px;
+  color: var(--red);
+  margin-bottom: 8px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.watchlist-empty {
+  text-align: center;
+  padding: 24px 12px;
+  color: var(--text3);
+  font-size: 11px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.watchlist-table-wrap {
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 4px;
+}
+
+.watchlist-th {
+  padding: 6px 10px;
+  font-size: 9.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text3);
+  background: var(--bg3);
+  border-bottom: 1px solid var(--border);
+  font-weight: 500;
+}
+
+.watchlist-td {
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+.watchlist-item-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.watchlist-item-tags--editable {
+  min-width: 120px;
+}
+
+.watchlist-item-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 1px;
+  padding: 2px 3px 2px 7px;
+  border-radius: 10px;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+  border: 1px solid var(--border2);
+  color: var(--text2);
+  background: var(--bg4);
+}
+
+.watchlist-item-tag-label {
+  line-height: 1.2;
+}
+
+.watchlist-item-tag-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .12s, color .12s, background .12s;
+}
+
+.watchlist-item-tag:hover .watchlist-item-tag-remove {
+  opacity: 1;
+}
+
+.watchlist-item-tag-remove:hover {
+  color: var(--red);
+  background: var(--red-dim-bg);
+}
+
+.watchlist-item-tag.highlighted {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-subtle-bg);
+}
+
+.watchlist-tags-builder {
+  flex: 1;
+  min-width: 56px;
+  max-width: 120px;
+  padding: 2px 4px;
+  border: none;
+  border-bottom: 1px dashed var(--border2);
+  background: transparent;
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.3px;
+  outline: none;
+}
+
+.watchlist-tags-builder::placeholder {
+  color: var(--text3);
+}
+
+.watchlist-tags-builder:focus {
+  border-bottom-color: var(--accent);
+}
+
+.watchlist-comment-input {
+  padding: 4px 8px;
+  font-size: 11px;
+  min-width: 140px;
+}
+
+.watchlist-remove-btn {
+  padding: 2px 6px;
+}
+
