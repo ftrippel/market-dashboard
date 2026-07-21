@@ -1,19 +1,17 @@
 import { loadWatchlistStorage, saveWatchlistStorage } from '../features/watchlist/watchlistStorage';
 import type { Watchlist, WatchlistItem, WatchlistStorage } from '../features/watchlist/types';
-import type { HoverPreviewPlacement, SparklineMode } from '../context/SettingsContext';
+import type { SparklineMode } from '../context/SettingsContext';
 import type { Theme } from '../context/ThemeContext';
 import { config } from '../config';
 
-export const SETTINGS_EXPORT_VERSION = 1;
+export const SETTINGS_EXPORT_VERSION = 2;
 
 export interface DashboardSettingsExport {
   version: typeof SETTINGS_EXPORT_VERSION;
   exportedAt: string;
   theme: Theme;
   enableHoverPreview: boolean;
-  hoverPreviewPlacement: HoverPreviewPlacement;
   sparklineMode: SparklineMode;
-  useCustomCharts: boolean;
   calculator: {
     equity: number;
     riskPct: number;
@@ -24,12 +22,13 @@ export interface DashboardSettingsExport {
 const STORAGE_KEYS = {
   theme: 'market-dashboard-theme',
   enableHoverPreview: 'enableHoverPreview',
-  hoverPreviewPlacement: 'hoverPreviewPlacement',
   sparklineMode: 'sparklineMode',
-  useCustomCharts: 'useCustomCharts',
   calcEquity: 'agy_calc_equity',
   calcRiskPct: 'agy_calc_riskPct',
 } as const;
+
+/** Obsolete keys removed in settings export v2. */
+const OBSOLETE_STORAGE_KEYS = ['hoverPreviewPlacement', 'useCustomCharts'] as const;
 
 function readTheme(): Theme {
   const stored = localStorage.getItem(STORAGE_KEYS.theme);
@@ -40,12 +39,6 @@ function readBoolean(key: string, fallback: boolean): boolean {
   const stored = localStorage.getItem(key);
   if (stored === null) return fallback;
   return stored === 'true';
-}
-
-function readHoverPreviewPlacement(): HoverPreviewPlacement {
-  const stored = localStorage.getItem(STORAGE_KEYS.hoverPreviewPlacement);
-  if (stored === 'above-below' || stored === 'left-right') return stored;
-  return config.tradingView.hoverPreviewPlacement;
 }
 
 function readSparklineMode(): SparklineMode {
@@ -69,9 +62,7 @@ export function exportDashboardSettings(): DashboardSettingsExport {
       STORAGE_KEYS.enableHoverPreview,
       config.tradingView.enableHoverPreview,
     ),
-    hoverPreviewPlacement: readHoverPreviewPlacement(),
     sparklineMode: readSparklineMode(),
-    useCustomCharts: readBoolean(STORAGE_KEYS.useCustomCharts, config.tradingView.useCustomCharts),
     calculator: {
       equity: readCalculatorNumber(STORAGE_KEYS.calcEquity, 10_000_000),
       riskPct: readCalculatorNumber(STORAGE_KEYS.calcRiskPct, 0.3),
@@ -86,10 +77,6 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function parseTheme(value: unknown): Theme | null {
   return value === 'light' || value === 'dark' ? value : null;
-}
-
-function parseHoverPreviewPlacement(value: unknown): HoverPreviewPlacement | null {
-  return value === 'above-below' || value === 'left-right' ? value : null;
 }
 
 function parseSparklineMode(value: unknown): SparklineMode | null {
@@ -131,63 +118,73 @@ function parseWatchlistStorage(value: unknown): WatchlistStorage | null {
   return { watchlists, activeId };
 }
 
-export function parseDashboardSettingsExport(raw: unknown): DashboardSettingsExport {
-  if (!isRecord(raw)) {
-    throw new Error('Invalid settings file: expected a JSON object.');
-  }
-
-  if (raw.version !== SETTINGS_EXPORT_VERSION) {
-    throw new Error(`Unsupported settings version: ${String(raw.version)}`);
-  }
-
+function parseSharedSettings(raw: Record<string, unknown>): Omit<DashboardSettingsExport, 'version' | 'exportedAt'> | null {
   const theme = parseTheme(raw.theme);
-  const hoverPreviewPlacement = parseHoverPreviewPlacement(raw.hoverPreviewPlacement);
   const sparklineMode = parseSparklineMode(raw.sparklineMode);
 
-  if (!theme || !hoverPreviewPlacement || !sparklineMode) {
-    throw new Error('Invalid settings file: missing or invalid dashboard preferences.');
+  if (!theme || !sparklineMode) {
+    return null;
   }
 
-  if (typeof raw.enableHoverPreview !== 'boolean' || typeof raw.useCustomCharts !== 'boolean') {
-    throw new Error('Invalid settings file: missing chart preference flags.');
+  if (typeof raw.enableHoverPreview !== 'boolean') {
+    return null;
   }
 
   if (!isRecord(raw.calculator)) {
-    throw new Error('Invalid settings file: missing calculator settings.');
+    return null;
   }
 
   const equity = Number(raw.calculator.equity);
   const riskPct = Number(raw.calculator.riskPct);
   if (!Number.isFinite(equity) || !Number.isFinite(riskPct)) {
-    throw new Error('Invalid settings file: calculator values must be numbers.');
+    return null;
   }
 
   const watchlists = parseWatchlistStorage(raw.watchlists);
   if (!watchlists) {
-    throw new Error('Invalid settings file: missing or invalid watchlists.');
+    return null;
+  }
+
+  return {
+    theme,
+    enableHoverPreview: raw.enableHoverPreview,
+    sparklineMode,
+    calculator: { equity, riskPct },
+    watchlists,
+  };
+}
+
+export function parseDashboardSettingsExport(raw: unknown): DashboardSettingsExport {
+  if (!isRecord(raw)) {
+    throw new Error('Invalid settings file: expected a JSON object.');
+  }
+
+  const version = raw.version;
+  if (version !== 1 && version !== 2) {
+    throw new Error(`Unsupported settings version: ${String(raw.version)}`);
+  }
+
+  const shared = parseSharedSettings(raw);
+  if (!shared) {
+    throw new Error('Invalid settings file: missing or invalid dashboard preferences.');
   }
 
   return {
     version: SETTINGS_EXPORT_VERSION,
     exportedAt: typeof raw.exportedAt === 'string' ? raw.exportedAt : new Date().toISOString(),
-    theme,
-    enableHoverPreview: raw.enableHoverPreview,
-    hoverPreviewPlacement,
-    sparklineMode,
-    useCustomCharts: raw.useCustomCharts,
-    calculator: { equity, riskPct },
-    watchlists,
+    ...shared,
   };
 }
 
 export function importDashboardSettings(data: DashboardSettingsExport): void {
   localStorage.setItem(STORAGE_KEYS.theme, data.theme);
   localStorage.setItem(STORAGE_KEYS.enableHoverPreview, String(data.enableHoverPreview));
-  localStorage.setItem(STORAGE_KEYS.hoverPreviewPlacement, data.hoverPreviewPlacement);
   localStorage.setItem(STORAGE_KEYS.sparklineMode, data.sparklineMode);
-  localStorage.setItem(STORAGE_KEYS.useCustomCharts, String(data.useCustomCharts));
   localStorage.setItem(STORAGE_KEYS.calcEquity, String(data.calculator.equity));
   localStorage.setItem(STORAGE_KEYS.calcRiskPct, String(data.calculator.riskPct));
+  for (const key of OBSOLETE_STORAGE_KEYS) {
+    localStorage.removeItem(key);
+  }
   saveWatchlistStorage(data.watchlists);
 }
 

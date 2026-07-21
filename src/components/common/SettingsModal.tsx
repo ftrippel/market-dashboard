@@ -1,6 +1,6 @@
 import { useCallback, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useSettings, type HoverPreviewPlacement } from '../../context/SettingsContext';
+import { useSettings } from '../../context/SettingsContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import {
   downloadDashboardSettings,
@@ -20,12 +20,8 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
   const {
     enableHoverPreview,
     setEnableHoverPreview,
-    hoverPreviewPlacement,
-    setHoverPreviewPlacement,
     sparklineMode,
     setSparklineMode,
-    useCustomCharts,
-    setUseCustomCharts,
   } = useSettings();
 
   const onCloseRef = useRef(onClose);
@@ -40,8 +36,6 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
 
   const closePenClick = usePenCompatibleClick(close);
   const hoverPreviewPenToggle = usePenCheckboxToggle(setEnableHoverPreview);
-  const customChartsPenToggle = usePenCheckboxToggle(setUseCustomCharts);
-  const hoverPlacementPenActivate = usePenSelectActivate();
   const sparklineModePenActivate = usePenSelectActivate();
   const importInputRef = useRef<HTMLInputElement>(null);
   const [importError, setImportError] = useState<string | null>(null);
@@ -156,78 +150,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             />
           </label>
           <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
-            When enabled, hovering over any financial ticker symbol displays a 1-year daily historical line chart.
-          </p>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', opacity: enableHoverPreview ? 1 : 0.5 }}>
-            <label
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                cursor: enableHoverPreview ? 'pointer' : 'default',
-                userSelect: 'none',
-              }}
-            >
-              <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
-                Hover Preview Position
-              </span>
-              <select
-                value={hoverPreviewPlacement}
-                onChange={(e) => setHoverPreviewPlacement(e.target.value as HoverPreviewPlacement)}
-                onPointerUp={hoverPlacementPenActivate}
-                disabled={!enableHoverPreview}
-                style={{
-                  background: 'var(--bg2)',
-                  color: 'var(--text)',
-                  border: '1px solid var(--border2)',
-                  borderRadius: '4px',
-                  padding: '4px 8px',
-                  fontSize: '12px',
-                  fontWeight: 500,
-                  cursor: enableHoverPreview ? 'pointer' : 'default',
-                  outline: 'none',
-                }}
-              >
-                <option value="above-below">Above / Below</option>
-                <option value="left-right">Left / Right</option>
-              </select>
-            </label>
-            <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
-              Choose whether the hover preview appears vertically (Above / Below) or horizontally (Left / Right) relative to the hovered item.
-            </p>
-          </div>
-
-          <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
-
-          <label
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              userSelect: 'none',
-            }}
-          >
-            <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
-              Use Yahoo Finance Charts
-            </span>
-            <input
-              type="checkbox"
-              checked={useCustomCharts}
-              onChange={(e) => setUseCustomCharts(e.target.checked)}
-              onPointerUp={customChartsPenToggle}
-              style={{
-                width: '18px',
-                height: '18px',
-                accentColor: 'var(--accent)',
-                cursor: 'pointer',
-              }}
-            />
-          </label>
-          <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
-            When enabled, full-size charts are drawn locally with lightweight-charts using Yahoo Finance data
-            (candlesticks with EMA 20, SMA 50, and SMA 200) instead of the embedded TradingView widget.
+            When enabled, hovering over any financial ticker symbol displays a 1-year daily historical line chart to the left or right of the symbol.
           </p>
 
           <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />

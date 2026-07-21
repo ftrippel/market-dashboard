@@ -14,12 +14,8 @@ export const config = {
   tradingView: {
     /** Enable hover preview chart (enabled by default). */
     enableHoverPreview: true,
-    /** Hover preview placement when no user preference is stored. */
-    hoverPreviewPlacement: 'left-right' as const,
     /** Enable display name / symbol underlining (disabled by default). */
     enableUnderline: false,
-    /** Render modal charts with lightweight-charts + Yahoo Finance instead of TradingView embed. */
-    useCustomCharts: true,
   },
 } as const;
 

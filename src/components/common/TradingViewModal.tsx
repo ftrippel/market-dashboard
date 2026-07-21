@@ -2,12 +2,10 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useChartModal } from '../../context/ChartModalContext';
 import { useTheme } from '../../context/ThemeContext';
-import { useSettings } from '../../context/SettingsContext';
 import { useSymbolPreviewActions } from '../../context/SymbolPreviewContext';
 import { colors } from '../../utils/formatting';
 import { config } from '../../config';
 import { Icon } from './Icon';
-import { TradingViewAdvancedChart } from './TradingViewAdvancedChart';
 import { TradingViewCustomChart } from './TradingViewCustomChart';
 import { ChartOpenMenu } from './ChartOpenMenu';
 import { getSymbolMeta } from '../../data/symbolMaps';
@@ -16,7 +14,6 @@ import { usePenCompatibleClick } from '../../utils/penClick';
 export function TradingViewModal() {
   const { chart, openChart, closeChart, setChartSymbol } = useChartModal();
   const { theme } = useTheme();
-  const { useCustomCharts } = useSettings();
   const [chartReady, setChartReady] = useState(false);
   const [openMenu, setOpenMenu] = useState(false);
   const [symbolInput, setSymbolInput] = useState('');
@@ -55,7 +52,7 @@ export function TradingViewModal() {
 
   useEffect(() => {
     setChartReady(false);
-  }, [chart.tvSym, chart.rawSym, theme, useCustomCharts]);
+  }, [chart.rawSym, theme]);
 
   const handleChartReady = useCallback(() => {
     setChartReady(true);
@@ -72,11 +69,7 @@ export function TradingViewModal() {
 
   if (!chart.open) return null;
 
-  const displaySym = hasSymbol
-    ? useCustomCharts
-      ? getSymbolMeta(chart.rawSym).sym
-      : chart.tvSym
-    : '';
+  const displaySym = hasSymbol ? getSymbolMeta(chart.rawSym).sym : '';
 
   return createPortal(
     <div
@@ -209,21 +202,12 @@ export function TradingViewModal() {
                   Loading chart...
                 </div>
               )}
-              {useCustomCharts ? (
-                <TradingViewCustomChart
-                  key={`${chart.rawSym}-${theme}`}
-                  symbol={chart.rawSym}
-                  theme={theme}
-                  onReady={handleChartReady}
-                />
-              ) : (
-                <TradingViewAdvancedChart
-                  key={`${chart.tvSym}-${theme}`}
-                  symbol={chart.tvSym}
-                  theme={theme}
-                  onReady={handleChartReady}
-                />
-              )}
+              <TradingViewCustomChart
+                key={`${chart.rawSym}-${theme}`}
+                symbol={chart.rawSym}
+                theme={theme}
+                onReady={handleChartReady}
+              />
             </>
           )}
         </div>

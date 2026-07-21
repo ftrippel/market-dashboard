@@ -2,14 +2,12 @@ import { useEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useSymbolPreviewActions, useSymbolPreviewState } from '../../context/SymbolPreviewContext';
 import { useTheme } from '../../context/ThemeContext';
-import { useSettings } from '../../context/SettingsContext';
 import { TradingViewMiniChart } from './TradingViewMiniChart';
 
 export function SymbolPreviewOverlay() {
   const preview = useSymbolPreviewState();
   const { onMouseEnterPreview, onMouseLeavePreview } = useSymbolPreviewActions();
   const { theme } = useTheme();
-  const { hoverPreviewPlacement } = useSettings();
   const [style, setStyle] = useState<React.CSSProperties>({ display: 'none' });
   const [chartReady, setChartReady] = useState(false);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -25,49 +23,20 @@ export function SymbolPreviewOverlay() {
     const overlayHeight = 240;
     const rect = preview.anchorRect;
 
-    let left = 0;
-    let top = 0;
-    let origin = 'bottom center';
+    const linkMiddle = rect.top + rect.height / 2;
+    let top = linkMiddle - overlayHeight / 2;
+    top = Math.max(10, Math.min(top, window.innerHeight - overlayHeight - 10));
 
-    if (hoverPreviewPlacement === 'left-right') {
-      // Calculate vertical position (centered relative to the link)
-      const linkMiddle = rect.top + rect.height / 2;
-      top = linkMiddle - overlayHeight / 2;
-      // Clamp to screen viewport boundaries vertically
-      top = Math.max(10, Math.min(top, window.innerHeight - overlayHeight - 10));
+    let left = rect.right + 8;
+    let placeLeft = false;
 
-      // Calculate horizontal position (default to the right of the link)
-      left = rect.right + 8;
-      let placeLeft = false;
-
-      if (left + overlayWidth > window.innerWidth - 10) {
-        // Not enough space to the right, place to the left of the link
-        left = rect.left - overlayWidth - 8;
-        placeLeft = true;
-      }
-
-      // Clamp left horizontally
-      left = Math.max(10, Math.min(left, window.innerWidth - overlayWidth - 10));
-      origin = placeLeft ? 'center right' : 'center left';
-    } else {
-      // above-below
-      // Calculate horizontal center
-      const linkCenter = rect.left + rect.width / 2;
-      left = linkCenter - overlayWidth / 2;
-      // Clamp to screen viewport boundaries horizontally
-      left = Math.max(10, Math.min(left, window.innerWidth - overlayWidth - 10));
-
-      // Calculate vertical position (default above the link)
-      top = rect.top - overlayHeight - 8;
-      let placeBelow = false;
-
-      if (top < 10) {
-        // Not enough space above, place below the link
-        top = rect.bottom + 8;
-        placeBelow = true;
-      }
-      origin = placeBelow ? 'top center' : 'bottom center';
+    if (left + overlayWidth > window.innerWidth - 10) {
+      left = rect.left - overlayWidth - 8;
+      placeLeft = true;
     }
+
+    left = Math.max(10, Math.min(left, window.innerWidth - overlayWidth - 10));
+    const origin = placeLeft ? 'center right' : 'center left';
 
     setStyle({
       position: 'fixed',
@@ -79,7 +48,7 @@ export function SymbolPreviewOverlay() {
       flexDirection: 'column',
       transformOrigin: origin,
     });
-  }, [preview.open, preview.anchorRect, hoverPreviewPlacement]);
+  }, [preview.open, preview.anchorRect]);
 
   if (!preview.open) return null;
 
