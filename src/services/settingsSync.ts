@@ -31,6 +31,7 @@ import {
   hasCloudBaseline,
   hasPendingUpload,
   markPendingUpload,
+  REMOTE_SETTINGS_APPLIED_EVENT,
   setLocalBuildNumber,
   setLocalSchemaVersion,
   setServerRevision,
@@ -61,12 +62,17 @@ interface RemoteDocPayload {
 
 const REMOTE_APPLY_PAUSE_MS = 2500;
 const pausedRemoteApply = new Set<SettingsDomain>();
+const pendingRemoteSnapshots = new Map<
+  SettingsDomain,
+  { data: unknown; updatedAt: string; metadata: DomainSyncMetadata }
+>();
 const DOMAIN_SCHEMA_VERSION: Record<SettingsDomain, number> = {
   preferences: 2,
   calculator: 2,
   watchlists: 2,
 };
 const SYNC_BUILD_NUMBER = import.meta.env.VITE_BUILD_NUMBER ?? 'dev';
+const LEGACY_BUILD_NUMBER = 'legacy';
 
 interface DomainSyncMetadata {
   schemaVersion: number;
@@ -96,7 +102,7 @@ function parseBuildNumber(value: string | null | undefined): number | null {
 function getLocalMetadata(domain: SettingsDomain): DomainSyncMetadata {
   return {
     schemaVersion: getLocalSchemaVersion(domain),
-    buildNumber: getLocalBuildNumber(domain) ?? 'legacy',
+    buildNumber: getLocalBuildNumber(domain) ?? LEGACY_BUILD_NUMBER,
   };
 }
 
@@ -148,7 +154,18 @@ function isRemoteNewer(domain: SettingsDomain, remoteUpdatedAt: string): boolean
 
 export function pauseRemoteApply(domain: SettingsDomain, ms = REMOTE_APPLY_PAUSE_MS): void {
   pausedRemoteApply.add(domain);
-  window.setTimeout(() => pausedRemoteApply.delete(domain), ms);
+  window.setTimeout(() => {
+    pausedRemoteApply.delete(domain);
+    const queued = pendingRemoteSnapshots.get(domain);
+    if (!queued) return;
+    pendingRemoteSnapshots.delete(domain);
+    const applied = applyRemoteSnapshot(domain, queued.data, queued.updatedAt, queued.metadata);
+    if (applied) {
+      window.dispatchEvent(
+        new CustomEvent(REMOTE_SETTINGS_APPLIED_EVENT, { detail: { domain } }),
+      );
+    }
+  }, ms);
 }
 
 export function isRemoteApplyPaused(domain: SettingsDomain): boolean {
@@ -233,6 +250,7 @@ function applyRemoteDomain(
 
 function applyCloudEmptyDomain(domain: SettingsDomain, updatedAt: string): void {
   pauseRemoteApply(domain);
+  setServerRevision(domain, updatedAt);
   stampLocalMetadata(domain, getCurrentMetadata(domain));
 
   if (domain === 'preferences') {
@@ -421,6 +439,10 @@ export function applyRemoteSnapshot(
   metadata?: DomainSyncMetadata,
 ): boolean {
   const remoteMetadata = metadata ?? getCurrentMetadata(domain);
+  if (isRemoteApplyPaused(domain)) {
+    pendingRemoteSnapshots.set(domain, { data, updatedAt, metadata: remoteMetadata });
+    return false;
+  }
 
   if (shouldForcePullDueToVersion(domain, remoteMetadata)) {
     return applyRemoteDomain(domain, data, updatedAt, remoteMetadata);
