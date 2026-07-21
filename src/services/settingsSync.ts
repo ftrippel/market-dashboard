@@ -26,9 +26,11 @@ import {
 import { createDefaultWatchlistStorage } from '../features/watchlist/watchlistStorage';
 import {
   EPOCH_ISO,
-  getSettingsLastModified,
+  getServerRevision,
   hasCloudBaseline,
-  setSettingsLastModified,
+  hasPendingUpload,
+  markPendingUpload,
+  setServerRevision,
   SETTINGS_DOMAINS,
   type SettingsDomain,
 } from './settingsEvents';
@@ -69,6 +71,10 @@ function timestampToIso(value: Timestamp | string | undefined): string | null {
   return value.toDate().toISOString();
 }
 
+function isRemoteNewer(domain: SettingsDomain, remoteUpdatedAt: string): boolean {
+  return Date.parse(remoteUpdatedAt) > Date.parse(getServerRevision(domain));
+}
+
 export function pauseRemoteApply(domain: SettingsDomain, ms = REMOTE_APPLY_PAUSE_MS): void {
   pausedRemoteApply.add(domain);
   window.setTimeout(() => pausedRemoteApply.delete(domain), ms);
@@ -99,14 +105,12 @@ function remoteContentDiffers(domain: SettingsDomain, data: unknown): boolean {
   if (domain === 'preferences') {
     const remote = parsePreferencesSettings(data);
     if (!remote) return true;
-    const local = exportPreferencesSettings();
-    return JSON.stringify(local) !== JSON.stringify(remote);
+    return JSON.stringify(exportPreferencesSettings()) !== JSON.stringify(remote);
   }
 
   const remote = parseCalculatorSettings(data);
   if (!remote) return true;
-  const local = exportCalculatorSettings();
-  return JSON.stringify(local) !== JSON.stringify(remote);
+  return JSON.stringify(exportCalculatorSettings()) !== JSON.stringify(remote);
 }
 
 async function fetchRemoteDomain(
@@ -191,32 +195,48 @@ export async function uploadDomain(userId: string, domain: SettingsDomain): Prom
   const snapshot = await getDocFromServer(docRef);
   const payload = snapshot.data() as RemoteDocPayload | undefined;
   const updatedAt = timestampToIso(payload?.updatedAt);
-  setSettingsLastModified(domain, updatedAt ?? new Date().toISOString());
+  if (updatedAt) {
+    setServerRevision(domain, updatedAt);
+    markPendingUpload(domain, false);
+  }
 }
 
 export async function uploadDomains(userId: string, domains: SettingsDomain[]): Promise<void> {
   await Promise.all(domains.map((domain) => uploadDomain(userId, domain)));
 }
 
-/** First sync for a domain: always take cloud (or empty defaults). Never upload local. */
+function pullRemoteDomain(
+  domain: SettingsDomain,
+  data: unknown,
+  updatedAt: string,
+): DomainSyncResult {
+  if (applyRemoteDomain(domain, data, updatedAt)) {
+    return 'downloaded';
+  }
+
+  if (!remoteContentDiffers(domain, data)) {
+    setServerRevision(domain, updatedAt);
+    markPendingUpload(domain, false);
+    return 'unchanged';
+  }
+
+  applyCloudEmptyDomain(domain, updatedAt);
+  return 'downloaded';
+}
+
+/** First session pull: always replace local with cloud (or defaults). Never upload. */
 async function adoptDomainFromCloud(
   userId: string,
   domain: SettingsDomain,
 ): Promise<DomainSyncResult> {
   const remote = await fetchRemoteDomain(userId, domain);
 
-  if (remote && applyRemoteDomain(domain, remote.data, remote.updatedAt)) {
+  if (!remote) {
+    applyCloudEmptyDomain(domain, EPOCH_ISO);
     return 'downloaded';
   }
 
-  if (remote && !remoteContentDiffers(domain, remote.data)) {
-    setSettingsLastModified(domain, remote.updatedAt);
-    return 'unchanged';
-  }
-
-  const updatedAt = remote?.updatedAt ?? EPOCH_ISO;
-  applyCloudEmptyDomain(domain, updatedAt);
-  return 'downloaded';
+  return pullRemoteDomain(domain, remote.data, remote.updatedAt);
 }
 
 async function reconcileDomain(userId: string, domain: SettingsDomain): Promise<DomainSyncResult> {
@@ -224,28 +244,26 @@ async function reconcileDomain(userId: string, domain: SettingsDomain): Promise<
     return adoptDomainFromCloud(userId, domain);
   }
 
-  const localModified = getSettingsLastModified(domain);
   const remote = await fetchRemoteDomain(userId, domain);
 
   if (!remote) {
+    if (hasPendingUpload(domain)) {
+      await uploadDomain(userId, domain);
+      return 'uploaded';
+    }
+    return 'unchanged';
+  }
+
+  if (isRemoteNewer(domain, remote.updatedAt)) {
+    return pullRemoteDomain(domain, remote.data, remote.updatedAt);
+  }
+
+  if (hasPendingUpload(domain) || remoteContentDiffers(domain, remote.data)) {
     await uploadDomain(userId, domain);
     return 'uploaded';
   }
 
-  if (!remoteContentDiffers(domain, remote.data)) {
-    return 'unchanged';
-  }
-
-  const localTime = Date.parse(localModified);
-  const remoteTime = Date.parse(remote.updatedAt);
-
-  if (remoteTime > localTime) {
-    applyRemoteDomain(domain, remote.data, remote.updatedAt);
-    return 'downloaded';
-  }
-
-  await uploadDomain(userId, domain);
-  return 'uploaded';
+  return 'unchanged';
 }
 
 async function migrateLegacyDashboardDoc(userId: string): Promise<boolean> {
@@ -299,20 +317,28 @@ export function summarizeReconcileResult(result: ReconcileResult): SettingsSyncR
   return summarizeResults(result);
 }
 
-export function applyRemoteIfNewer(
+export function applyRemoteSnapshot(
   domain: SettingsDomain,
   data: unknown,
   updatedAt: string,
 ): boolean {
   if (isRemoteApplyPaused(domain)) return false;
-  if (!remoteContentDiffers(domain, data)) return false;
 
   if (!hasCloudBaseline(domain)) {
+    if (!remoteContentDiffers(domain, data)) {
+      setServerRevision(domain, updatedAt);
+      markPendingUpload(domain, false);
+      return false;
+    }
     return applyRemoteDomain(domain, data, updatedAt);
   }
 
-  const localModified = getSettingsLastModified(domain);
-  if (Date.parse(updatedAt) <= Date.parse(localModified)) return false;
+  if (!isRemoteNewer(domain, updatedAt)) return false;
+  if (!remoteContentDiffers(domain, data)) {
+    setServerRevision(domain, updatedAt);
+    markPendingUpload(domain, false);
+    return false;
+  }
 
   return applyRemoteDomain(domain, data, updatedAt);
 }
@@ -324,7 +350,6 @@ export function subscribeToRemoteSettings(
   const unsubs = SETTINGS_DOMAINS.map((domain) =>
     onSnapshot(settingsDocRef(userId, domain), (snapshot) => {
       if (!snapshot.exists()) return;
-      if (snapshot.metadata.fromCache) return;
       if (isRemoteApplyPaused(domain)) return;
 
       const payload = snapshot.data() as RemoteDocPayload;

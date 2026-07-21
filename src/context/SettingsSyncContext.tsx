@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { useAuth } from './AuthContext';
 import {
-  applyRemoteIfNewer,
+  applyRemoteSnapshot,
   reconcileSettings,
   subscribeToRemoteSettings,
   summarizeReconcileResult,
@@ -19,10 +19,11 @@ import {
   type SettingsSyncResult,
 } from '../services/settingsSync';
 import {
-  clearSyncUser,
+  beginCloudSession,
+  endCloudSession,
   hasCloudBaseline,
+  hasPendingUpload,
   isSettingsChangedEvent,
-  prepareSyncForUser,
   REMOTE_SETTINGS_APPLIED_EVENT,
   SETTINGS_CHANGED_EVENT,
   SETTINGS_DOMAINS,
@@ -32,6 +33,7 @@ export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error';
 
 interface SettingsSyncContextValue {
   enabled: boolean;
+  sessionReady: boolean;
   status: SyncStatus;
   statusMessage: string | null;
   lastSyncedAt: Date | null;
@@ -42,6 +44,22 @@ interface SettingsSyncContextValue {
 const SettingsSyncContext = createContext<SettingsSyncContextValue | null>(null);
 
 const UPLOAD_DEBOUNCE_MS = 1500;
+const INITIAL_SYNC_ATTEMPTS = 3;
+
+async function withInitialSyncRetry<T>(fn: () => Promise<T>): Promise<T> {
+  let lastError: unknown;
+  for (let attempt = 0; attempt < INITIAL_SYNC_ATTEMPTS; attempt += 1) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      if (attempt < INITIAL_SYNC_ATTEMPTS - 1) {
+        await new Promise((resolve) => window.setTimeout(resolve, 1000 * (attempt + 1)));
+      }
+    }
+  }
+  throw lastError;
+}
 
 function formatLastSyncedAt(date: Date | null): string | null {
   if (!date) return null;
@@ -70,8 +88,14 @@ function buildStatusMessage(result: SettingsSyncResult, lastSyncedAt: Date | nul
   }
 }
 
+function notifyRemoteApplied(domain: SettingsDomain): void {
+  window.dispatchEvent(
+    new CustomEvent(REMOTE_SETTINGS_APPLIED_EVENT, { detail: { domain } }),
+  );
+}
+
 export function SettingsSyncProvider({ children }: { children: ReactNode }) {
-  const { configured, user } = useAuth();
+  const { configured, user, loading: authLoading } = useAuth();
   const enabled = configured && user !== null;
   const userId = user?.uid ?? null;
 
@@ -79,11 +103,11 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
   const [lastSyncResult, setLastSyncResult] = useState<SettingsSyncResult | null>(null);
+  const [sessionReady, setSessionReady] = useState(false);
 
   const uploadTimersRef = useRef<Partial<Record<SettingsDomain, number>>>({});
-  const pendingUploadsRef = useRef<Set<SettingsDomain>>(new Set());
   const syncingRef = useRef(false);
-  const initialReconcileDoneRef = useRef(false);
+  const sessionUserIdRef = useRef<string | null>(null);
 
   const markSynced = useCallback((result: SettingsSyncResult) => {
     const now = new Date();
@@ -93,19 +117,23 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
     setStatusMessage(buildStatusMessage(result, now));
   }, []);
 
+  const clearUploadTimers = useCallback(() => {
+    for (const timer of Object.values(uploadTimersRef.current)) {
+      if (timer !== undefined) window.clearTimeout(timer);
+    }
+    uploadTimersRef.current = {};
+  }, []);
+
   const runUpload = useCallback(
     async (domains: SettingsDomain[]) => {
-      if (!userId || domains.length === 0) return;
+      if (!userId || !sessionReady || domains.length === 0) return;
 
-      const uniqueDomains = [...new Set(domains)].filter((domain) => hasCloudBaseline(domain));
+      const uniqueDomains = [...new Set(domains)].filter(
+        (domain) => hasCloudBaseline(domain) && hasPendingUpload(domain),
+      );
       if (uniqueDomains.length === 0) return;
 
-      if (syncingRef.current) {
-        for (const domain of uniqueDomains) {
-          pendingUploadsRef.current.add(domain);
-        }
-        return;
-      }
+      if (syncingRef.current) return;
 
       syncingRef.current = true;
       setStatus('syncing');
@@ -119,48 +147,51 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
         setStatusMessage(err instanceof Error ? err.message : 'Cloud sync failed.');
       } finally {
         syncingRef.current = false;
-        const pending = [...pendingUploadsRef.current];
-        pendingUploadsRef.current.clear();
-        if (pending.length > 0) {
-          void runUpload(pending);
-        }
       }
     },
-    [markSynced, userId],
+    [markSynced, sessionReady, userId],
   );
 
-  const flushPendingUploads = useCallback(() => {
-    const pending = [...pendingUploadsRef.current];
-    if (pending.length === 0) return;
-    pendingUploadsRef.current.clear();
-    void runUpload(pending);
-  }, [runUpload]);
-
-  const clearPendingUploads = useCallback(() => {
-    for (const timer of Object.values(uploadTimersRef.current)) {
-      if (timer !== undefined) window.clearTimeout(timer);
-    }
-    uploadTimersRef.current = {};
-    pendingUploadsRef.current.clear();
-  }, []);
-
-  const runReconcile = useCallback(async () => {
+  const runInitialSession = useCallback(async () => {
     if (!userId || syncingRef.current) return;
 
-    clearPendingUploads();
+    syncingRef.current = true;
+    setSessionReady(false);
+    setStatus('syncing');
+    setStatusMessage('Loading cloud settings…');
+    clearUploadTimers();
+
+    try {
+      const result = await withInitialSyncRetry(() => reconcileSettings(userId));
+      markSynced(summarizeReconcileResult(result));
+
+      for (const domain of SETTINGS_DOMAINS) {
+        notifyRemoteApplied(domain);
+      }
+    } catch (err) {
+      setStatus('error');
+      setStatusMessage(err instanceof Error ? err.message : 'Cloud sync failed.');
+    } finally {
+      syncingRef.current = false;
+      setSessionReady(true);
+    }
+  }, [clearUploadTimers, markSynced, userId]);
+
+  const runReconcile = useCallback(async () => {
+    if (!userId || !sessionReady || syncingRef.current) return;
+
     syncingRef.current = true;
     setStatus('syncing');
     setStatusMessage('Syncing with cloud…');
+    clearUploadTimers();
 
     try {
       const result = await reconcileSettings(userId);
       markSynced(summarizeReconcileResult(result));
 
       for (const domain of SETTINGS_DOMAINS) {
-        if (result[domain] === 'downloaded') {
-          window.dispatchEvent(
-            new CustomEvent(REMOTE_SETTINGS_APPLIED_EVENT, { detail: { domain } }),
-          );
+        if (result[domain] !== 'unchanged') {
+          notifyRemoteApplied(domain);
         }
       }
     } catch (err) {
@@ -168,18 +199,20 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
       setStatusMessage(err instanceof Error ? err.message : 'Cloud sync failed.');
     } finally {
       syncingRef.current = false;
-      flushPendingUploads();
     }
-  }, [clearPendingUploads, flushPendingUploads, markSynced, userId]);
+  }, [clearUploadTimers, markSynced, sessionReady, userId]);
 
   const syncNow = useCallback(async () => {
     await runReconcile();
   }, [runReconcile]);
 
   useEffect(() => {
+    if (authLoading) return;
+
     if (!userId) {
-      clearSyncUser();
-      initialReconcileDoneRef.current = false;
+      sessionUserIdRef.current = null;
+      setSessionReady(false);
+      endCloudSession();
       setStatus('idle');
       setStatusMessage(null);
       setLastSyncedAt(null);
@@ -187,24 +220,21 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    prepareSyncForUser(userId);
+    if (sessionUserIdRef.current === userId) return;
 
-    if (initialReconcileDoneRef.current) return;
-
-    initialReconcileDoneRef.current = true;
-    void runReconcile();
-  }, [runReconcile, userId]);
+    sessionUserIdRef.current = userId;
+    beginCloudSession(userId);
+    void runInitialSession();
+  }, [authLoading, runInitialSession, userId]);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || !sessionReady) return;
 
     return subscribeToRemoteSettings(userId, (domain, data, updatedAt) => {
-      const applied = applyRemoteIfNewer(domain, data, updatedAt);
+      const applied = applyRemoteSnapshot(domain, data, updatedAt);
       if (!applied) return;
 
-      window.dispatchEvent(
-        new CustomEvent(REMOTE_SETTINGS_APPLIED_EVENT, { detail: { domain } }),
-      );
+      notifyRemoteApplied(domain);
 
       const now = new Date();
       setLastSyncedAt(now);
@@ -212,24 +242,23 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
       setStatus('synced');
       setStatusMessage(buildStatusMessage('downloaded', now));
     });
-  }, [userId]);
+  }, [sessionReady, userId]);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId || !sessionReady) return;
 
     let hiddenAt: number | null = null;
 
     const handleVisibility = () => {
       if (document.visibilityState === 'hidden') {
         hiddenAt = Date.now();
+        clearUploadTimers();
 
-        const domainsFromTimers = Object.keys(uploadTimersRef.current) as SettingsDomain[];
-        for (const timer of Object.values(uploadTimersRef.current)) {
-          if (timer !== undefined) window.clearTimeout(timer);
-        }
-        uploadTimersRef.current = {};
-        if (domainsFromTimers.length > 0) {
-          void runUpload(domainsFromTimers);
+        const domains = SETTINGS_DOMAINS.filter(
+          (domain) => hasCloudBaseline(domain) && hasPendingUpload(domain),
+        );
+        if (domains.length > 0) {
+          void runUpload(domains);
         }
         return;
       }
@@ -255,15 +284,14 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
       document.removeEventListener('visibilitychange', handleVisibility);
       window.removeEventListener('pageshow', handlePageShow);
     };
-  }, [runReconcile, userId]);
+  }, [clearUploadTimers, runReconcile, runUpload, sessionReady, userId]);
 
   useEffect(() => {
     const scheduleUpload = (event: Event) => {
       if (!isSettingsChangedEvent(event)) return;
 
       const domain = event.detail.domain;
-
-      if (!userId || !hasCloudBaseline(domain)) {
+      if (!userId || !sessionReady || !hasCloudBaseline(domain) || !hasPendingUpload(domain)) {
         return;
       }
 
@@ -281,23 +309,21 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
     window.addEventListener(SETTINGS_CHANGED_EVENT, scheduleUpload);
     return () => {
       window.removeEventListener(SETTINGS_CHANGED_EVENT, scheduleUpload);
-      for (const timer of Object.values(uploadTimersRef.current)) {
-        if (timer !== undefined) window.clearTimeout(timer);
-      }
-      uploadTimersRef.current = {};
+      clearUploadTimers();
     };
-  }, [runUpload, userId]);
+  }, [clearUploadTimers, runUpload, sessionReady, userId]);
 
   const value = useMemo(
     () => ({
       enabled,
+      sessionReady,
       status,
       statusMessage,
       lastSyncedAt,
       lastSyncResult,
       syncNow,
     }),
-    [enabled, status, statusMessage, lastSyncedAt, lastSyncResult, syncNow],
+    [enabled, sessionReady, status, statusMessage, lastSyncedAt, lastSyncResult, syncNow],
   );
 
   return <SettingsSyncContext.Provider value={value}>{children}</SettingsSyncContext.Provider>;

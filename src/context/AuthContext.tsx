@@ -9,12 +9,15 @@ import {
 } from 'react';
 import {
   GoogleAuthProvider,
+  getRedirectResult,
   onAuthStateChanged,
   signInWithPopup,
+  signInWithRedirect,
   signOut as firebaseSignOut,
   type User,
 } from 'firebase/auth';
 import { getFirebaseAuth, isFirebaseConfigured } from '../services/firebase';
+import { isCoarsePointerDevice } from '../utils/device';
 
 interface AuthContextValue {
   configured: boolean;
@@ -40,6 +43,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const auth = getFirebaseAuth();
+    void getRedirectResult(auth).catch(() => {
+      // Ignore redirect errors here; sign-in button can retry.
+    });
+
     return onAuthStateChanged(auth, (nextUser) => {
       setUser(nextUser);
       setLoading(false);
@@ -50,7 +57,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!configured) {
       throw new Error('Firebase is not configured.');
     }
-    await signInWithPopup(getFirebaseAuth(), googleProvider);
+    const auth = getFirebaseAuth();
+    if (isCoarsePointerDevice()) {
+      await signInWithRedirect(auth, googleProvider);
+      return;
+    }
+    await signInWithPopup(auth, googleProvider);
   }, [configured]);
 
   const signOut = useCallback(async () => {

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSettingsSync } from '../../context/SettingsSyncContext';
 import {
   isRemoteSettingsAppliedEvent,
   REMOTE_SETTINGS_APPLIED_EVENT,
@@ -13,6 +14,7 @@ import { touchSettingsModified } from '../../services/settingsEvents';
 import type { Watchlist, WatchlistItem, WatchlistStorage } from './types';
 
 export function useWatchlists() {
+  const { sessionReady } = useSettingsSync();
   const [storage, setStorage] = useState<WatchlistStorage>(() => loadWatchlistStorage());
   const hasHydratedWatchlists = useRef(false);
   const skipNextPersistRef = useRef(false);
@@ -43,10 +45,20 @@ export function useWatchlists() {
   }, [storage]);
 
   useEffect(() => {
+    if (!sessionReady) return;
+    skipNextPersistRef.current = true;
+    const next = loadWatchlistStorage();
+    prevWatchlistsJsonRef.current = JSON.stringify(next.watchlists);
+    setStorage(next);
+  }, [sessionReady]);
+
+  useEffect(() => {
     const handleRemoteApply = (event: Event) => {
       if (!isRemoteSettingsAppliedEvent(event) || event.detail.domain !== 'watchlists') return;
       skipNextPersistRef.current = true;
-      setStorage(loadWatchlistStorage());
+      const next = loadWatchlistStorage();
+      prevWatchlistsJsonRef.current = JSON.stringify(next.watchlists);
+      setStorage(next);
     };
 
     window.addEventListener(REMOTE_SETTINGS_APPLIED_EVENT, handleRemoteApply);
