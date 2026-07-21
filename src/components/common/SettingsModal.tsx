@@ -14,6 +14,7 @@ import {
   type MaType,
 } from '../../types/chartMaSettings';
 import { dismissOverlay } from '../../utils/focus';
+import { formatAuthError } from '../../utils/authErrors';
 import { useOverlayDismiss } from '../../utils/overlayStack';
 import { usePenCheckboxToggle, usePenCompatibleClick, usePenSelectActivate } from '../../utils/penClick';
 import { Icon } from './Icon';
@@ -114,7 +115,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     try {
       await signInWithGoogle();
     } catch (err) {
-      setAuthError(err instanceof Error ? err.message : 'Sign-in failed.');
+      setAuthError(formatAuthError(err));
     }
   }, [signInWithGoogle]);
 
@@ -123,7 +124,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     try {
       await signOut();
     } catch (err) {
-      setAuthError(err instanceof Error ? err.message : 'Sign-out failed.');
+      setAuthError(formatAuthError(err));
     }
   }, [signOut]);
 
