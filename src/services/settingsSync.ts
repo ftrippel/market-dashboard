@@ -16,6 +16,7 @@ import {
   parseCalculatorSettings,
   parsePreferencesSettings,
   mergeWatchlists,
+  mergeWatchlistsFromServerSnapshot,
   parseWatchlistsSyncPayload,
   watchlistsContentEqual,
   type CalculatorSettings,
@@ -25,7 +26,6 @@ import {
 import {
   getSettingsLastModified,
   setSettingsLastModified,
-  touchSettingsModified,
   SETTINGS_DOMAINS,
   type SettingsDomain,
 } from './settingsEvents';
@@ -159,8 +159,9 @@ function exportDomain(domain: SettingsDomain): unknown {
 export async function uploadDomain(userId: string, domain: SettingsDomain): Promise<void> {
   pauseRemoteApply(domain);
 
+  const docRef = settingsDocRef(userId, domain);
   await setDoc(
-    settingsDocRef(userId, domain),
+    docRef,
     {
       data: exportDomain(domain),
       updatedAt: serverTimestamp(),
@@ -168,7 +169,10 @@ export async function uploadDomain(userId: string, domain: SettingsDomain): Prom
     { merge: true },
   );
 
-  setSettingsLastModified(domain, new Date().toISOString());
+  const snapshot = await getDocFromServer(docRef);
+  const payload = snapshot.data() as RemoteDocPayload | undefined;
+  const updatedAt = timestampToIso(payload?.updatedAt);
+  setSettingsLastModified(domain, updatedAt ?? new Date().toISOString());
 }
 
 export async function uploadDomains(userId: string, domains: SettingsDomain[]): Promise<void> {
@@ -318,23 +322,11 @@ export function applyRemoteIfNewer(
     const local = exportWatchlistsForSync().watchlists;
     if (watchlistsContentEqual(local, remote.watchlists)) return false;
 
-    const mergeContext = {
-      localUpdatedAt: getSettingsLastModified('watchlists'),
-      remoteUpdatedAt: updatedAt,
-    };
-    const merged = mergeWatchlists(local, remote.watchlists, mergeContext);
-    const localChanged = !watchlistsContentEqual(local, merged);
-    const remoteChanged = !watchlistsContentEqual(remote.watchlists, merged);
+    const merged = mergeWatchlistsFromServerSnapshot(local, remote.watchlists);
+    if (watchlistsContentEqual(local, merged)) return false;
 
-    if (localChanged) {
-      applyWatchlistsFromSync({ watchlists: merged }, { source: 'remote', updatedAt });
-    }
-
-    if (remoteChanged) {
-      touchSettingsModified('watchlists');
-    }
-
-    return localChanged;
+    applyWatchlistsFromSync({ watchlists: merged }, { source: 'remote', updatedAt });
+    return true;
   }
 
   if (!remoteContentDiffers(domain, data)) return false;

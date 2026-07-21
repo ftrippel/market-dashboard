@@ -117,6 +117,10 @@ function isSymSubset(subset: Set<string>, superset: Set<string>): boolean {
   return true;
 }
 
+function isProperSymSubset(subset: Set<string>, superset: Set<string>): boolean {
+  return subset.size < superset.size && isSymSubset(subset, superset);
+}
+
 function mergeTags(a: string[], b: string[]): string[] {
   const seen = new Set<string>();
   const merged: string[] = [];
@@ -194,18 +198,48 @@ function mergeWatchlistItems(
     return mergeWatchlistItemsUnion(localItems, remoteItems);
   }
 
-  const oneSideIsSubset =
-    isSymSubset(remoteSyms, localSyms) || isSymSubset(localSyms, remoteSyms);
-
-  if (remoteNewer && oneSideIsSubset) {
+  // Deletion synced to cloud — always apply even if local clock is ahead of server.
+  if (isProperSymSubset(remoteSyms, localSyms)) {
     return mergeWatchlistItemsPreferRemoteList(localItems, remoteItems);
   }
 
-  if (localNewer && oneSideIsSubset) {
-    return mergeWatchlistItemsPreferLocalList(localItems, remoteItems);
+  if (isProperSymSubset(localSyms, remoteSyms)) {
+    if (localNewer) {
+      return mergeWatchlistItemsPreferLocalList(localItems, remoteItems);
+    }
+    return mergeWatchlistItemsPreferRemoteList(localItems, remoteItems);
   }
 
   return mergeWatchlistItemsUnion(localItems, remoteItems);
+}
+
+/** Realtime server snapshot: cloud item lists win; merge tags/comments from local. */
+export function mergeWatchlistsFromServerSnapshot(
+  local: Watchlist[],
+  remote: Watchlist[],
+): Watchlist[] {
+  const localById = new Map(local.map((watchlist) => [watchlist.id, watchlist]));
+  const merged: Watchlist[] = [];
+  const seenIds = new Set<string>();
+
+  for (const remoteWatchlist of remote) {
+    const localWatchlist = localById.get(remoteWatchlist.id);
+    merged.push({
+      id: remoteWatchlist.id,
+      name: localWatchlist?.name ?? remoteWatchlist.name,
+      items: localWatchlist
+        ? mergeWatchlistItemsPreferRemoteList(localWatchlist.items, remoteWatchlist.items)
+        : remoteWatchlist.items,
+    });
+    seenIds.add(remoteWatchlist.id);
+  }
+
+  for (const localWatchlist of local) {
+    if (seenIds.has(localWatchlist.id)) continue;
+    merged.push(localWatchlist);
+  }
+
+  return merged;
 }
 
 /**
