@@ -1,4 +1,4 @@
-import { loadWatchlistStorage, persistWatchlistStorage } from '../features/watchlist/watchlistStorage';
+import { createDefaultWatchlistStorage, loadWatchlistStorage, persistWatchlistStorage } from '../features/watchlist/watchlistStorage';
 import type { Watchlist, WatchlistItem, WatchlistStorage } from '../features/watchlist/types';
 import type { SparklineMode } from '../context/SettingsContext';
 import type { Theme } from '../context/ThemeContext';
@@ -85,6 +85,21 @@ export function exportCalculatorSettings(): CalculatorSettings {
   };
 }
 
+export function getDefaultPreferencesSettings(): PreferencesSettings {
+  return {
+    theme: 'dark',
+    enableHoverPreview: config.tradingView.enableHoverPreview,
+    sparklineMode: 'line',
+  };
+}
+
+export function getDefaultCalculatorSettings(): CalculatorSettings {
+  return {
+    equity: 10_000_000,
+    riskPct: 0.3,
+  };
+}
+
 export function exportWatchlistsSettings(): WatchlistStorage {
   return loadWatchlistStorage();
 }
@@ -99,190 +114,6 @@ export function exportWatchlistsForSync(): WatchlistsSyncPayload {
 
 export function watchlistsContentEqual(a: Watchlist[], b: Watchlist[]): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
-}
-
-export interface WatchlistMergeContext {
-  localUpdatedAt: string;
-  remoteUpdatedAt: string;
-}
-
-function watchlistItemSymSet(items: WatchlistItem[]): Set<string> {
-  return new Set(items.map((item) => item.sym));
-}
-
-function isSymSubset(subset: Set<string>, superset: Set<string>): boolean {
-  for (const sym of subset) {
-    if (!superset.has(sym)) return false;
-  }
-  return true;
-}
-
-function isProperSymSubset(subset: Set<string>, superset: Set<string>): boolean {
-  return subset.size < superset.size && isSymSubset(subset, superset);
-}
-
-function mergeTags(a: string[], b: string[]): string[] {
-  const seen = new Set<string>();
-  const merged: string[] = [];
-  for (const tag of [...a, ...b]) {
-    const key = tag.toLowerCase();
-    if (seen.has(key)) continue;
-    seen.add(key);
-    merged.push(tag);
-  }
-  return merged;
-}
-
-function mergeWatchlistItem(local: WatchlistItem, remote: WatchlistItem): WatchlistItem {
-  const localComment = local.comment?.trim() ?? '';
-  const remoteComment = remote.comment?.trim() ?? '';
-  return {
-    sym: local.sym,
-    tags: mergeTags(local.tags, remote.tags),
-    comment: localComment || remoteComment,
-  };
-}
-
-function mergeWatchlistItemsUnion(localItems: WatchlistItem[], remoteItems: WatchlistItem[]): WatchlistItem[] {
-  const localBySym = new Map(localItems.map((item) => [item.sym, item]));
-  const merged: WatchlistItem[] = [];
-  const seen = new Set<string>();
-
-  for (const remoteItem of remoteItems) {
-    const localItem = localBySym.get(remoteItem.sym);
-    merged.push(localItem ? mergeWatchlistItem(localItem, remoteItem) : remoteItem);
-    seen.add(remoteItem.sym);
-  }
-
-  for (const localItem of localItems) {
-    if (seen.has(localItem.sym)) continue;
-    merged.push(localItem);
-    seen.add(localItem.sym);
-  }
-
-  return merged;
-}
-
-function mergeWatchlistItemsPreferRemoteList(
-  localItems: WatchlistItem[],
-  remoteItems: WatchlistItem[],
-): WatchlistItem[] {
-  const localBySym = new Map(localItems.map((item) => [item.sym, item]));
-  return remoteItems.map((remoteItem) => {
-    const localItem = localBySym.get(remoteItem.sym);
-    return localItem ? mergeWatchlistItem(localItem, remoteItem) : remoteItem;
-  });
-}
-
-function mergeWatchlistItemsPreferLocalList(
-  localItems: WatchlistItem[],
-  remoteItems: WatchlistItem[],
-): WatchlistItem[] {
-  const remoteBySym = new Map(remoteItems.map((item) => [item.sym, item]));
-  return localItems.map((localItem) => {
-    const remoteItem = remoteBySym.get(localItem.sym);
-    return remoteItem ? mergeWatchlistItem(localItem, remoteItem) : localItem;
-  });
-}
-
-function mergeWatchlistItems(
-  localItems: WatchlistItem[],
-  remoteItems: WatchlistItem[],
-  localNewer: boolean,
-  remoteNewer: boolean,
-): WatchlistItem[] {
-  const localSyms = watchlistItemSymSet(localItems);
-  const remoteSyms = watchlistItemSymSet(remoteItems);
-
-  if (localSyms.size === remoteSyms.size && isSymSubset(localSyms, remoteSyms)) {
-    return mergeWatchlistItemsUnion(localItems, remoteItems);
-  }
-
-  // Deletion synced to cloud — always apply even if local clock is ahead of server.
-  if (isProperSymSubset(remoteSyms, localSyms)) {
-    return mergeWatchlistItemsPreferRemoteList(localItems, remoteItems);
-  }
-
-  if (isProperSymSubset(localSyms, remoteSyms)) {
-    if (localNewer) {
-      return mergeWatchlistItemsPreferLocalList(localItems, remoteItems);
-    }
-    return mergeWatchlistItemsPreferRemoteList(localItems, remoteItems);
-  }
-
-  return mergeWatchlistItemsUnion(localItems, remoteItems);
-}
-
-/** Realtime server snapshot: cloud item lists win; merge tags/comments from local. */
-export function mergeWatchlistsFromServerSnapshot(
-  local: Watchlist[],
-  remote: Watchlist[],
-): Watchlist[] {
-  const localById = new Map(local.map((watchlist) => [watchlist.id, watchlist]));
-  const merged: Watchlist[] = [];
-  const seenIds = new Set<string>();
-
-  for (const remoteWatchlist of remote) {
-    const localWatchlist = localById.get(remoteWatchlist.id);
-    merged.push({
-      id: remoteWatchlist.id,
-      name: localWatchlist?.name ?? remoteWatchlist.name,
-      items: localWatchlist
-        ? mergeWatchlistItemsPreferRemoteList(localWatchlist.items, remoteWatchlist.items)
-        : remoteWatchlist.items,
-    });
-    seenIds.add(remoteWatchlist.id);
-  }
-
-  for (const localWatchlist of local) {
-    if (seenIds.has(localWatchlist.id)) continue;
-    merged.push(localWatchlist);
-  }
-
-  return merged;
-}
-
-/**
- * Merge watchlists across devices. Union-adds unique symbols, but when one side is
- * newer and a strict superset, the newer side wins (covers remote/local deletions).
- */
-export function mergeWatchlists(
-  local: Watchlist[],
-  remote: Watchlist[],
-  context: WatchlistMergeContext,
-): Watchlist[] {
-  const localTime = Date.parse(context.localUpdatedAt);
-  const remoteTime = Date.parse(context.remoteUpdatedAt);
-  const localNewer = localTime > remoteTime;
-  const remoteNewer = remoteTime > localTime;
-
-  const localById = new Map(local.map((watchlist) => [watchlist.id, watchlist]));
-  const merged: Watchlist[] = [];
-  const seenIds = new Set<string>();
-
-  for (const remoteWatchlist of remote) {
-    const localWatchlist = localById.get(remoteWatchlist.id);
-    merged.push({
-      id: remoteWatchlist.id,
-      name: localWatchlist?.name ?? remoteWatchlist.name,
-      items: localWatchlist
-        ? mergeWatchlistItems(
-            localWatchlist.items,
-            remoteWatchlist.items,
-            localNewer,
-            remoteNewer,
-          )
-        : remoteWatchlist.items,
-    });
-    seenIds.add(remoteWatchlist.id);
-  }
-
-  for (const localWatchlist of local) {
-    if (seenIds.has(localWatchlist.id)) continue;
-    merged.push(localWatchlist);
-  }
-
-  return merged;
 }
 
 function resolveLocalActiveId(watchlists: Watchlist[], preferredActiveId: string): string {
@@ -351,9 +182,11 @@ export function applyWatchlistsFromSync(
   options: { source: 'local' | 'remote'; updatedAt?: string },
 ): void {
   const local = loadWatchlistStorage();
+  const watchlists =
+    data.watchlists.length > 0 ? data.watchlists : createDefaultWatchlistStorage().watchlists;
   persistWatchlistStorage({
-    watchlists: data.watchlists,
-    activeId: resolveLocalActiveId(data.watchlists, local.activeId),
+    watchlists,
+    activeId: resolveLocalActiveId(watchlists, local.activeId),
   });
 
   if (options.source === 'remote') {
@@ -544,7 +377,7 @@ export function parseWatchlistsSyncPayload(value: unknown): WatchlistsSyncPayloa
     watchlists.push({ id: entry.id, name: entry.name, items });
   }
 
-  if (watchlists.length === 0) return null;
+  if (watchlists.length === 0) return { watchlists: [] };
   return { watchlists };
 }
 

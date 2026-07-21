@@ -20,7 +20,9 @@ function lastModifiedKey(domain: SettingsDomain): string {
 }
 
 export function touchSettingsModified(domain: SettingsDomain): void {
-  localStorage.setItem(lastModifiedKey(domain), new Date().toISOString());
+  if (domain !== 'watchlists') {
+    localStorage.setItem(lastModifiedKey(domain), new Date().toISOString());
+  }
   window.dispatchEvent(
     new CustomEvent<SettingsChangedDetail>(SETTINGS_CHANGED_EVENT, { detail: { domain } }),
   );

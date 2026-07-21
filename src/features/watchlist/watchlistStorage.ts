@@ -15,6 +15,11 @@ function createDefaultWatchlist(): Watchlist {
   };
 }
 
+export function createDefaultWatchlistStorage(): WatchlistStorage {
+  const watchlist = createDefaultWatchlist();
+  return { watchlists: [watchlist], activeId: watchlist.id };
+}
+
 export function loadWatchlistStorage(): WatchlistStorage {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);

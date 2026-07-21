@@ -131,30 +131,47 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
     void runUpload(pending);
   }, [runUpload]);
 
-  const runReconcile = useCallback(async () => {
-    if (!userId || syncingRef.current) return;
-
-    syncingRef.current = true;
-    setStatus('syncing');
-    setStatusMessage('Syncing with cloud…');
-
-    try {
-      const result = await reconcileSettings(userId);
-      markSynced(summarizeReconcileResult(result));
-
-      if (result.watchlists !== 'unchanged') {
-        window.dispatchEvent(
-          new CustomEvent(REMOTE_SETTINGS_APPLIED_EVENT, { detail: { domain: 'watchlists' } }),
-        );
-      }
-    } catch (err) {
-      setStatus('error');
-      setStatusMessage(err instanceof Error ? err.message : 'Cloud sync failed.');
-    } finally {
-      syncingRef.current = false;
-      flushPendingUploads();
+  const clearPendingUploads = useCallback(() => {
+    for (const timer of Object.values(uploadTimersRef.current)) {
+      if (timer !== undefined) window.clearTimeout(timer);
     }
-  }, [flushPendingUploads, markSynced, userId]);
+    uploadTimersRef.current = {};
+    pendingUploadsRef.current.clear();
+  }, []);
+
+  const runReconcile = useCallback(
+    async (options?: { preferCloud?: boolean }) => {
+      if (!userId || syncingRef.current) return;
+
+      if (options?.preferCloud) {
+        clearPendingUploads();
+      }
+
+      syncingRef.current = true;
+      setStatus('syncing');
+      setStatusMessage(options?.preferCloud ? 'Loading cloud settings…' : 'Syncing with cloud…');
+
+      try {
+        const result = await reconcileSettings(userId, { preferCloud: options?.preferCloud });
+        markSynced(summarizeReconcileResult(result));
+
+        if (result.watchlists !== 'unchanged') {
+          window.dispatchEvent(
+            new CustomEvent(REMOTE_SETTINGS_APPLIED_EVENT, { detail: { domain: 'watchlists' } }),
+          );
+        }
+      } catch (err) {
+        setStatus('error');
+        setStatusMessage(err instanceof Error ? err.message : 'Cloud sync failed.');
+      } finally {
+        syncingRef.current = false;
+        if (!options?.preferCloud) {
+          flushPendingUploads();
+        }
+      }
+    },
+    [clearPendingUploads, flushPendingUploads, markSynced, userId],
+  );
 
   const syncNow = useCallback(async () => {
     await runReconcile();
@@ -173,7 +190,7 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
     if (initialReconcileDoneRef.current) return;
 
     initialReconcileDoneRef.current = true;
-    void runReconcile();
+    void runReconcile({ preferCloud: true });
   }, [runReconcile, userId]);
 
   useEffect(() => {
@@ -265,11 +282,6 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
       uploadTimersRef.current = {};
     };
   }, [runUpload, userId]);
-
-  useEffect(() => {
-    if (!enabled) return;
-    flushPendingUploads();
-  }, [enabled, flushPendingUploads]);
 
   const value = useMemo(
     () => ({
