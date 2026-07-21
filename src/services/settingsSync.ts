@@ -248,10 +248,14 @@ function applyRemoteDomain(
   return true;
 }
 
-function applyCloudEmptyDomain(domain: SettingsDomain, updatedAt: string): void {
+function applyCloudEmptyDomain(
+  domain: SettingsDomain,
+  updatedAt: string,
+  metadata: DomainSyncMetadata = getCurrentMetadata(domain),
+): void {
   pauseRemoteApply(domain);
   setServerRevision(domain, updatedAt);
-  stampLocalMetadata(domain, getCurrentMetadata(domain));
+  stampLocalMetadata(domain, metadata);
 
   if (domain === 'preferences') {
     applyPreferencesSettings(getDefaultPreferencesSettings(), { source: 'remote', updatedAt });
@@ -325,7 +329,7 @@ function pullRemoteDomain(
     return 'unchanged';
   }
 
-  applyCloudEmptyDomain(domain, updatedAt);
+  applyCloudEmptyDomain(domain, updatedAt, metadata);
   return 'downloaded';
 }
 
@@ -337,8 +341,16 @@ async function adoptDomainFromCloud(
   const remote = await fetchRemoteDomain(userId, domain);
 
   if (!remote) {
-    await uploadDomain(userId, domain);
-    return 'uploaded';
+    try {
+      await uploadDomain(userId, domain);
+      return 'uploaded';
+    } catch {
+      const latestRemote = await fetchRemoteDomain(userId, domain);
+      if (latestRemote) {
+        return pullRemoteDomain(domain, latestRemote.data, latestRemote.updatedAt, latestRemote.metadata);
+      }
+      throw new Error(`Unable to initialize cloud sync for "${domain}".`);
+    }
   }
 
   return pullRemoteDomain(domain, remote.data, remote.updatedAt, remote.metadata);
@@ -481,6 +493,7 @@ export function subscribeToRemoteSettings(
   const unsubs = SETTINGS_DOMAINS.map((domain) =>
     onSnapshot(settingsDocRef(userId, domain), (snapshot) => {
       if (!snapshot.exists()) return;
+      // Pause/queue behavior is handled inside applyRemoteSnapshot.
 
       const payload = snapshot.data() as RemoteDocPayload;
       const updatedAt = timestampToIso(payload.updatedAt);
