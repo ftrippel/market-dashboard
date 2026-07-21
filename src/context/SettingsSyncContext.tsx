@@ -139,7 +139,11 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
       setStatusMessage('Saving to cloud…');
 
       try {
-        await Promise.all(uniqueDomains.map((domain) => uploadDomain(userId, domain)));
+        let pendingDomains = uniqueDomains;
+        while (pendingDomains.length > 0) {
+          await Promise.all(pendingDomains.map((domain) => uploadDomain(userId, domain)));
+          pendingDomains = uniqueDomains.filter((domain) => hasPendingUpload(domain));
+        }
         markSynced('uploaded');
       } catch (err) {
         setStatus('error');
@@ -225,6 +229,15 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
     beginCloudSession(userId);
     void runInitialSession();
   }, [authLoading, runInitialSession, userId]);
+
+  useEffect(() => {
+    if (!userId || !sessionReady) return;
+
+    const pendingDomains = SETTINGS_DOMAINS.filter((domain) => hasPendingUpload(domain));
+    if (pendingDomains.length > 0) {
+      void runUpload(pendingDomains);
+    }
+  }, [runUpload, sessionReady, userId]);
 
   useEffect(() => {
     if (!userId || !sessionReady) return;

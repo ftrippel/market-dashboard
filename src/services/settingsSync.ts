@@ -2,8 +2,8 @@ import {
   doc,
   getDocFromServer,
   onSnapshot,
+  runTransaction,
   serverTimestamp,
-  setDoc,
   type Timestamp,
 } from 'firebase/firestore';
 import {
@@ -26,10 +26,9 @@ import { createDefaultWatchlistStorage } from '../features/watchlist/watchlistSt
 import {
   CURRENT_SYNC_BUILD_NUMBER,
   CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN,
-  getLocalBuildNumber,
   getLocalEditSequence,
-  getLocalSchemaVersion,
   getServerRevisionMs,
+  getSyncBase,
   hasCloudBaseline,
   hasPendingUpload,
   markPendingUpload,
@@ -37,10 +36,12 @@ import {
   setLocalBuildNumber,
   setLocalSchemaVersion,
   setServerRevision,
+  setSyncBase,
   SETTINGS_DOMAINS,
   type SettingsDomain,
 } from './settingsEvents';
 import { getFirebaseDb } from './firebase';
+import { mergeWatchlistsForUpload } from './settingsMerge';
 
 export { SETTINGS_CHANGED_EVENT } from './settingsEvents';
 export type { SettingsDomain } from './settingsEvents';
@@ -60,6 +61,9 @@ interface RemoteDocPayload {
   updatedAt?: Timestamp | string;
   schemaVersion?: number;
   buildNumber?: string;
+  minimumWriterBuild?: number;
+  writerBuildNumber?: number;
+  writeId?: string;
 }
 
 const REMOTE_APPLY_PAUSE_MS = 2500;
@@ -68,7 +72,6 @@ const pendingRemoteSnapshots = new Map<
   SettingsDomain,
   { data: unknown; updatedAt: string; metadata: DomainSyncMetadata }
 >();
-const LEGACY_BUILD_NUMBER = 'legacy';
 
 interface DomainSyncMetadata {
   schemaVersion: number;
@@ -90,17 +93,9 @@ function timestampToIso(value: Timestamp | string | undefined): string | null {
 }
 
 function parseBuildNumberAsInt(value: string | null | undefined): number | null {
-  if (!value) return null;
-  const parsed = Number.parseInt(value, 10);
-  // Only numeric build labels can be compared for ordering.
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-function getLocalMetadata(domain: SettingsDomain): DomainSyncMetadata {
-  return {
-    schemaVersion: getLocalSchemaVersion(domain),
-    buildNumber: getLocalBuildNumber(domain) ?? LEGACY_BUILD_NUMBER,
-  };
+  if (!value || !/^\d+$/.test(value)) return null;
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) ? parsed : null;
 }
 
 function getCurrentMetadata(domain: SettingsDomain): DomainSyncMetadata {
@@ -127,20 +122,6 @@ function normalizeRemoteMetadata(
 function stampLocalMetadata(domain: SettingsDomain, metadata: DomainSyncMetadata): void {
   setLocalSchemaVersion(domain, metadata.schemaVersion);
   setLocalBuildNumber(domain, metadata.buildNumber);
-}
-
-function shouldForcePullDueToVersion(
-  domain: SettingsDomain,
-  remoteMetadata: DomainSyncMetadata,
-): boolean {
-  const local = getLocalMetadata(domain);
-  if (local.schemaVersion < remoteMetadata.schemaVersion) return true;
-  if (local.schemaVersion > remoteMetadata.schemaVersion) return false;
-
-  const localBuild = parseBuildNumberAsInt(local.buildNumber);
-  const remoteBuild = parseBuildNumberAsInt(remoteMetadata.buildNumber);
-  if (localBuild === null || remoteBuild === null) return false;
-  return localBuild < remoteBuild;
 }
 
 function isRemoteNewer(domain: SettingsDomain, remoteUpdatedAt: string): boolean {
@@ -202,7 +183,37 @@ async function fetchRemoteDomain(
   userId: string,
   domain: SettingsDomain,
 ): Promise<{ data: unknown; updatedAt: string; metadata: DomainSyncMetadata } | null> {
-  const snapshot = await getDocFromServer(settingsDocRef(userId, domain));
+  const docRef = settingsDocRef(userId, domain);
+  const currentBuild = parseBuildNumberAsInt(CURRENT_SYNC_BUILD_NUMBER);
+  const snapshot =
+    currentBuild === null
+      ? await getDocFromServer(docRef)
+      : await runTransaction(getFirebaseDb(), async (transaction) => {
+          const currentSnapshot = await transaction.get(docRef);
+          if (!currentSnapshot.exists()) return currentSnapshot;
+
+          const currentPayload = currentSnapshot.data() as RemoteDocPayload;
+          const remoteMinimumBuild =
+            typeof currentPayload.minimumWriterBuild === 'number'
+              ? currentPayload.minimumWriterBuild
+              : 0;
+          if (currentBuild < remoteMinimumBuild) {
+            throw new Error('This app build is too old to sync. Reload the app before editing settings.');
+          }
+
+          if (
+            remoteMinimumBuild < currentBuild ||
+            currentPayload.writerBuildNumber !== currentBuild ||
+            typeof currentPayload.writeId !== 'string'
+          ) {
+            transaction.update(docRef, {
+              minimumWriterBuild: currentBuild,
+              writerBuildNumber: currentBuild,
+              writeId: crypto.randomUUID(),
+            });
+          }
+          return currentSnapshot;
+        });
   if (!snapshot.exists()) return null;
 
   const payload = snapshot.data() as RemoteDocPayload;
@@ -226,6 +237,7 @@ function applyRemoteDomain(
     const parsed = parsePreferencesSettings(data);
     if (!parsed) return false;
     applyPreferencesSettings(parsed, { source: 'remote', updatedAt });
+    setSyncBase(domain, data);
     stampLocalMetadata(domain, metadata);
     return true;
   }
@@ -234,6 +246,7 @@ function applyRemoteDomain(
     const parsed = parseCalculatorSettings(data);
     if (!parsed) return false;
     applyCalculatorSettings(parsed, { source: 'remote', updatedAt });
+    setSyncBase(domain, data);
     stampLocalMetadata(domain, metadata);
     return true;
   }
@@ -241,6 +254,7 @@ function applyRemoteDomain(
   const parsed = parseWatchlistsSyncPayload(data);
   if (!parsed) return false;
   applyWatchlistsFromSync(parsed, { source: 'remote', updatedAt });
+  setSyncBase(domain, data);
   stampLocalMetadata(domain, metadata);
   return true;
 }
@@ -256,11 +270,13 @@ function applyCloudEmptyDomain(
 
   if (domain === 'preferences') {
     applyPreferencesSettings(getDefaultPreferencesSettings(), { source: 'remote', updatedAt });
+    setSyncBase(domain, exportPreferencesSettings());
     return;
   }
 
   if (domain === 'calculator') {
     applyCalculatorSettings(getDefaultCalculatorSettings(), { source: 'remote', updatedAt });
+    setSyncBase(domain, exportCalculatorSettings());
     return;
   }
 
@@ -268,6 +284,7 @@ function applyCloudEmptyDomain(
     { watchlists: createDefaultWatchlistStorage().watchlists },
     { source: 'remote', updatedAt },
   );
+  setSyncBase(domain, exportWatchlistsForSync());
 }
 
 function exportDomain(domain: SettingsDomain): unknown {
@@ -280,27 +297,86 @@ export async function uploadDomain(userId: string, domain: SettingsDomain): Prom
   const editSeqAtStart = getLocalEditSequence(domain);
   pauseRemoteApply(domain);
   const metadata = getCurrentMetadata(domain);
-
+  const localData = exportDomain(domain);
+  const baseData = getSyncBase(domain);
+  const baseRevisionMs = getServerRevisionMs(domain);
+  const currentBuild = parseBuildNumberAsInt(CURRENT_SYNC_BUILD_NUMBER);
   const docRef = settingsDocRef(userId, domain);
-  await setDoc(
-    docRef,
-    {
-      data: exportDomain(domain),
-      updatedAt: serverTimestamp(),
-      schemaVersion: metadata.schemaVersion,
-      buildNumber: metadata.buildNumber,
-    },
-    { merge: true },
-  );
+  const uploadedData = await runTransaction(getFirebaseDb(), async (transaction) => {
+    const currentSnapshot = await transaction.get(docRef);
+    const currentPayload = currentSnapshot.data() as RemoteDocPayload | undefined;
+    const remoteUpdatedAt = timestampToIso(currentPayload?.updatedAt);
+    const remoteMinimumBuild =
+      typeof currentPayload?.minimumWriterBuild === 'number'
+        ? currentPayload.minimumWriterBuild
+        : null;
+
+    if (remoteMinimumBuild !== null && (currentBuild === null || currentBuild < remoteMinimumBuild)) {
+      throw new Error('This app build is too old to sync. Reload the app before editing settings.');
+    }
+
+    let data = localData;
+    if (
+      domain === 'watchlists' &&
+      currentPayload?.data !== undefined &&
+      ((remoteUpdatedAt && Date.parse(remoteUpdatedAt) > baseRevisionMs) ||
+        JSON.stringify(currentPayload.data) !== JSON.stringify(baseData))
+    ) {
+      const localWatchlists = parseWatchlistsSyncPayload(localData);
+      const remoteWatchlists = parseWatchlistsSyncPayload(currentPayload.data);
+      const baseWatchlists = baseData ? parseWatchlistsSyncPayload(baseData) : null;
+      if (localWatchlists && remoteWatchlists) {
+        data = mergeWatchlistsForUpload(baseWatchlists, localWatchlists, remoteWatchlists);
+      }
+    }
+
+    const writerProtection =
+      currentBuild === null
+        ? {}
+        : {
+            minimumWriterBuild: Math.max(remoteMinimumBuild ?? 0, currentBuild),
+            writerBuildNumber: currentBuild,
+            writeId: crypto.randomUUID(),
+          };
+
+    transaction.set(
+      docRef,
+      {
+        data,
+        updatedAt: serverTimestamp(),
+        schemaVersion: metadata.schemaVersion,
+        buildNumber: metadata.buildNumber,
+        ...writerProtection,
+      },
+      { merge: true },
+    );
+    return data;
+  });
 
   const snapshot = await getDocFromServer(docRef);
   const payload = snapshot.data() as RemoteDocPayload | undefined;
   const updatedAt = timestampToIso(payload?.updatedAt);
   if (updatedAt) {
+    const confirmedData = payload?.data ?? uploadedData;
+    const editSequenceUnchanged = getLocalEditSequence(domain) === editSeqAtStart;
     setServerRevision(domain, updatedAt);
+    setSyncBase(domain, confirmedData);
     stampLocalMetadata(domain, metadata);
-    if (getLocalEditSequence(domain) === editSeqAtStart) {
+    if (editSequenceUnchanged) {
+      if (JSON.stringify(exportDomain(domain)) !== JSON.stringify(confirmedData)) {
+        applyRemoteDomain(domain, confirmedData, updatedAt, metadata);
+      }
       markPendingUpload(domain, false);
+    } else if (domain === 'watchlists') {
+      const uploadStart = parseWatchlistsSyncPayload(localData);
+      const currentLocal = parseWatchlistsSyncPayload(exportDomain(domain));
+      const currentRemote = parseWatchlistsSyncPayload(confirmedData);
+      if (uploadStart && currentLocal && currentRemote) {
+        const mergedLocal = mergeWatchlistsForUpload(uploadStart, currentLocal, currentRemote);
+        applyRemoteDomain(domain, mergedLocal, updatedAt, metadata);
+        setSyncBase(domain, confirmedData);
+        markPendingUpload(domain, true);
+      }
     }
   }
 }
@@ -321,6 +397,7 @@ function pullRemoteDomain(
 
   if (!remoteContentDiffers(domain, data)) {
     setServerRevision(domain, updatedAt);
+    setSyncBase(domain, data);
     stampLocalMetadata(domain, metadata);
     markPendingUpload(domain, false);
     return 'unchanged';
@@ -330,12 +407,23 @@ function pullRemoteDomain(
   return 'downloaded';
 }
 
-/** First session pull: always replace local with cloud (or defaults). Never upload. */
+/** First sync pulls cloud unless this device has preserved offline edits to merge. */
 async function adoptDomainFromCloud(
   userId: string,
   domain: SettingsDomain,
 ): Promise<DomainSyncResult> {
   const remote = await fetchRemoteDomain(userId, domain);
+  const hasLocalWatchlistEntries =
+    domain === 'watchlists' &&
+    exportWatchlistsForSync().watchlists.some((watchlist) => watchlist.items.length > 0);
+
+  if (
+    hasPendingUpload(domain) ||
+    (remote && hasLocalWatchlistEntries && remoteContentDiffers(domain, remote.data))
+  ) {
+    await uploadDomain(userId, domain);
+    return 'uploaded';
+  }
 
   if (!remote) {
     try {
@@ -372,11 +460,11 @@ async function reconcileDomain(userId: string, domain: SettingsDomain): Promise<
     return 'unchanged';
   }
 
-  if (shouldForcePullDueToVersion(domain, remote.metadata)) {
-    return pullRemoteDomain(domain, remote.data, remote.updatedAt, remote.metadata);
-  }
-
   if (isRemoteNewer(domain, remote.updatedAt)) {
+    if (hasPendingUpload(domain)) {
+      await uploadDomain(userId, domain);
+      return 'uploaded';
+    }
     return pullRemoteDomain(domain, remote.data, remote.updatedAt, remote.metadata);
   }
 
@@ -403,32 +491,41 @@ async function migrateLegacyDashboardDoc(userId: string): Promise<boolean> {
     chartMaSettings: settings.chartMaSettings ?? getDefaultPreferencesSettings().chartMaSettings,
   };
 
-  pauseRemoteApply('preferences');
-  pauseRemoteApply('calculator');
-  pauseRemoteApply('watchlists');
+  const legacyByDomain: Record<SettingsDomain, unknown> = {
+    preferences,
+    calculator: settings.calculator,
+    watchlists: { watchlists: settings.watchlists.watchlists },
+  };
+  const currentBuild = parseBuildNumberAsInt(CURRENT_SYNC_BUILD_NUMBER);
 
-  await Promise.all([
-    setDoc(settingsDocRef(userId, 'preferences'), {
-      data: preferences,
-      updatedAt: legacy.updatedAt ?? serverTimestamp(),
-      schemaVersion: CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN.preferences,
-      buildNumber: CURRENT_SYNC_BUILD_NUMBER,
-    }),
-    setDoc(settingsDocRef(userId, 'calculator'), {
-      data: settings.calculator,
-      updatedAt: legacy.updatedAt ?? serverTimestamp(),
-      schemaVersion: CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN.calculator,
-      buildNumber: CURRENT_SYNC_BUILD_NUMBER,
-    }),
-    setDoc(settingsDocRef(userId, 'watchlists'), {
-      data: { watchlists: settings.watchlists.watchlists },
-      updatedAt: legacy.updatedAt ?? serverTimestamp(),
-      schemaVersion: CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN.watchlists,
-      buildNumber: CURRENT_SYNC_BUILD_NUMBER,
-    }),
-  ]);
+  return runTransaction(getFirebaseDb(), async (transaction) => {
+    const domainSnapshots = await Promise.all(
+      SETTINGS_DOMAINS.map((domain) => transaction.get(settingsDocRef(userId, domain))),
+    );
+    let migrated = false;
 
-  return true;
+    SETTINGS_DOMAINS.forEach((domain, index) => {
+      if (domainSnapshots[index].exists()) return;
+      const writerProtection =
+        currentBuild === null
+          ? {}
+          : {
+              minimumWriterBuild: currentBuild,
+              writerBuildNumber: currentBuild,
+              writeId: crypto.randomUUID(),
+            };
+      transaction.set(settingsDocRef(userId, domain), {
+        data: legacyByDomain[domain],
+        updatedAt: legacy.updatedAt ?? serverTimestamp(),
+        schemaVersion: CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN[domain],
+        buildNumber: CURRENT_SYNC_BUILD_NUMBER,
+        ...writerProtection,
+      });
+      migrated = true;
+    });
+
+    return migrated;
+  });
 }
 
 export async function reconcileSettings(userId: string): Promise<ReconcileResult> {
@@ -458,13 +555,11 @@ export function applyRemoteSnapshot(
     return false;
   }
 
-  if (shouldForcePullDueToVersion(domain, remoteMetadata)) {
-    return applyRemoteDomain(domain, data, updatedAt, remoteMetadata);
-  }
-
   if (!hasCloudBaseline(domain)) {
+    if (hasPendingUpload(domain)) return false;
     if (!remoteContentDiffers(domain, data)) {
       setServerRevision(domain, updatedAt);
+      setSyncBase(domain, data);
       stampLocalMetadata(domain, remoteMetadata);
       markPendingUpload(domain, false);
       return false;
@@ -473,8 +568,10 @@ export function applyRemoteSnapshot(
   }
 
   if (!isRemoteNewer(domain, updatedAt)) return false;
+  if (hasPendingUpload(domain)) return false;
   if (!remoteContentDiffers(domain, data)) {
     setServerRevision(domain, updatedAt);
+    setSyncBase(domain, data);
     stampLocalMetadata(domain, remoteMetadata);
     markPendingUpload(domain, false);
     return false;

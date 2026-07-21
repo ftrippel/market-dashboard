@@ -91,7 +91,9 @@ Sign in with Google to sync dashboard settings and watchlists across devices via
 1. Create a [Firebase project](https://console.firebase.google.com/) and add a Web app.
 2. Enable **Authentication → Sign-in method → Google**.
 3. Create a **Firestore** database.
-4. Deploy `firestore.rules` from this repo (each user can only access their own settings).
+4. Deploy `firestore.rules` from this repo (each user can only access their own settings). Redeploy
+   these rules after sync updates: they reject stale writes from older app builds once a current build
+   has connected.
 5. Copy the Firebase web config into `.env`:
 
 ```bash

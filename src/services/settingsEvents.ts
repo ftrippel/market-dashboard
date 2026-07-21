@@ -11,6 +11,7 @@ const PENDING_PREFIX = 'dashboard-settings-pending-';
 const LOCAL_SCHEMA_PREFIX = 'dashboard-settings-local-schema-';
 const LOCAL_BUILD_PREFIX = 'dashboard-settings-local-build-';
 const LOCAL_EDIT_SEQ_PREFIX = 'dashboard-settings-local-edit-seq-';
+const SYNC_BASE_PREFIX = 'dashboard-settings-sync-base-';
 const SYNC_USER_KEY = 'dashboard-settings-sync-user';
 const LEGACY_LAST_MODIFIED_PREFIX = 'dashboard-settings-last-modified-';
 export const CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN: Record<SettingsDomain, number> = {
@@ -54,6 +55,10 @@ function localBuildKey(domain: SettingsDomain): string {
 
 function localEditSeqKey(domain: SettingsDomain): string {
   return `${LOCAL_EDIT_SEQ_PREFIX}${domain}`;
+}
+
+function syncBaseKey(domain: SettingsDomain): string {
+  return `${SYNC_BASE_PREFIX}${domain}`;
 }
 
 /** True once cloud data has been applied at least once for this domain. */
@@ -114,6 +119,20 @@ export function setLocalBuildNumber(domain: SettingsDomain, buildNumber: string)
   localStorage.setItem(localBuildKey(domain), buildNumber);
 }
 
+export function getSyncBase(domain: SettingsDomain): unknown | null {
+  const stored = localStorage.getItem(syncBaseKey(domain));
+  if (!stored) return null;
+  try {
+    return JSON.parse(stored) as unknown;
+  } catch {
+    return null;
+  }
+}
+
+export function setSyncBase(domain: SettingsDomain, data: unknown): void {
+  localStorage.setItem(syncBaseKey(domain), JSON.stringify(data));
+}
+
 export function getLocalEditSequence(domain: SettingsDomain): number {
   const parsed = Number(localStorage.getItem(localEditSeqKey(domain)));
   return Number.isFinite(parsed) ? parsed : 0;
@@ -129,19 +148,22 @@ export function resetSyncState(): void {
     localStorage.setItem(revisionKey(domain), EPOCH_ISO);
     localStorage.setItem(revisionMsKey(domain), '0');
     localStorage.removeItem(pendingKey(domain));
+    localStorage.removeItem(syncBaseKey(domain));
     localStorage.removeItem(`${LEGACY_LAST_MODIFIED_PREFIX}${domain}`);
   }
 }
 
-/** Start a fresh cloud session (sign-in / page load while signed in). */
+/** Preserve offline edits for the same user; reset only when the account changes. */
 export function beginCloudSession(userId: string): void {
-  resetSyncState();
+  const previousUserId = localStorage.getItem(SYNC_USER_KEY);
+  if (previousUserId && previousUserId !== userId) {
+    resetSyncState();
+  }
   localStorage.setItem(SYNC_USER_KEY, userId);
 }
 
 export function endCloudSession(): void {
-  localStorage.removeItem(SYNC_USER_KEY);
-  resetSyncState();
+  return;
 }
 
 /** Local user edit — queue upload; never bump revision with client clock. */
