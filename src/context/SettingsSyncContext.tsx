@@ -72,6 +72,7 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
   const [lastSyncResult, setLastSyncResult] = useState<SettingsSyncResult | null>(null);
 
   const uploadTimersRef = useRef<Partial<Record<SettingsDomain, number>>>({});
+  const pendingUploadsRef = useRef<Set<SettingsDomain>>(new Set());
   const syncingRef = useRef(false);
   const initialReconcileDoneRef = useRef(false);
 
@@ -82,6 +83,48 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
     setStatus('synced');
     setStatusMessage(buildStatusMessage(result, now));
   }, []);
+
+  const runUpload = useCallback(
+    async (domains: SettingsDomain[]) => {
+      if (!userId || domains.length === 0) return;
+
+      const uniqueDomains = [...new Set(domains)];
+
+      if (syncingRef.current) {
+        for (const domain of uniqueDomains) {
+          pendingUploadsRef.current.add(domain);
+        }
+        return;
+      }
+
+      syncingRef.current = true;
+      setStatus('syncing');
+      setStatusMessage('Saving to cloud…');
+
+      try {
+        await Promise.all(uniqueDomains.map((domain) => uploadDomain(userId, domain)));
+        markSynced('uploaded');
+      } catch (err) {
+        setStatus('error');
+        setStatusMessage(err instanceof Error ? err.message : 'Cloud sync failed.');
+      } finally {
+        syncingRef.current = false;
+        const pending = [...pendingUploadsRef.current];
+        pendingUploadsRef.current.clear();
+        if (pending.length > 0) {
+          void runUpload(pending);
+        }
+      }
+    },
+    [markSynced, userId],
+  );
+
+  const flushPendingUploads = useCallback(() => {
+    const pending = [...pendingUploadsRef.current];
+    if (pending.length === 0) return;
+    pendingUploadsRef.current.clear();
+    void runUpload(pending);
+  }, [runUpload]);
 
   const runReconcile = useCallback(async () => {
     if (!userId || syncingRef.current) return;
@@ -98,29 +141,9 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
       setStatusMessage(err instanceof Error ? err.message : 'Cloud sync failed.');
     } finally {
       syncingRef.current = false;
+      flushPendingUploads();
     }
-  }, [markSynced, userId]);
-
-  const runUpload = useCallback(
-    async (domains: SettingsDomain[]) => {
-      if (!userId || syncingRef.current || domains.length === 0) return;
-
-      syncingRef.current = true;
-      setStatus('syncing');
-      setStatusMessage('Saving to cloud…');
-
-      try {
-        await Promise.all(domains.map((domain) => uploadDomain(userId, domain)));
-        markSynced('uploaded');
-      } catch (err) {
-        setStatus('error');
-        setStatusMessage(err instanceof Error ? err.message : 'Cloud sync failed.');
-      } finally {
-        syncingRef.current = false;
-      }
-    },
-    [markSynced, userId],
-  );
+  }, [flushPendingUploads, markSynced, userId]);
 
   const syncNow = useCallback(async () => {
     await runReconcile();
@@ -158,12 +181,16 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
   }, [userId]);
 
   useEffect(() => {
-    if (!enabled) return;
-
     const scheduleUpload = (event: Event) => {
       if (!isSettingsChangedEvent(event)) return;
 
       const domain = event.detail.domain;
+
+      if (!userId) {
+        pendingUploadsRef.current.add(domain);
+        return;
+      }
+
       const existing = uploadTimersRef.current[domain];
       if (existing !== undefined) {
         window.clearTimeout(existing);
@@ -183,7 +210,12 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
       }
       uploadTimersRef.current = {};
     };
-  }, [enabled, runUpload]);
+  }, [runUpload, userId]);
+
+  useEffect(() => {
+    if (!enabled) return;
+    flushPendingUploads();
+  }, [enabled, flushPendingUploads]);
 
   const value = useMemo(
     () => ({

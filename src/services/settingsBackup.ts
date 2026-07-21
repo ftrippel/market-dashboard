@@ -89,6 +89,14 @@ export function exportWatchlistsSettings(): WatchlistStorage {
   return loadWatchlistStorage();
 }
 
+export function countWatchlistItems(storage: WatchlistStorage): number {
+  return storage.watchlists.reduce((sum, watchlist) => sum + watchlist.items.length, 0);
+}
+
+export function watchlistsContentEqual(a: WatchlistStorage, b: WatchlistStorage): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
+}
+
 export function exportDashboardSettings(): DashboardSettingsExport {
   return {
     version: SETTINGS_EXPORT_VERSION,

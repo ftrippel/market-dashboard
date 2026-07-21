@@ -10,12 +10,14 @@ import {
   applyCalculatorSettings,
   applyPreferencesSettings,
   applyWatchlistsSettings,
+  countWatchlistItems,
   exportCalculatorSettings,
   exportPreferencesSettings,
   exportWatchlistsSettings,
   parseCalculatorSettings,
   parsePreferencesSettings,
   parseWatchlistsSettings,
+  watchlistsContentEqual,
   type CalculatorSettings,
   type DashboardSettingsExport,
   type PreferencesSettings,
@@ -48,6 +50,7 @@ interface RemoteDocPayload {
 }
 
 const REMOTE_APPLY_PAUSE_MS = 2500;
+const EPOCH_ISO = '1970-01-01T00:00:00.000Z';
 const pausedRemoteApply = new Set<SettingsDomain>();
 
 function settingsDocRef(userId: string, domain: SettingsDomain) {
@@ -82,6 +85,36 @@ function summarizeResults(result: ReconcileResult): SettingsSyncResult {
   if (values.some((value) => value === 'downloaded')) return 'downloaded';
   if (values.some((value) => value === 'uploaded')) return 'uploaded';
   return 'mixed';
+}
+
+function hasNeverSynced(domain: SettingsDomain): boolean {
+  return getSettingsLastModified(domain) === EPOCH_ISO;
+}
+
+function shouldPreferLocalWatchlists(local: WatchlistStorage, remote: WatchlistStorage | null): boolean {
+  const localItems = countWatchlistItems(local);
+  const remoteItems = remote ? countWatchlistItems(remote) : 0;
+  return localItems > remoteItems;
+}
+
+function remoteContentDiffers(domain: SettingsDomain, data: unknown): boolean {
+  if (domain === 'watchlists') {
+    const remote = parseWatchlistsSettings(data);
+    if (!remote) return false;
+    return !watchlistsContentEqual(exportWatchlistsSettings(), remote);
+  }
+
+  if (domain === 'preferences') {
+    const remote = parsePreferencesSettings(data);
+    if (!remote) return false;
+    const local = exportPreferencesSettings();
+    return JSON.stringify(local) !== JSON.stringify(remote);
+  }
+
+  const remote = parseCalculatorSettings(data);
+  if (!remote) return false;
+  const local = exportCalculatorSettings();
+  return JSON.stringify(local) !== JSON.stringify(remote);
 }
 
 async function fetchRemoteDomain(
@@ -130,8 +163,6 @@ function exportDomain(domain: SettingsDomain): unknown {
 }
 
 export async function uploadDomain(userId: string, domain: SettingsDomain): Promise<void> {
-  const now = new Date().toISOString();
-  setSettingsLastModified(domain, now);
   pauseRemoteApply(domain);
 
   await setDoc(
@@ -142,6 +173,8 @@ export async function uploadDomain(userId: string, domain: SettingsDomain): Prom
     },
     { merge: true },
   );
+
+  setSettingsLastModified(domain, new Date().toISOString());
 }
 
 export async function uploadDomains(userId: string, domains: SettingsDomain[]): Promise<void> {
@@ -157,15 +190,25 @@ async function reconcileDomain(userId: string, domain: SettingsDomain): Promise<
     return 'uploaded';
   }
 
+  if (domain === 'watchlists') {
+    const local = exportWatchlistsSettings();
+    const remoteParsed = parseWatchlistsSettings(remote.data);
+    if (shouldPreferLocalWatchlists(local, remoteParsed)) {
+      await uploadDomain(userId, domain);
+      return 'uploaded';
+    }
+  }
+
   const localTime = Date.parse(localModified);
   const remoteTime = Date.parse(remote.updatedAt);
+  const contentDiffers = remoteContentDiffers(domain, remote.data);
 
-  if (remoteTime > localTime) {
+  if (remoteTime > localTime || (contentDiffers && hasNeverSynced(domain))) {
     applyRemoteDomain(domain, remote.data, remote.updatedAt);
     return 'downloaded';
   }
 
-  if (localTime > remoteTime) {
+  if (localTime > remoteTime || contentDiffers) {
     await uploadDomain(userId, domain);
     return 'uploaded';
   }
@@ -237,8 +280,15 @@ export function applyRemoteIfNewer(
 ): boolean {
   if (isRemoteApplyPaused(domain)) return false;
 
-  const localModified = getSettingsLastModified(domain);
-  if (Date.parse(updatedAt) <= Date.parse(localModified)) return false;
+  if (!remoteContentDiffers(domain, data)) return false;
+
+  if (domain === 'watchlists') {
+    const remote = parseWatchlistsSettings(data);
+    const local = exportWatchlistsSettings();
+    if (remote && shouldPreferLocalWatchlists(local, remote)) {
+      return false;
+    }
+  }
 
   return applyRemoteDomain(domain, data, updatedAt);
 }
