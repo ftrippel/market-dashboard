@@ -1,6 +1,8 @@
 import { useCallback, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useAuth } from '../../context/AuthContext';
 import { useSettings } from '../../context/SettingsContext';
+import { useSettingsSync } from '../../context/SettingsSyncContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import {
   downloadDashboardSettings,
@@ -23,6 +25,8 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     sparklineMode,
     setSparklineMode,
   } = useSettings();
+  const { configured, user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
+  const { status, statusMessage, syncNow } = useSettingsSync();
 
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -39,6 +43,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
   const sparklineModePenActivate = usePenSelectActivate();
   const importInputRef = useRef<HTMLInputElement>(null);
   const [importError, setImportError] = useState<string | null>(null);
+  const [authError, setAuthError] = useState<string | null>(null);
 
   const handleExport = useCallback(() => {
     setImportError(null);
@@ -73,6 +78,33 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
 
   const exportPenClick = usePenCompatibleClick(handleExport);
   const importPenClick = usePenCompatibleClick(handleImportClick);
+
+  const handleGoogleSignIn = useCallback(async () => {
+    setAuthError(null);
+    try {
+      await signInWithGoogle();
+    } catch (err) {
+      setAuthError(err instanceof Error ? err.message : 'Sign-in failed.');
+    }
+  }, [signInWithGoogle]);
+
+  const handleSignOut = useCallback(async () => {
+    setAuthError(null);
+    try {
+      await signOut();
+    } catch (err) {
+      setAuthError(err instanceof Error ? err.message : 'Sign-out failed.');
+    }
+  }, [signOut]);
+
+  const handleSyncNow = useCallback(async () => {
+    setAuthError(null);
+    await syncNow();
+  }, [syncNow]);
+
+  const googleSignInPenClick = usePenCompatibleClick(handleGoogleSignIn);
+  const signOutPenClick = usePenCompatibleClick(handleSignOut);
+  const syncNowPenClick = usePenCompatibleClick(handleSyncNow);
 
   if (!open) return null;
 
@@ -193,6 +225,64 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
               Choose the visualization style for 5-day price changes in the market tables, or disable it completely.
             </p>
+          </div>
+
+          <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+              Cloud Sync
+            </span>
+            {!configured ? (
+              <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                Add Firebase environment variables to enable Google sign-in and automatic settings sync.
+              </p>
+            ) : authLoading ? (
+              <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                Checking sign-in status…
+              </p>
+            ) : user ? (
+              <>
+                <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                  Signed in as <span style={{ color: 'var(--text)' }}>{user.email ?? user.displayName ?? 'Google account'}</span>.
+                  Settings sync automatically across devices.
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                  <button type="button" className="btn" {...syncNowPenClick} disabled={status === 'syncing'}>
+                    {status === 'syncing' ? 'Syncing…' : 'Sync now'}
+                  </button>
+                  <button type="button" className="btn" {...signOutPenClick}>
+                    Sign out
+                  </button>
+                </div>
+                {(statusMessage || authError) && (
+                  <p
+                    style={{
+                      margin: 0,
+                      fontSize: '11px',
+                      color: status === 'error' || authError ? 'var(--red)' : 'var(--text2)',
+                      lineHeight: '1.4',
+                    }}
+                  >
+                    {authError ?? statusMessage}
+                  </p>
+                )}
+              </>
+            ) : (
+              <>
+                <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                  Sign in with Google to back up and sync your dashboard settings and watchlists.
+                </p>
+                <button type="button" className="btn" {...googleSignInPenClick}>
+                  Sign in with Google
+                </button>
+                {authError && (
+                  <p style={{ margin: 0, fontSize: '11px', color: 'var(--red)', lineHeight: '1.4' }}>
+                    {authError}
+                  </p>
+                )}
+              </>
+            )}
           </div>
 
           <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />

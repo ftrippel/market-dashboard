@@ -1,3 +1,4 @@
+import { touchSettingsModified } from '../../services/settingsEvents';
 import type { Watchlist, WatchlistStorage } from './types';
 
 const STORAGE_KEY = 'agy_watchlists';
@@ -52,6 +53,7 @@ export function loadWatchlistStorage(): WatchlistStorage {
 
 export function saveWatchlistStorage(state: WatchlistStorage): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  touchSettingsModified();
 }
 
 export function createWatchlist(name: string): Watchlist {

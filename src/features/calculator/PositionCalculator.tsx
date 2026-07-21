@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedNumberInput, Icon, Section, Toast } from '../../components/common';
+import { touchSettingsModified } from '../../services/settingsEvents';
 import { usePenCompatibleClick } from '../../utils/penClick';
 import { colors, formatUsCurrency, formatUsInteger } from '../../utils/formatting';
 
@@ -38,13 +39,25 @@ export function PositionCalculator() {
   const [notes, setNotes] = useState('');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
+  const hasHydratedCalcSettings = useRef(false);
+
   useEffect(() => {
     localStorage.setItem('agy_calc_equity', equity.toString());
+    if (hasHydratedCalcSettings.current) {
+      touchSettingsModified();
+    }
   }, [equity]);
 
   useEffect(() => {
     localStorage.setItem('agy_calc_riskPct', riskPct.toString());
+    if (hasHydratedCalcSettings.current) {
+      touchSettingsModified();
+    }
   }, [riskPct]);
+
+  useEffect(() => {
+    hasHydratedCalcSettings.current = true;
+  }, []);
 
   const calc = useMemo(() => {
     const safeEquity = equity || 0;

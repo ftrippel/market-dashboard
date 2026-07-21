@@ -4,6 +4,8 @@ import { Header, Toast, TradingViewModal, SymbolPreviewOverlay, SettingsModal } 
 import { ChartModalProvider } from './context/ChartModalContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { SettingsProvider } from './context/SettingsContext';
+import { AuthProvider } from './context/AuthContext';
+import { SettingsSyncProvider } from './context/SettingsSyncContext';
 import { SymbolPreviewProvider } from './context/SymbolPreviewContext';
 import { MacroDivider, MacroSection } from './features/macro/MacroSection';
 import { EquitiesSection } from './features/equities/EquitiesSection';
@@ -224,16 +226,20 @@ const MemoizedDashboardContent = memo(DashboardContent);
 
 function App() {
   return (
-    <ThemeProvider>
-      <SettingsProvider>
-        <ChartModalProvider>
-          <SymbolPreviewProvider>
-            <MemoizedDashboardContent />
-            <SymbolPreviewOverlay />
-          </SymbolPreviewProvider>
-        </ChartModalProvider>
-      </SettingsProvider>
-    </ThemeProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <SettingsProvider>
+          <SettingsSyncProvider>
+            <ChartModalProvider>
+              <SymbolPreviewProvider>
+                <MemoizedDashboardContent />
+                <SymbolPreviewOverlay />
+              </SymbolPreviewProvider>
+            </ChartModalProvider>
+          </SettingsSyncProvider>
+        </SettingsProvider>
+      </ThemeProvider>
+    </AuthProvider>
   );
 }
 

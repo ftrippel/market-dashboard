@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useLayoutEffect, useMemo, useState } from 'react';
+import React, { createContext, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { touchSettingsModified } from '../services/settingsEvents';
 
 export type Theme = 'light' | 'dark';
 
@@ -23,10 +24,16 @@ function applyTheme(theme: Theme) {
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(readStoredTheme);
+  const hasHydratedTheme = useRef(false);
 
   useLayoutEffect(() => {
     applyTheme(theme);
     localStorage.setItem(STORAGE_KEY, theme);
+    if (hasHydratedTheme.current) {
+      touchSettingsModified();
+    } else {
+      hasHydratedTheme.current = true;
+    }
   }, [theme]);
 
   const value = useMemo(

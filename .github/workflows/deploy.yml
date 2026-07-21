@@ -36,6 +36,13 @@ jobs:
         run: npm ci
 
       - name: Build
+        env:
+          VITE_FIREBASE_API_KEY: AIzaSyBY8nKYYGMcxxmhLpFF1V-LMFQiBgrTYns
+          VITE_FIREBASE_AUTH_DOMAIN: market-dashboard-f832e.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: market-dashboard-f832e
+          VITE_FIREBASE_STORAGE_BUCKET: market-dashboard-f832e.firebasestorage.app
+          VITE_FIREBASE_MESSAGING_SENDER_ID: "923810954895"
+          VITE_FIREBASE_APP_ID: 1:923810954895:web:7588911a204b75f407fafa
         run: npm run build
 
       - name: Verify dist output

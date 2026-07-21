@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
 import { config } from '../config';
+import { touchSettingsModified } from '../services/settingsEvents';
 
 export type SparklineMode = 'none' | 'line' | 'bar' | 'dot';
 
@@ -28,11 +29,13 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const setEnableHoverPreview = useCallback((val: boolean) => {
     setEnableHoverPreviewState(val);
     localStorage.setItem('enableHoverPreview', String(val));
+    touchSettingsModified();
   }, []);
 
   const setSparklineMode = useCallback((mode: SparklineMode) => {
     setSparklineModeState(mode);
     localStorage.setItem('sparklineMode', mode);
+    touchSettingsModified();
   }, []);
 
   return (

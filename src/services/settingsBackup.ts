@@ -3,6 +3,7 @@ import type { Watchlist, WatchlistItem, WatchlistStorage } from '../features/wat
 import type { SparklineMode } from '../context/SettingsContext';
 import type { Theme } from '../context/ThemeContext';
 import { config } from '../config';
+import { touchSettingsModified } from './settingsEvents';
 
 export const SETTINGS_EXPORT_VERSION = 2;
 
@@ -186,6 +187,7 @@ export function importDashboardSettings(data: DashboardSettingsExport): void {
     localStorage.removeItem(key);
   }
   saveWatchlistStorage(data.watchlists);
+  touchSettingsModified();
 }
 
 export function downloadDashboardSettings(): void {

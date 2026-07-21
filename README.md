@@ -84,6 +84,29 @@ Useful flags:
 YF_BATCH_SIZE=15 YF_BATCH_PAUSE=2 ./fetch-data.sh
 ```
 
+### Cloud settings sync (optional)
+
+Sign in with Google to sync dashboard settings and watchlists across devices via Firebase.
+
+1. Create a [Firebase project](https://console.firebase.google.com/) and add a Web app.
+2. Enable **Authentication → Sign-in method → Google**.
+3. Create a **Firestore** database.
+4. Deploy `firestore.rules` from this repo (each user can only access their own settings).
+5. Copy the Firebase web config into `.env`:
+
+```bash
+VITE_FIREBASE_API_KEY=...
+VITE_FIREBASE_AUTH_DOMAIN=...
+VITE_FIREBASE_PROJECT_ID=...
+VITE_FIREBASE_STORAGE_BUCKET=...
+VITE_FIREBASE_MESSAGING_SENDER_ID=...
+VITE_FIREBASE_APP_ID=...
+```
+
+6. Add your dev and production domains under **Authentication → Settings → Authorized domains** (e.g. `localhost`, `ftrippel.github.io`).
+
+Without these variables, the dashboard works as before with local storage and JSON export/import only.
+
 ## Scripts
 
 | Command | Description |
