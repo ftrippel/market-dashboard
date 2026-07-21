@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { showConfirm } from './confirmDialog';
 import { isCoarsePointerDevice } from './device';
 import { isTypingTarget } from './focus';
 
@@ -57,13 +58,20 @@ function onPopState() {
     return;
   }
 
-  if (window.confirm(LEAVE_CONFIRM_MESSAGE)) {
-    ignoringPopstateCount++;
-    history.back();
-    return;
-  }
+  void showConfirm({
+    title: 'Leave page',
+    message: LEAVE_CONFIRM_MESSAGE,
+    confirmLabel: 'Go back',
+    cancelLabel: 'Stay',
+  }).then((confirmed) => {
+    if (confirmed) {
+      ignoringPopstateCount++;
+      history.back();
+      return;
+    }
 
-  history.pushState(ROOT_GUARD_STATE, '');
+    history.pushState(ROOT_GUARD_STATE, '');
+  });
 }
 
 function ensureKeydownListening() {

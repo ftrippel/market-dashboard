@@ -2,6 +2,7 @@ import { memo, useCallback, useRef, useState, useEffect } from 'react';
 import { fetchYahooFinancePrice } from './services/api';
 import { Header, Toast, TradingViewModal, SymbolPreviewOverlay, SettingsModal } from './components/common';
 import { ChartModalProvider } from './context/ChartModalContext';
+import { ConfirmDialogProvider } from './context/ConfirmDialogContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { AuthProvider } from './context/AuthContext';
@@ -229,20 +230,22 @@ const MemoizedDashboardContent = memo(DashboardContent);
 
 function App() {
   return (
-    <AuthProvider>
-      <ThemeProvider>
-        <SettingsProvider>
-          <SettingsSyncProvider>
-            <ChartModalProvider>
-              <SymbolPreviewProvider>
-                <MemoizedDashboardContent />
-                <SymbolPreviewOverlay />
-              </SymbolPreviewProvider>
-            </ChartModalProvider>
-          </SettingsSyncProvider>
-        </SettingsProvider>
-      </ThemeProvider>
-    </AuthProvider>
+    <ConfirmDialogProvider>
+      <AuthProvider>
+        <ThemeProvider>
+          <SettingsProvider>
+            <SettingsSyncProvider>
+              <ChartModalProvider>
+                <SymbolPreviewProvider>
+                  <MemoizedDashboardContent />
+                  <SymbolPreviewOverlay />
+                </SymbolPreviewProvider>
+              </ChartModalProvider>
+            </SettingsSyncProvider>
+          </SettingsProvider>
+        </ThemeProvider>
+      </AuthProvider>
+    </ConfirmDialogProvider>
   );
 }
 

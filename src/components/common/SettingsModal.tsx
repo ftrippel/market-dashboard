@@ -1,6 +1,7 @@
 import { useCallback, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useConfirm } from '../../context/ConfirmDialogContext';
 import { useSettings } from '../../context/SettingsContext';
 import { useSettingsSync } from '../../context/SettingsSyncContext';
 import { useScrollLock } from '../../hooks/useScrollLock';
@@ -60,6 +61,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     removeChartMa,
   } = useSettings();
   const { configured, user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
+  const confirm = useConfirm();
   const { status, statusMessage, lastSyncedAt, syncNow } = useSettingsSync();
 
   const onCloseRef = useRef(onClose);
@@ -96,9 +98,12 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     if (!file) return;
 
     if (
-      !window.confirm(
-        'Import settings? This will replace your current dashboard settings and watchlists.',
-      )
+      !(await confirm({
+        title: 'Import settings',
+        message:
+          'Import settings? This will replace your current dashboard settings and watchlists.',
+        confirmLabel: 'Import',
+      }))
     ) {
       return;
     }
@@ -109,7 +114,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     } catch (err) {
       setImportError(err instanceof Error ? err.message : 'Import failed.');
     }
-  }, []);
+  }, [confirm]);
 
   const exportPenClick = usePenCompatibleClick(handleExport);
   const importPenClick = usePenCompatibleClick(handleImportClick);
@@ -137,35 +142,43 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     await syncNow();
   }, [syncNow]);
 
-  const handleClearWatchlists = useCallback(() => {
+  const handleClearWatchlists = useCallback(async () => {
     const storage = loadWatchlistStorage();
     const symbolCount = storage.watchlists.reduce((sum, list) => sum + list.items.length, 0);
 
     if (
-      !window.confirm(
-        symbolCount === 0 && storage.watchlists.length <= 1
-          ? 'Watchlists are already empty. Reset to a single default watchlist anyway?'
-          : `Delete all watchlists and ${symbolCount} symbol${symbolCount === 1 ? '' : 's'}? This cannot be undone locally.`,
-      )
+      !(await confirm({
+        title: 'Clear watchlists',
+        message:
+          symbolCount === 0 && storage.watchlists.length <= 1
+            ? 'Watchlists are already empty. Reset to a single default watchlist anyway?'
+            : `Delete all watchlists and ${symbolCount} symbol${symbolCount === 1 ? '' : 's'}? This cannot be undone locally.`,
+        confirmLabel: 'Clear all',
+        destructive: true,
+      }))
     ) {
       return;
     }
 
     resetWatchlistsToDefault();
-  }, []);
+  }, [confirm]);
 
-  const handleResetAllSettings = useCallback(() => {
+  const handleResetAllSettings = useCallback(async () => {
     if (
-      !window.confirm(
-        'Reset all dashboard settings to defaults? This clears watchlists, chart preferences, calculator values, and display options.',
-      )
+      !(await confirm({
+        title: 'Reset all settings',
+        message:
+          'Reset all dashboard settings to defaults? This clears watchlists, chart preferences, calculator values, and display options.',
+        confirmLabel: 'Reset all',
+        destructive: true,
+      }))
     ) {
       return;
     }
 
     resetAllSettingsToDefaults();
     setActiveTab('display');
-  }, []);
+  }, [confirm]);
 
   const googleSignInPenClick = usePenCompatibleClick(handleGoogleSignIn);
   const signOutPenClick = usePenCompatibleClick(handleSignOut);
@@ -185,10 +198,19 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     updateChartMa(id, { period: clampMaPeriod(parsed) });
   }, [updateChartMa]);
 
-  const handleRemoveChartMa = useCallback((id: string) => {
-    if (!window.confirm('Remove this moving average?')) return;
+  const handleRemoveChartMa = useCallback(async (id: string) => {
+    if (
+      !(await confirm({
+        title: 'Remove moving average',
+        message: 'Remove this moving average?',
+        confirmLabel: 'Remove',
+        destructive: true,
+      }))
+    ) {
+      return;
+    }
     removeChartMa(id);
-  }, [removeChartMa]);
+  }, [confirm, removeChartMa]);
 
   const addChartMaPenClick = usePenCompatibleClick(addChartMa);
 

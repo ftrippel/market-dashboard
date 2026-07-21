@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Card, CardLabel, Icon, Section } from '../../components/common';
+import { useConfirm } from '../../context/ConfirmDialogContext';
 import { SortableHeader, type SortOrder } from '../../components/common/SortableHeader';
 import { PctCell } from '../../components/common/PctCell';
 import { SymbolLink } from '../../components/common/TradingViewModal';
@@ -639,6 +640,7 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
     setItemComment,
     allTags,
   } = useWatchlists();
+  const confirm = useConfirm();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTags, setActiveTags] = useState<string[]>([]);
@@ -746,21 +748,39 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
   );
 
   const handleDeleteWatchlist = useCallback(
-    (id: string) => {
+    async (id: string) => {
       const watchlist = watchlists.find((w) => w.id === id);
       const name = watchlist?.name ?? 'this watchlist';
-      if (!window.confirm(`Delete "${name}" and all its symbols?`)) return;
+      if (
+        !(await confirm({
+          title: 'Delete watchlist',
+          message: `Delete "${name}" and all its symbols?`,
+          confirmLabel: 'Delete',
+          destructive: true,
+        }))
+      ) {
+        return;
+      }
       deleteWatchlist(id);
     },
-    [watchlists, deleteWatchlist],
+    [watchlists, deleteWatchlist, confirm],
   );
 
   const handleRemoveItem = useCallback(
-    (sym: string) => {
-      if (!window.confirm(`Remove ${sym} from the watchlist?`)) return;
+    async (sym: string) => {
+      if (
+        !(await confirm({
+          title: 'Remove symbol',
+          message: `Remove ${sym} from the watchlist?`,
+          confirmLabel: 'Remove',
+          destructive: true,
+        }))
+      ) {
+        return;
+      }
       removeItem(sym);
     },
-    [removeItem],
+    [removeItem, confirm],
   );
 
   const handleRenameActive = useCallback(
