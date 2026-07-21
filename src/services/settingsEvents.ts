@@ -13,8 +13,12 @@ const LOCAL_BUILD_PREFIX = 'dashboard-settings-local-build-';
 const LOCAL_EDIT_SEQ_PREFIX = 'dashboard-settings-local-edit-seq-';
 const SYNC_USER_KEY = 'dashboard-settings-sync-user';
 const LEGACY_LAST_MODIFIED_PREFIX = 'dashboard-settings-last-modified-';
-const CURRENT_SYNC_SCHEMA_VERSION = 2;
-const CURRENT_SYNC_BUILD_NUMBER = import.meta.env.VITE_BUILD_NUMBER ?? 'dev';
+export const CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN: Record<SettingsDomain, number> = {
+  preferences: 2,
+  calculator: 2,
+  watchlists: 2,
+};
+export const CURRENT_SYNC_BUILD_NUMBER = import.meta.env.VITE_BUILD_NUMBER ?? 'dev';
 
 /** Never synced with cloud yet for this domain. */
 export const EPOCH_ISO = '1970-01-01T00:00:00.000Z';
@@ -141,8 +145,9 @@ export function endCloudSession(): void {
 
 /** Local user edit — queue upload; never bump revision with client clock. */
 export function touchSettingsModified(domain: SettingsDomain): void {
+  // Intentionally mark pending even before baseline: first sync must be able to upload local edits.
   markPendingUpload(domain, true);
-  setLocalSchemaVersion(domain, CURRENT_SYNC_SCHEMA_VERSION);
+  setLocalSchemaVersion(domain, CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN[domain]);
   setLocalBuildNumber(domain, CURRENT_SYNC_BUILD_NUMBER);
   bumpLocalEditSequence(domain);
   window.dispatchEvent(

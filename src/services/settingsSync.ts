@@ -24,6 +24,8 @@ import {
 } from './settingsBackup';
 import { createDefaultWatchlistStorage } from '../features/watchlist/watchlistStorage';
 import {
+  CURRENT_SYNC_BUILD_NUMBER,
+  CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN,
   getLocalBuildNumber,
   getLocalEditSequence,
   getLocalSchemaVersion,
@@ -66,12 +68,6 @@ const pendingRemoteSnapshots = new Map<
   SettingsDomain,
   { data: unknown; updatedAt: string; metadata: DomainSyncMetadata }
 >();
-const DOMAIN_SCHEMA_VERSION: Record<SettingsDomain, number> = {
-  preferences: 2,
-  calculator: 2,
-  watchlists: 2,
-};
-const SYNC_BUILD_NUMBER = import.meta.env.VITE_BUILD_NUMBER ?? 'dev';
 const LEGACY_BUILD_NUMBER = 'legacy';
 
 interface DomainSyncMetadata {
@@ -93,7 +89,7 @@ function timestampToIso(value: Timestamp | string | undefined): string | null {
   return value.toDate().toISOString();
 }
 
-function parseBuildNumber(value: string | null | undefined): number | null {
+function parseBuildNumberAsInt(value: string | null | undefined): number | null {
   if (!value) return null;
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) ? parsed : null;
@@ -108,8 +104,8 @@ function getLocalMetadata(domain: SettingsDomain): DomainSyncMetadata {
 
 function getCurrentMetadata(domain: SettingsDomain): DomainSyncMetadata {
   return {
-    schemaVersion: DOMAIN_SCHEMA_VERSION[domain],
-    buildNumber: SYNC_BUILD_NUMBER,
+    schemaVersion: CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN[domain],
+    buildNumber: CURRENT_SYNC_BUILD_NUMBER,
   };
 }
 
@@ -140,8 +136,8 @@ function shouldForcePullDueToVersion(
   if (local.schemaVersion < remoteMetadata.schemaVersion) return true;
   if (local.schemaVersion > remoteMetadata.schemaVersion) return false;
 
-  const localBuild = parseBuildNumber(local.buildNumber);
-  const remoteBuild = parseBuildNumber(remoteMetadata.buildNumber);
+  const localBuild = parseBuildNumberAsInt(local.buildNumber);
+  const remoteBuild = parseBuildNumberAsInt(remoteMetadata.buildNumber);
   if (localBuild === null || remoteBuild === null) return false;
   return localBuild < remoteBuild;
 }
@@ -280,8 +276,8 @@ function exportDomain(domain: SettingsDomain): unknown {
 }
 
 export async function uploadDomain(userId: string, domain: SettingsDomain): Promise<void> {
-  pauseRemoteApply(domain);
   const editSeqAtStart = getLocalEditSequence(domain);
+  pauseRemoteApply(domain);
   const metadata = getCurrentMetadata(domain);
 
   const docRef = settingsDocRef(userId, domain);
@@ -345,11 +341,14 @@ async function adoptDomainFromCloud(
       await uploadDomain(userId, domain);
       return 'uploaded';
     } catch {
+      // Another client may have created the doc between fetch and upload; pull if it now exists.
       const latestRemote = await fetchRemoteDomain(userId, domain);
       if (latestRemote) {
         return pullRemoteDomain(domain, latestRemote.data, latestRemote.updatedAt, latestRemote.metadata);
       }
-      throw new Error(`Unable to initialize cloud sync for "${domain}".`);
+      throw new Error(
+        `Unable to initialize cloud sync for "${domain}" after upload and re-fetch attempt.`,
+      );
     }
   }
 
@@ -410,20 +409,20 @@ async function migrateLegacyDashboardDoc(userId: string): Promise<boolean> {
     setDoc(settingsDocRef(userId, 'preferences'), {
       data: preferences,
       updatedAt: legacy.updatedAt ?? serverTimestamp(),
-      schemaVersion: DOMAIN_SCHEMA_VERSION.preferences,
-      buildNumber: SYNC_BUILD_NUMBER,
+      schemaVersion: CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN.preferences,
+      buildNumber: CURRENT_SYNC_BUILD_NUMBER,
     }),
     setDoc(settingsDocRef(userId, 'calculator'), {
       data: settings.calculator,
       updatedAt: legacy.updatedAt ?? serverTimestamp(),
-      schemaVersion: DOMAIN_SCHEMA_VERSION.calculator,
-      buildNumber: SYNC_BUILD_NUMBER,
+      schemaVersion: CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN.calculator,
+      buildNumber: CURRENT_SYNC_BUILD_NUMBER,
     }),
     setDoc(settingsDocRef(userId, 'watchlists'), {
       data: { watchlists: settings.watchlists.watchlists },
       updatedAt: legacy.updatedAt ?? serverTimestamp(),
-      schemaVersion: DOMAIN_SCHEMA_VERSION.watchlists,
-      buildNumber: SYNC_BUILD_NUMBER,
+      schemaVersion: CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN.watchlists,
+      buildNumber: CURRENT_SYNC_BUILD_NUMBER,
     }),
   ]);
 
