@@ -1,13 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Card, CardLabel, Icon, Section } from '../../components/common';
+import { SortableHeader, type SortOrder } from '../../components/common/SortableHeader';
 import { PctCell } from '../../components/common/PctCell';
 import { SymbolLink } from '../../components/common/TradingViewModal';
 import { getDisplayName, getSymbolMeta } from '../../data/symbolMaps';
 import { useMarketStore } from '../../store/marketStore';
+import type { MarketState } from '../../types';
 import { colors } from '../../utils/formatting';
 import { usePenCompatibleClick } from '../../utils/penClick';
 import {
   findMarketData,
+  getWatchlistMetrics,
   matchesWatchlistSearch,
   matchesWatchlistTags,
   watchlistItemToMarketData,
@@ -17,6 +20,42 @@ import { useWatchlists } from './useWatchlists';
 import { parseTags } from './watchlistStorage';
 import type { WatchlistItem } from './types';
 import type { WatchlistQuote } from './useWatchlistQuotes';
+
+type WatchlistSortKey = 'name' | 'd1' | 'w1' | 'hi52' | 'ytd' | 'tags' | 'comment';
+
+function compareWatchlistItems(
+  a: WatchlistItem,
+  b: WatchlistItem,
+  key: WatchlistSortKey,
+  order: SortOrder,
+  store: MarketState,
+  quotes: Record<string, WatchlistQuote>,
+): number {
+  let cmp = 0;
+
+  if (key === 'name') {
+    const aName = getDisplayName(a.sym, watchlistItemToMarketData(a, store, quotes).name);
+    const bName = getDisplayName(b.sym, watchlistItemToMarketData(b, store, quotes).name);
+    cmp = aName.localeCompare(bName);
+  } else if (key === 'tags') {
+    cmp = a.tags.join(', ').localeCompare(b.tags.join(', '));
+  } else if (key === 'comment') {
+    cmp = (a.comment ?? '').localeCompare(b.comment ?? '');
+  } else {
+    const metricsA = getWatchlistMetrics(a, store, quotes);
+    const metricsB = getWatchlistMetrics(b, store, quotes);
+    const aVal = Number(metricsA[key] ?? NaN);
+    const bVal = Number(metricsB[key] ?? NaN);
+    const aMissing = Number.isNaN(aVal);
+    const bMissing = Number.isNaN(bVal);
+    if (aMissing && bMissing) cmp = 0;
+    else if (aMissing) cmp = 1;
+    else if (bMissing) cmp = -1;
+    else cmp = aVal - bVal;
+  }
+
+  return order === 'asc' ? cmp : -cmp;
+}
 
 function EditableWatchlistTitle({
   name,
@@ -607,6 +646,17 @@ export function WatchlistSection() {
   const [addTags, setAddTags] = useState<string[]>([]);
   const [commentInput, setCommentInput] = useState('');
   const [addError, setAddError] = useState<string | null>(null);
+  const [sort, setSort] = useState<{ key: WatchlistSortKey; order: SortOrder }>({
+    key: 'w1',
+    order: 'desc',
+  });
+
+  const handleSort = useCallback((key: WatchlistSortKey) => {
+    setSort((prev) => ({
+      key,
+      order: prev.key === key && prev.order === 'desc' ? 'asc' : 'desc',
+    }));
+  }, []);
 
   const allSymbols = useMemo(
     () => activeWatchlist?.items.map((item) => item.sym) ?? [],
@@ -623,13 +673,21 @@ export function WatchlistSection() {
     );
   }, [activeWatchlist, store, searchQuery, activeTags]);
 
+  const sortedItems = useMemo(
+    () =>
+      [...filteredItems].sort((a, b) =>
+        compareWatchlistItems(a, b, sort.key, sort.order, store, quotes),
+      ),
+    [filteredItems, sort, store, quotes],
+  );
+
   const siblings = useMemo(
     () =>
-      filteredItems.map((item) => ({
+      sortedItems.map((item) => ({
         sym: item.sym,
         name: getDisplayName(item.sym, watchlistItemToMarketData(item, store, quotes).name),
       })),
-    [filteredItems, store, quotes],
+    [sortedItems, store, quotes],
   );
 
   const handleAdd = useCallback(() => {
@@ -796,34 +854,72 @@ export function WatchlistSection() {
                 >
                   <thead>
                     <tr>
-                      <th className="watchlist-th" style={{ textAlign: 'left' }}>
-                        Symbol
-                      </th>
-                      <th className="watchlist-th" style={{ textAlign: 'right' }}>
-                        1D%
-                      </th>
-                      <th className="watchlist-th" style={{ textAlign: 'right' }}>
-                        1W%
-                      </th>
-                      <th className="watchlist-th" style={{ textAlign: 'right' }}>
-                        52W Hi%
-                      </th>
-                      <th className="watchlist-th" style={{ textAlign: 'right' }}>
-                        YTD%
-                      </th>
-                      <th className="watchlist-th" style={{ textAlign: 'left' }}>
-                        Tags
-                      </th>
-                      <th className="watchlist-th" style={{ textAlign: 'left' }}>
-                        Comment
-                      </th>
+                      <SortableHeader
+                        label="Symbol"
+                        sortKey="name"
+                        activeKey={sort.key}
+                        order={sort.order}
+                        align="left"
+                        onSort={handleSort}
+                        thClassName="watchlist-th"
+                      />
+                      <SortableHeader
+                        label="1D%"
+                        sortKey="d1"
+                        activeKey={sort.key}
+                        order={sort.order}
+                        onSort={handleSort}
+                        thClassName="watchlist-th"
+                      />
+                      <SortableHeader
+                        label="1W%"
+                        sortKey="w1"
+                        activeKey={sort.key}
+                        order={sort.order}
+                        onSort={handleSort}
+                        thClassName="watchlist-th"
+                      />
+                      <SortableHeader
+                        label="52W Hi%"
+                        sortKey="hi52"
+                        activeKey={sort.key}
+                        order={sort.order}
+                        onSort={handleSort}
+                        thClassName="watchlist-th"
+                      />
+                      <SortableHeader
+                        label="YTD%"
+                        sortKey="ytd"
+                        activeKey={sort.key}
+                        order={sort.order}
+                        onSort={handleSort}
+                        thClassName="watchlist-th"
+                      />
+                      <SortableHeader
+                        label="Tags"
+                        sortKey="tags"
+                        activeKey={sort.key}
+                        order={sort.order}
+                        align="left"
+                        onSort={handleSort}
+                        thClassName="watchlist-th"
+                      />
+                      <SortableHeader
+                        label="Comment"
+                        sortKey="comment"
+                        activeKey={sort.key}
+                        order={sort.order}
+                        align="left"
+                        onSort={handleSort}
+                        thClassName="watchlist-th"
+                      />
                       <th className="watchlist-th" style={{ textAlign: 'center', width: '48px' }}>
                         {' '}
                       </th>
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredItems.map((item) => (
+                    {sortedItems.map((item) => (
                       <WatchlistRow
                         key={item.sym}
                         item={item}

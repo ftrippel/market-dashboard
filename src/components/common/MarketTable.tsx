@@ -8,13 +8,13 @@ import { Sparkbar } from './Sparkbar';
 import { Sparkdots } from './Sparkdots';
 import { useSettings } from '../../context/SettingsContext';
 import { BpsCell, PctCell } from './PctCell';
+import { SortableHeader, type SortOrder } from './SortableHeader';
 import { Icon } from './Icon';
 import { SymbolLink } from './TradingViewModal';
 import { HoldingsFlyover } from './HoldingsFlyover';
 import { CardSearchContext } from './CardSearchContext';
 
 type SortKey = 'name' | 'price' | 'd1' | 'w1' | 'hi52' | 'ytd' | 'ema_uptrend';
-type SortOrder = 'asc' | 'desc';
 
 interface MarketTableProps extends MarketTableOptions {
   data: MarketData[];
@@ -61,47 +61,6 @@ function compareRows(a: MarketData, b: MarketData, key: SortKey, order: SortOrde
   }
 
   return order === 'asc' ? cmp : -cmp;
-}
-
-function SortableHeader({
-  label,
-  sortKey,
-  activeKey,
-  order,
-  align = 'right',
-  onSort,
-}: {
-  label: string;
-  sortKey: SortKey;
-  activeKey: SortKey;
-  order: SortOrder;
-  align?: 'left' | 'right' | 'center';
-  onSort: (key: SortKey) => void;
-}) {
-  const active = sortKey === activeKey;
-  const justify =
-    align === 'left' ? 'flex-start' : align === 'center' ? 'center' : 'flex-end';
-  const sortPenClick = usePenCompatibleClick(() => onSort(sortKey));
-
-  return (
-    <th style={{ ...thStyle, textAlign: align, padding: 0 }}>
-      <button
-        type="button"
-        className={`th-sort${active ? ' active' : ''}`}
-        {...sortPenClick}
-        aria-sort={active ? (order === 'asc' ? 'ascending' : 'descending') : 'none'}
-        style={{ justifyContent: justify }}
-      >
-        <span>{label}</span>
-        <span className="th-sort-icon" aria-hidden>
-          <Icon
-            name={active ? (order === 'asc' ? 'arrow_upward' : 'arrow_downward') : 'unfold_more'}
-            size="xs"
-          />
-        </span>
-      </button>
-    </th>
-  );
 }
 
 function TrendCell({ value }: { value?: boolean }) {
@@ -217,6 +176,7 @@ export const MarketTable: React.FC<MarketTableProps> = ({
             order={sort.order}
             align="left"
             onSort={handleSort}
+            thStyle={thStyle}
           />
           {hasPrice && (
             <SortableHeader
@@ -225,6 +185,7 @@ export const MarketTable: React.FC<MarketTableProps> = ({
               activeKey={sort.key}
               order={sort.order}
               onSort={handleSort}
+              thStyle={thStyle}
             />
           )}
           <SortableHeader
@@ -233,6 +194,7 @@ export const MarketTable: React.FC<MarketTableProps> = ({
             activeKey={sort.key}
             order={sort.order}
             onSort={handleSort}
+            thStyle={thStyle}
           />
           <SortableHeader
             label={isYield ? '1W (bps)' : '1W%'}
@@ -240,6 +202,7 @@ export const MarketTable: React.FC<MarketTableProps> = ({
             activeKey={sort.key}
             order={sort.order}
             onSort={handleSort}
+            thStyle={thStyle}
           />
           <SortableHeader
             label={isYield ? '52W Hi (bps)' : '52W Hi%'}
@@ -247,6 +210,7 @@ export const MarketTable: React.FC<MarketTableProps> = ({
             activeKey={sort.key}
             order={sort.order}
             onSort={handleSort}
+            thStyle={thStyle}
           />
           <SortableHeader
             label={isYield ? 'YTD (bps)' : 'YTD%'}
@@ -254,6 +218,7 @@ export const MarketTable: React.FC<MarketTableProps> = ({
             activeKey={sort.key}
             order={sort.order}
             onSort={handleSort}
+            thStyle={thStyle}
           />
           {shouldShowSpark && <th style={{ ...thStyle, textAlign: 'center' }}>5D</th>}
           {showTrend && (
@@ -264,6 +229,7 @@ export const MarketTable: React.FC<MarketTableProps> = ({
               order={sort.order}
               align="center"
               onSort={handleSort}
+              thStyle={thStyle}
             />
           )}
           {showHoldings && <th style={{ ...thStyle, textAlign: 'left' }}>Holdings</th>}

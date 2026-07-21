@@ -53,6 +53,21 @@ export function watchlistItemToMarketData(
   };
 }
 
+export function getWatchlistMetrics(
+  item: WatchlistItem,
+  store: MarketState,
+  quotes: Record<string, WatchlistQuote> = {},
+) {
+  const existing = findMarketData(store, item.sym);
+  const quote = quotes[item.sym];
+  return {
+    d1: existing?.d1 ?? quote?.d1,
+    w1: existing?.w1 ?? quote?.w1,
+    hi52: existing?.hi52 ?? quote?.hi52,
+    ytd: existing?.ytd ?? quote?.ytd,
+  };
+}
+
 export function matchesWatchlistSearch(
   item: WatchlistItem,
   store: MarketState,
