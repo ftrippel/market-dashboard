@@ -37,6 +37,7 @@ jobs:
 
       - name: Build
         env:
+          VITE_BUILD_NUMBER: ${{ github.run_number }}
           VITE_FIREBASE_API_KEY: AIzaSyBY8nKYYGMcxxmhLpFF1V-LMFQiBgrTYns
           VITE_FIREBASE_AUTH_DOMAIN: market-dashboard-f832e.firebaseapp.com
           VITE_FIREBASE_PROJECT_ID: market-dashboard-f832e

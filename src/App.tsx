@@ -23,6 +23,7 @@ import {
 } from './services/share';
 import { config } from './config';
 import { colors } from './utils/formatting';
+import { buildLabel } from './buildInfo';
 import { Icon } from './components/common/Icon';
 import './App.css';
 
@@ -217,6 +218,8 @@ function DashboardContent() {
             ⚠️ No data loaded. Check browser console for errors.
           </div>
         )}
+
+        <footer className="build-footer">{buildLabel}</footer>
       </div>
     </div>
   );
