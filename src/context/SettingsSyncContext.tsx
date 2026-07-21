@@ -21,7 +21,6 @@ import {
 import {
   beginCloudSession,
   endCloudSession,
-  hasCloudBaseline,
   hasPendingUpload,
   isSettingsChangedEvent,
   REMOTE_SETTINGS_APPLIED_EVENT,
@@ -129,7 +128,7 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
       if (!userId || !sessionReady || domains.length === 0) return;
 
       const uniqueDomains = [...new Set(domains)].filter(
-        (domain) => hasCloudBaseline(domain) && hasPendingUpload(domain),
+        (domain) => hasPendingUpload(domain),
       );
       if (uniqueDomains.length === 0) return;
 
@@ -230,8 +229,8 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!userId || !sessionReady) return;
 
-    return subscribeToRemoteSettings(userId, (domain, data, updatedAt) => {
-      const applied = applyRemoteSnapshot(domain, data, updatedAt);
+    return subscribeToRemoteSettings(userId, (domain, data, updatedAt, metadata) => {
+      const applied = applyRemoteSnapshot(domain, data, updatedAt, metadata);
       if (!applied) return;
 
       notifyRemoteApplied(domain);
@@ -255,7 +254,7 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
         clearUploadTimers();
 
         const domains = SETTINGS_DOMAINS.filter(
-          (domain) => hasCloudBaseline(domain) && hasPendingUpload(domain),
+          (domain) => hasPendingUpload(domain),
         );
         if (domains.length > 0) {
           void runUpload(domains);
@@ -291,7 +290,7 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
       if (!isSettingsChangedEvent(event)) return;
 
       const domain = event.detail.domain;
-      if (!userId || !sessionReady || !hasCloudBaseline(domain) || !hasPendingUpload(domain)) {
+      if (!userId || !sessionReady || !hasPendingUpload(domain)) {
         return;
       }
 
