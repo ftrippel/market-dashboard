@@ -1,6 +1,6 @@
 import {
   doc,
-  getDoc,
+  getDocFromServer,
   onSnapshot,
   serverTimestamp,
   setDoc,
@@ -10,22 +10,22 @@ import {
   applyCalculatorSettings,
   applyPreferencesSettings,
   applyWatchlistsFromSync,
-  countWatchlistItems,
   exportCalculatorSettings,
   exportPreferencesSettings,
   exportWatchlistsForSync,
   parseCalculatorSettings,
   parsePreferencesSettings,
+  mergeWatchlists,
   parseWatchlistsSyncPayload,
   watchlistsContentEqual,
   type CalculatorSettings,
   type DashboardSettingsExport,
   type PreferencesSettings,
 } from './settingsBackup';
-import type { Watchlist } from '../features/watchlist/types';
 import {
   getSettingsLastModified,
   setSettingsLastModified,
+  touchSettingsModified,
   SETTINGS_DOMAINS,
   type SettingsDomain,
 } from './settingsEvents';
@@ -91,12 +91,6 @@ function hasNeverSynced(domain: SettingsDomain): boolean {
   return getSettingsLastModified(domain) === EPOCH_ISO;
 }
 
-function shouldPreferLocalWatchlists(local: Watchlist[], remote: Watchlist[] | null): boolean {
-  const localItems = countWatchlistItems(local);
-  const remoteItems = remote ? countWatchlistItems(remote) : 0;
-  return localItems > remoteItems;
-}
-
 function remoteContentDiffers(domain: SettingsDomain, data: unknown): boolean {
   if (domain === 'watchlists') {
     const remote = parseWatchlistsSyncPayload(data);
@@ -121,7 +115,7 @@ async function fetchRemoteDomain(
   userId: string,
   domain: SettingsDomain,
 ): Promise<{ data: unknown; updatedAt: string } | null> {
-  const snapshot = await getDoc(settingsDocRef(userId, domain));
+  const snapshot = await getDocFromServer(settingsDocRef(userId, domain));
   if (!snapshot.exists()) return null;
 
   const payload = snapshot.data() as RemoteDocPayload;
@@ -181,22 +175,57 @@ export async function uploadDomains(userId: string, domains: SettingsDomain[]): 
   await Promise.all(domains.map((domain) => uploadDomain(userId, domain)));
 }
 
+async function reconcileWatchlistsDomain(userId: string): Promise<DomainSyncResult> {
+  const localWatchlists = exportWatchlistsForSync().watchlists;
+  const remote = await fetchRemoteDomain(userId, 'watchlists');
+
+  if (!remote) {
+    await uploadDomain(userId, 'watchlists');
+    return 'uploaded';
+  }
+
+  const remoteParsed = parseWatchlistsSyncPayload(remote.data);
+  if (!remoteParsed) {
+    await uploadDomain(userId, 'watchlists');
+    return 'uploaded';
+  }
+
+  const remoteWatchlists = remoteParsed.watchlists;
+  if (watchlistsContentEqual(localWatchlists, remoteWatchlists)) {
+    return 'unchanged';
+  }
+
+  const mergeContext = {
+    localUpdatedAt: getSettingsLastModified('watchlists'),
+    remoteUpdatedAt: remote.updatedAt,
+  };
+  const merged = mergeWatchlists(localWatchlists, remoteWatchlists, mergeContext);
+  const localChanged = !watchlistsContentEqual(localWatchlists, merged);
+  const remoteChanged = !watchlistsContentEqual(remoteWatchlists, merged);
+
+  if (localChanged) {
+    applyWatchlistsFromSync({ watchlists: merged }, { source: 'remote', updatedAt: remote.updatedAt });
+  }
+
+  if (remoteChanged) {
+    await uploadDomain(userId, 'watchlists');
+    return localChanged ? 'downloaded' : 'uploaded';
+  }
+
+  return localChanged ? 'downloaded' : 'unchanged';
+}
+
 async function reconcileDomain(userId: string, domain: SettingsDomain): Promise<DomainSyncResult> {
+  if (domain === 'watchlists') {
+    return reconcileWatchlistsDomain(userId);
+  }
+
   const localModified = getSettingsLastModified(domain);
   const remote = await fetchRemoteDomain(userId, domain);
 
   if (!remote) {
     await uploadDomain(userId, domain);
     return 'uploaded';
-  }
-
-  if (domain === 'watchlists') {
-    const local = exportWatchlistsForSync().watchlists;
-    const remoteParsed = parseWatchlistsSyncPayload(remote.data);
-    if (shouldPreferLocalWatchlists(local, remoteParsed?.watchlists ?? null)) {
-      await uploadDomain(userId, domain);
-      return 'uploaded';
-    }
   }
 
   const localTime = Date.parse(localModified);
@@ -217,7 +246,7 @@ async function reconcileDomain(userId: string, domain: SettingsDomain): Promise<
 }
 
 async function migrateLegacyDashboardDoc(userId: string): Promise<boolean> {
-  const snapshot = await getDoc(legacySettingsDocRef(userId));
+  const snapshot = await getDocFromServer(legacySettingsDocRef(userId));
   if (!snapshot.exists()) return false;
 
   const legacy = snapshot.data();
@@ -261,15 +290,17 @@ async function migrateLegacyDashboardDoc(userId: string): Promise<boolean> {
   return true;
 }
 
-export async function reconcileSettings(userId: string): Promise<SettingsSyncResult> {
+export async function reconcileSettings(userId: string): Promise<ReconcileResult> {
   await migrateLegacyDashboardDoc(userId);
 
-  const result: ReconcileResult = {
+  return {
     preferences: await reconcileDomain(userId, 'preferences'),
     calculator: await reconcileDomain(userId, 'calculator'),
-    watchlists: await reconcileDomain(userId, 'watchlists'),
+    watchlists: await reconcileWatchlistsDomain(userId),
   };
+}
 
+export function summarizeReconcileResult(result: ReconcileResult): SettingsSyncResult {
   return summarizeResults(result);
 }
 
@@ -280,15 +311,33 @@ export function applyRemoteIfNewer(
 ): boolean {
   if (isRemoteApplyPaused(domain)) return false;
 
-  if (!remoteContentDiffers(domain, data)) return false;
-
   if (domain === 'watchlists') {
     const remote = parseWatchlistsSyncPayload(data);
+    if (!remote) return false;
+
     const local = exportWatchlistsForSync().watchlists;
-    if (remote && shouldPreferLocalWatchlists(local, remote.watchlists)) {
-      return false;
+    if (watchlistsContentEqual(local, remote.watchlists)) return false;
+
+    const mergeContext = {
+      localUpdatedAt: getSettingsLastModified('watchlists'),
+      remoteUpdatedAt: updatedAt,
+    };
+    const merged = mergeWatchlists(local, remote.watchlists, mergeContext);
+    const localChanged = !watchlistsContentEqual(local, merged);
+    const remoteChanged = !watchlistsContentEqual(remote.watchlists, merged);
+
+    if (localChanged) {
+      applyWatchlistsFromSync({ watchlists: merged }, { source: 'remote', updatedAt });
     }
+
+    if (remoteChanged) {
+      touchSettingsModified('watchlists');
+    }
+
+    return localChanged;
   }
+
+  if (!remoteContentDiffers(domain, data)) return false;
 
   return applyRemoteDomain(domain, data, updatedAt);
 }
@@ -300,6 +349,7 @@ export function subscribeToRemoteSettings(
   const unsubs = SETTINGS_DOMAINS.map((domain) =>
     onSnapshot(settingsDocRef(userId, domain), (snapshot) => {
       if (!snapshot.exists()) return;
+      if (snapshot.metadata.fromCache) return;
       if (isRemoteApplyPaused(domain)) return;
 
       const payload = snapshot.data() as RemoteDocPayload;

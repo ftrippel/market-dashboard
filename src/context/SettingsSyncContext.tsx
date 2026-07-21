@@ -13,11 +13,16 @@ import {
   applyRemoteIfNewer,
   reconcileSettings,
   subscribeToRemoteSettings,
+  summarizeReconcileResult,
   uploadDomain,
   type SettingsDomain,
   type SettingsSyncResult,
 } from '../services/settingsSync';
-import { isSettingsChangedEvent, SETTINGS_CHANGED_EVENT } from '../services/settingsEvents';
+import {
+  isSettingsChangedEvent,
+  REMOTE_SETTINGS_APPLIED_EVENT,
+  SETTINGS_CHANGED_EVENT,
+} from '../services/settingsEvents';
 
 export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error';
 
@@ -135,7 +140,13 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
 
     try {
       const result = await reconcileSettings(userId);
-      markSynced(result);
+      markSynced(summarizeReconcileResult(result));
+
+      if (result.watchlists !== 'unchanged') {
+        window.dispatchEvent(
+          new CustomEvent(REMOTE_SETTINGS_APPLIED_EVENT, { detail: { domain: 'watchlists' } }),
+        );
+      }
     } catch (err) {
       setStatus('error');
       setStatusMessage(err instanceof Error ? err.message : 'Cloud sync failed.');

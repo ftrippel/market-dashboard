@@ -97,12 +97,158 @@ export function exportWatchlistsForSync(): WatchlistsSyncPayload {
   return { watchlists: loadWatchlistStorage().watchlists };
 }
 
-export function countWatchlistItems(watchlists: Watchlist[]): number {
-  return watchlists.reduce((sum, watchlist) => sum + watchlist.items.length, 0);
-}
-
 export function watchlistsContentEqual(a: Watchlist[], b: Watchlist[]): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
+}
+
+export interface WatchlistMergeContext {
+  localUpdatedAt: string;
+  remoteUpdatedAt: string;
+}
+
+function watchlistItemSymSet(items: WatchlistItem[]): Set<string> {
+  return new Set(items.map((item) => item.sym));
+}
+
+function isSymSubset(subset: Set<string>, superset: Set<string>): boolean {
+  for (const sym of subset) {
+    if (!superset.has(sym)) return false;
+  }
+  return true;
+}
+
+function mergeTags(a: string[], b: string[]): string[] {
+  const seen = new Set<string>();
+  const merged: string[] = [];
+  for (const tag of [...a, ...b]) {
+    const key = tag.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    merged.push(tag);
+  }
+  return merged;
+}
+
+function mergeWatchlistItem(local: WatchlistItem, remote: WatchlistItem): WatchlistItem {
+  const localComment = local.comment?.trim() ?? '';
+  const remoteComment = remote.comment?.trim() ?? '';
+  return {
+    sym: local.sym,
+    tags: mergeTags(local.tags, remote.tags),
+    comment: localComment || remoteComment,
+  };
+}
+
+function mergeWatchlistItemsUnion(localItems: WatchlistItem[], remoteItems: WatchlistItem[]): WatchlistItem[] {
+  const localBySym = new Map(localItems.map((item) => [item.sym, item]));
+  const merged: WatchlistItem[] = [];
+  const seen = new Set<string>();
+
+  for (const remoteItem of remoteItems) {
+    const localItem = localBySym.get(remoteItem.sym);
+    merged.push(localItem ? mergeWatchlistItem(localItem, remoteItem) : remoteItem);
+    seen.add(remoteItem.sym);
+  }
+
+  for (const localItem of localItems) {
+    if (seen.has(localItem.sym)) continue;
+    merged.push(localItem);
+    seen.add(localItem.sym);
+  }
+
+  return merged;
+}
+
+function mergeWatchlistItemsPreferRemoteList(
+  localItems: WatchlistItem[],
+  remoteItems: WatchlistItem[],
+): WatchlistItem[] {
+  const localBySym = new Map(localItems.map((item) => [item.sym, item]));
+  return remoteItems.map((remoteItem) => {
+    const localItem = localBySym.get(remoteItem.sym);
+    return localItem ? mergeWatchlistItem(localItem, remoteItem) : remoteItem;
+  });
+}
+
+function mergeWatchlistItemsPreferLocalList(
+  localItems: WatchlistItem[],
+  remoteItems: WatchlistItem[],
+): WatchlistItem[] {
+  const remoteBySym = new Map(remoteItems.map((item) => [item.sym, item]));
+  return localItems.map((localItem) => {
+    const remoteItem = remoteBySym.get(localItem.sym);
+    return remoteItem ? mergeWatchlistItem(localItem, remoteItem) : localItem;
+  });
+}
+
+function mergeWatchlistItems(
+  localItems: WatchlistItem[],
+  remoteItems: WatchlistItem[],
+  localNewer: boolean,
+  remoteNewer: boolean,
+): WatchlistItem[] {
+  const localSyms = watchlistItemSymSet(localItems);
+  const remoteSyms = watchlistItemSymSet(remoteItems);
+
+  if (localSyms.size === remoteSyms.size && isSymSubset(localSyms, remoteSyms)) {
+    return mergeWatchlistItemsUnion(localItems, remoteItems);
+  }
+
+  const oneSideIsSubset =
+    isSymSubset(remoteSyms, localSyms) || isSymSubset(localSyms, remoteSyms);
+
+  if (remoteNewer && oneSideIsSubset) {
+    return mergeWatchlistItemsPreferRemoteList(localItems, remoteItems);
+  }
+
+  if (localNewer && oneSideIsSubset) {
+    return mergeWatchlistItemsPreferLocalList(localItems, remoteItems);
+  }
+
+  return mergeWatchlistItemsUnion(localItems, remoteItems);
+}
+
+/**
+ * Merge watchlists across devices. Union-adds unique symbols, but when one side is
+ * newer and a strict superset, the newer side wins (covers remote/local deletions).
+ */
+export function mergeWatchlists(
+  local: Watchlist[],
+  remote: Watchlist[],
+  context: WatchlistMergeContext,
+): Watchlist[] {
+  const localTime = Date.parse(context.localUpdatedAt);
+  const remoteTime = Date.parse(context.remoteUpdatedAt);
+  const localNewer = localTime > remoteTime;
+  const remoteNewer = remoteTime > localTime;
+
+  const localById = new Map(local.map((watchlist) => [watchlist.id, watchlist]));
+  const merged: Watchlist[] = [];
+  const seenIds = new Set<string>();
+
+  for (const remoteWatchlist of remote) {
+    const localWatchlist = localById.get(remoteWatchlist.id);
+    merged.push({
+      id: remoteWatchlist.id,
+      name: localWatchlist?.name ?? remoteWatchlist.name,
+      items: localWatchlist
+        ? mergeWatchlistItems(
+            localWatchlist.items,
+            remoteWatchlist.items,
+            localNewer,
+            remoteNewer,
+          )
+        : remoteWatchlist.items,
+    });
+    seenIds.add(remoteWatchlist.id);
+  }
+
+  for (const localWatchlist of local) {
+    if (seenIds.has(localWatchlist.id)) continue;
+    merged.push(localWatchlist);
+  }
+
+  return merged;
 }
 
 function resolveLocalActiveId(watchlists: Watchlist[], preferredActiveId: string): string {
