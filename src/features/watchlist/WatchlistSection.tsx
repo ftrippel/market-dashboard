@@ -674,7 +674,7 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
     }
     return syms;
   }, [watchlists]);
-  const { quotes, refetchAll, refetching } = useWatchlistQuotes(
+  const { quotes, refetch, refetchAll, refetching } = useWatchlistQuotes(
     allSymbols,
     store,
     liveEnabled,
@@ -955,25 +955,37 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
           )}
 
           <div className="watchlist-footer">
-            <button
-              type="button"
-              className="btn watchlist-refresh-btn"
-              onClick={() => void refetchAll()}
-              disabled={refetching || allWatchlistSymbols.length === 0}
-              title="Refresh quotes for all watchlists (max 2 requests/sec)"
-            >
-              <Icon name="refresh" size="sm" />
-              {refetching ? 'Refreshing…' : 'Refresh'}
-            </button>
-            {watchlists.length > 1 && (
+            <div className="watchlist-footer-actions">
               <button
                 type="button"
-                className="btn watchlist-delete-btn"
-                {...deleteWatchlistPenClick}
+                className="btn watchlist-refresh-btn"
+                onClick={() => void refetch()}
+                disabled={refetching || allSymbols.length === 0}
+                title="Refresh quotes for this watchlist (max 2 requests/sec)"
               >
-                <Icon name="close" size="xs" /> Delete &ldquo;{activeWatchlist.name}&rdquo;
+                <Icon name="refresh" size="sm" />
+                {refetching ? 'Refreshing…' : 'Refresh'}
               </button>
-            )}
+              <button
+                type="button"
+                className="btn watchlist-refresh-btn"
+                onClick={() => void refetchAll()}
+                disabled={refetching || allWatchlistSymbols.length === 0}
+                title="Refresh quotes for all watchlists (max 2 requests/sec)"
+              >
+                <Icon name="refresh" size="sm" />
+                {refetching ? 'Refreshing…' : 'Refresh All'}
+              </button>
+              {watchlists.length > 1 && (
+                <button
+                  type="button"
+                  className="btn watchlist-delete-btn"
+                  {...deleteWatchlistPenClick}
+                >
+                  Delete
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </Card>

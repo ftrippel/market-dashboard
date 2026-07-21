@@ -1299,13 +1299,16 @@ body::before {
 }
 
 .watchlist-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
+}
+
+.watchlist-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .watchlist-delete-btn {

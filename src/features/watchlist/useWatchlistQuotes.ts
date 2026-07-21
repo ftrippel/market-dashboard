@@ -119,41 +119,54 @@ export function useWatchlistQuotes(
     };
   }, [liveEnabled, symbolsKey, updatePrice]);
 
-  const refetchAll = useCallback(async () => {
-    if (refetchSymbols.length === 0) return;
+  const refetchSymbolsList = useCallback(
+    async (syms: string[]) => {
+      if (syms.length === 0) return;
 
-    const runId = ++refetchRunIdRef.current;
-    setRefetching(true);
+      const runId = ++refetchRunIdRef.current;
+      setRefetching(true);
 
-    try {
-      for (let i = 0; i < refetchSymbols.length; i++) {
-        if (runId !== refetchRunIdRef.current) return;
-        if (i > 0) await delay(REFETCH_MIN_INTERVAL_MS);
-        if (runId !== refetchRunIdRef.current) return;
+      try {
+        for (let i = 0; i < syms.length; i++) {
+          if (runId !== refetchRunIdRef.current) return;
+          if (i > 0) await delay(REFETCH_MIN_INTERVAL_MS);
+          if (runId !== refetchRunIdRef.current) return;
 
-        const sym = refetchSymbols[i];
-        try {
-          const res = await fetchYahooFinanceMarketMetrics(sym);
-          if (runId !== refetchRunIdRef.current || !res) continue;
+          const sym = syms[i];
+          try {
+            const res = await fetchYahooFinanceMarketMetrics(sym);
+            if (runId !== refetchRunIdRef.current || !res) continue;
 
-          setQuotes((prev) => ({
-            ...prev,
-            [sym]: res,
-          }));
+            setQuotes((prev) => ({
+              ...prev,
+              [sym]: res,
+            }));
 
-          if (findMarketData(useMarketStore.getState(), sym)) {
-            updateMetrics(sym, res);
+            if (findMarketData(useMarketStore.getState(), sym)) {
+              updateMetrics(sym, res);
+            }
+          } catch (err) {
+            console.warn(`Failed to refresh watchlist metrics for ${sym}:`, err);
           }
-        } catch (err) {
-          console.warn(`Failed to refresh watchlist metrics for ${sym}:`, err);
+        }
+      } finally {
+        if (runId === refetchRunIdRef.current) {
+          setRefetching(false);
         }
       }
-    } finally {
-      if (runId === refetchRunIdRef.current) {
-        setRefetching(false);
-      }
-    }
-  }, [refetchKey, updateMetrics]);
+    },
+    [updateMetrics],
+  );
 
-  return { quotes, refetchAll, refetching };
+  const refetch = useCallback(
+    () => refetchSymbolsList(symbols),
+    [refetchSymbolsList, symbolsKey, symbols],
+  );
+
+  const refetchAll = useCallback(
+    () => refetchSymbolsList(refetchSymbols),
+    [refetchSymbolsList, refetchKey, refetchSymbols],
+  );
+
+  return { quotes, refetch, refetchAll, refetching };
 }
