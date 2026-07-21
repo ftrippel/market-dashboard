@@ -202,7 +202,7 @@ function DashboardContent() {
         <MacroDivider />
         <BreadthSection breadth={store.breadth} />
         <MacroDivider />
-        <WatchlistSection />
+        <WatchlistSection liveEnabled={liveEnabled} />
         <MacroDivider />
         <PositionCalculator />
 

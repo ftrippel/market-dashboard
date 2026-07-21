@@ -622,7 +622,7 @@ function WatchlistRow({
   );
 }
 
-export function WatchlistSection() {
+export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolean }) {
   const store = useMarketStore();
   const {
     watchlists,
@@ -662,7 +662,7 @@ export function WatchlistSection() {
     () => activeWatchlist?.items.map((item) => item.sym) ?? [],
     [activeWatchlist],
   );
-  const quotes = useWatchlistQuotes(allSymbols, store);
+  const quotes = useWatchlistQuotes(allSymbols, store, liveEnabled);
 
   const filteredItems = useMemo(() => {
     if (!activeWatchlist) return [];
