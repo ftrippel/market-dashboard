@@ -15,6 +15,7 @@ export type MaterialIconName =
   | 'light_mode'
   | 'open_in_full'
   | 'photo_camera'
+  | 'refresh'
   | 'search'
   | 'settings'
   | 'show_chart'

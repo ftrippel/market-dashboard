@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   fetchYahooFinanceMarketMetrics,
   fetchYahooFinancePrice,
@@ -11,17 +11,29 @@ import { findMarketData } from './resolveMarketData';
 
 export type WatchlistQuote = YahooMarketMetrics;
 
+/** Max 2 Yahoo requests per second when bulk-refreshing watchlist quotes. */
+const REFETCH_MIN_INTERVAL_MS = 500;
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => window.setTimeout(resolve, ms));
+}
+
 export function useWatchlistQuotes(
   symbols: string[],
   store: MarketState,
   liveEnabled = false,
+  refetchSymbols: string[] = symbols,
 ) {
   const [quotes, setQuotes] = useState<Record<string, WatchlistQuote>>({});
+  const [refetching, setRefetching] = useState(false);
   const updatePrice = useMarketStore((state) => state.updatePrice);
+  const updateMetrics = useMarketStore((state) => state.updateMetrics);
+  const refetchRunIdRef = useRef(0);
 
   const missingSymbols = symbols.filter((sym) => !findMarketData(store, sym));
   const missingKey = missingSymbols.join(',');
   const symbolsKey = symbols.join(',');
+  const refetchKey = refetchSymbols.join(',');
 
   useEffect(() => {
     if (missingSymbols.length === 0) return;
@@ -107,5 +119,41 @@ export function useWatchlistQuotes(
     };
   }, [liveEnabled, symbolsKey, updatePrice]);
 
-  return quotes;
+  const refetchAll = useCallback(async () => {
+    if (refetchSymbols.length === 0) return;
+
+    const runId = ++refetchRunIdRef.current;
+    setRefetching(true);
+
+    try {
+      for (let i = 0; i < refetchSymbols.length; i++) {
+        if (runId !== refetchRunIdRef.current) return;
+        if (i > 0) await delay(REFETCH_MIN_INTERVAL_MS);
+        if (runId !== refetchRunIdRef.current) return;
+
+        const sym = refetchSymbols[i];
+        try {
+          const res = await fetchYahooFinanceMarketMetrics(sym);
+          if (runId !== refetchRunIdRef.current || !res) continue;
+
+          setQuotes((prev) => ({
+            ...prev,
+            [sym]: res,
+          }));
+
+          if (findMarketData(useMarketStore.getState(), sym)) {
+            updateMetrics(sym, res);
+          }
+        } catch (err) {
+          console.warn(`Failed to refresh watchlist metrics for ${sym}:`, err);
+        }
+      }
+    } finally {
+      if (runId === refetchRunIdRef.current) {
+        setRefetching(false);
+      }
+    }
+  }, [refetchKey, updateMetrics]);
+
+  return { quotes, refetchAll, refetching };
 }

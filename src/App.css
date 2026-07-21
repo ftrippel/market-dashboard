@@ -1300,7 +1300,9 @@ body::before {
 
 .watchlist-footer {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
   margin-top: 12px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
@@ -1374,6 +1376,21 @@ body::before {
   flex-direction: column;
   gap: 8px;
   margin-bottom: 12px;
+}
+
+.watchlist-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.watchlist-refresh-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .watchlist-search-wrap {

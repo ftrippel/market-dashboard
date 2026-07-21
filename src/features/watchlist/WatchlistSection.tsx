@@ -662,7 +662,24 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
     () => activeWatchlist?.items.map((item) => item.sym) ?? [],
     [activeWatchlist],
   );
-  const quotes = useWatchlistQuotes(allSymbols, store, liveEnabled);
+  const allWatchlistSymbols = useMemo(() => {
+    const seen = new Set<string>();
+    const syms: string[] = [];
+    for (const watchlist of watchlists) {
+      for (const item of watchlist.items) {
+        if (seen.has(item.sym)) continue;
+        seen.add(item.sym);
+        syms.push(item.sym);
+      }
+    }
+    return syms;
+  }, [watchlists]);
+  const { quotes, refetchAll, refetching } = useWatchlistQuotes(
+    allSymbols,
+    store,
+    liveEnabled,
+    allWatchlistSymbols,
+  );
 
   const filteredItems = useMemo(() => {
     if (!activeWatchlist) return [];
@@ -937,8 +954,18 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
             </div>
           )}
 
-          {watchlists.length > 1 && (
-            <div className="watchlist-footer">
+          <div className="watchlist-footer">
+            <button
+              type="button"
+              className="btn watchlist-refresh-btn"
+              onClick={() => void refetchAll()}
+              disabled={refetching || allWatchlistSymbols.length === 0}
+              title="Refresh quotes for all watchlists (max 2 requests/sec)"
+            >
+              <Icon name="refresh" size="sm" />
+              {refetching ? 'Refreshing…' : 'Refresh'}
+            </button>
+            {watchlists.length > 1 && (
               <button
                 type="button"
                 className="btn watchlist-delete-btn"
@@ -946,8 +973,8 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
               >
                 <Icon name="close" size="xs" /> Delete &ldquo;{activeWatchlist.name}&rdquo;
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </Card>
     </Section>

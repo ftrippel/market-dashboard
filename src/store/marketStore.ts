@@ -6,6 +6,10 @@ interface MarketStore extends MarketState {
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   updatePrice: (sym: string, price: number, d1: number, updatedAt?: number) => void;
+  updateMetrics: (
+    sym: string,
+    metrics: Pick<MarketData, 'price' | 'd1' | 'w1' | 'hi52' | 'ytd' | 'spark' | 'updatedAt'>,
+  ) => void;
 }
 
 const initialState: MarketState = {
@@ -70,6 +74,42 @@ export const useMarketStore = create<MarketStore>((set) => ({
       const timestamp = updatedAt ?? Date.now();
       const updateArray = <T extends MarketData>(arr: T[]): T[] =>
         arr.map((item) => (item.sym === sym ? { ...item, price, d1, updatedAt: timestamp } : item));
+
+      return {
+        futures: updateArray(state.futures),
+        dxvix: updateArray(state.dxvix),
+        crypto: updateArray(state.crypto),
+        metals: updateArray(state.metals),
+        commodities: updateArray(state.commodities),
+        yields: updateArray(state.yields),
+        global: updateArray(state.global),
+        etfs: updateArray(state.etfs),
+        submkt: updateArray(state.submkt),
+        sectors: updateArray(state.sectors),
+        sectorsEW: updateArray(state.sectorsEW),
+        thematic: updateArray(state.thematic),
+        country: updateArray(state.country),
+      };
+    }),
+
+  updateMetrics: (sym, metrics) =>
+    set((state) => {
+      const timestamp = metrics.updatedAt ?? Date.now();
+      const updateArray = <T extends MarketData>(arr: T[]): T[] =>
+        arr.map((item) =>
+          item.sym === sym
+            ? {
+                ...item,
+                price: metrics.price,
+                d1: metrics.d1,
+                w1: metrics.w1,
+                hi52: metrics.hi52,
+                ytd: metrics.ytd,
+                spark: metrics.spark,
+                updatedAt: timestamp,
+              }
+            : item,
+        );
 
       return {
         futures: updateArray(state.futures),
