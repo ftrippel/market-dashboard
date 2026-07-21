@@ -181,6 +181,49 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
   }, [userId]);
 
   useEffect(() => {
+    if (!userId) return;
+
+    let hiddenAt: number | null = null;
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        hiddenAt = Date.now();
+
+        const domainsFromTimers = Object.keys(uploadTimersRef.current) as SettingsDomain[];
+        for (const timer of Object.values(uploadTimersRef.current)) {
+          if (timer !== undefined) window.clearTimeout(timer);
+        }
+        uploadTimersRef.current = {};
+        if (domainsFromTimers.length > 0) {
+          void runUpload(domainsFromTimers);
+        }
+        return;
+      }
+
+      if (document.visibilityState !== 'visible') return;
+
+      const awayMs = hiddenAt !== null ? Date.now() - hiddenAt : 0;
+      hiddenAt = null;
+      if (awayMs >= 2000) {
+        void runReconcile();
+      }
+    };
+
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        void runReconcile();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    window.addEventListener('pageshow', handlePageShow);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibility);
+      window.removeEventListener('pageshow', handlePageShow);
+    };
+  }, [runReconcile, userId]);
+
+  useEffect(() => {
     const scheduleUpload = (event: Event) => {
       if (!isSettingsChangedEvent(event)) return;
 

@@ -282,6 +282,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               <>
                 <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
                   Sign in with Google to back up and sync your dashboard settings and watchlists.
+                  On phones, you will be redirected to Google and back to this page.
                 </p>
                 <button type="button" className="btn" {...googleSignInPenClick}>
                   Sign in with Google
