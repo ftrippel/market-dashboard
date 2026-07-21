@@ -271,6 +271,7 @@ async function migrateLegacyDashboardDoc(userId: string): Promise<boolean> {
     theme: settings.theme,
     enableHoverPreview: settings.enableHoverPreview,
     sparklineMode: settings.sparklineMode,
+    chartMaSettings: settings.chartMaSettings ?? getDefaultPreferencesSettings().chartMaSettings,
   };
 
   pauseRemoteApply('preferences');

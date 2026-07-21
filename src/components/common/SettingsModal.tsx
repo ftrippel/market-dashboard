@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useRef, useState, type CSSProperties } from 'react';
 import { createPortal } from 'react-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useSettings } from '../../context/SettingsContext';
@@ -8,6 +8,11 @@ import {
   downloadDashboardSettings,
   importDashboardSettingsFromFile,
 } from '../../services/settingsBackup';
+import {
+  MAX_CHART_MAS,
+  clampMaPeriod,
+  type MaType,
+} from '../../types/chartMaSettings';
 import { dismissOverlay } from '../../utils/focus';
 import { useOverlayDismiss } from '../../utils/overlayStack';
 import { usePenCheckboxToggle, usePenCompatibleClick, usePenSelectActivate } from '../../utils/penClick';
@@ -18,12 +23,36 @@ interface SettingsModalProps {
   onClose: () => void;
 }
 
+type SettingsTab = 'display' | 'charts' | 'sync' | 'backup';
+
+const SETTINGS_TABS: { id: SettingsTab; label: string }[] = [
+  { id: 'display', label: 'Display' },
+  { id: 'charts', label: 'Charts' },
+  { id: 'sync', label: 'Sync' },
+  { id: 'backup', label: 'Backup' },
+];
+
+const inputStyle: CSSProperties = {
+  background: 'var(--bg2)',
+  color: 'var(--text)',
+  border: '1px solid var(--border2)',
+  borderRadius: '4px',
+  padding: '4px 8px',
+  fontSize: '12px',
+  fontWeight: 500,
+  outline: 'none',
+};
+
 export function SettingsModal({ open, onClose }: SettingsModalProps) {
   const {
     enableHoverPreview,
     setEnableHoverPreview,
     sparklineMode,
     setSparklineMode,
+    chartMaSettings,
+    updateChartMa,
+    addChartMa,
+    removeChartMa,
   } = useSettings();
   const { configured, user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
   const { status, statusMessage, lastSyncedAt, syncNow } = useSettingsSync();
@@ -42,6 +71,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
   const hoverPreviewPenToggle = usePenCheckboxToggle(setEnableHoverPreview);
   const sparklineModePenActivate = usePenSelectActivate();
   const importInputRef = useRef<HTMLInputElement>(null);
+  const [activeTab, setActiveTab] = useState<SettingsTab>('display');
   const [importError, setImportError] = useState<string | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
 
@@ -106,6 +136,19 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
   const signOutPenClick = usePenCompatibleClick(handleSignOut);
   const syncNowPenClick = usePenCompatibleClick(handleSyncNow);
 
+  const handleMaPeriodChange = useCallback((id: string, rawValue: string) => {
+    const parsed = Number.parseInt(rawValue, 10);
+    if (!Number.isFinite(parsed)) return;
+    updateChartMa(id, { period: clampMaPeriod(parsed) });
+  }, [updateChartMa]);
+
+  const handleRemoveChartMa = useCallback((id: string) => {
+    if (!window.confirm('Remove this moving average?')) return;
+    removeChartMa(id);
+  }, [removeChartMa]);
+
+  const addChartMaPenClick = usePenCompatibleClick(addChartMa);
+
   if (!open) return null;
 
   return createPortal(
@@ -117,7 +160,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
       <div
         id="settings-modal-box"
         style={{
-          width: 'min(420px, 95vw)',
+          width: 'min(460px, 95vw)',
           background: 'var(--bg)',
           border: '1px solid var(--border2)',
           borderRadius: '6px',
@@ -155,176 +198,317 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
           </button>
         </div>
 
-        <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <label
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              userSelect: 'none',
-            }}
-          >
-            <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
-              Enable Hover Preview Charts
-            </span>
-            <input
-              type="checkbox"
-              checked={enableHoverPreview}
-              onChange={(e) => setEnableHoverPreview(e.target.checked)}
-              onPointerUp={hoverPreviewPenToggle}
-              style={{
-                width: '18px',
-                height: '18px',
-                accentColor: 'var(--accent)',
-                cursor: 'pointer',
-              }}
-            />
-          </label>
-          <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
-            When enabled, hovering over any financial ticker symbol displays a 1-year daily historical line chart to the left or right of the symbol.
-          </p>
-
-          <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-            <label
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                cursor: 'pointer',
-                userSelect: 'none',
-              }}
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '6px',
+            padding: '10px 14px 0',
+            borderBottom: '1px solid var(--border)',
+          }}
+        >
+          {SETTINGS_TABS.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              className={`s-tab${activeTab === tab.id ? ' on' : ''}`}
+              onClick={() => setActiveTab(tab.id)}
             >
-              <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
-                Sparkline Display
-              </span>
-              <select
-                value={sparklineMode}
-                onChange={(e) => setSparklineMode(e.target.value as any)}
-                onPointerUp={sparklineModePenActivate}
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px', minHeight: '280px' }}>
+          {activeTab === 'display' && (
+            <>
+              <label
                 style={{
-                  background: 'var(--bg2)',
-                  color: 'var(--text)',
-                  border: '1px solid var(--border2)',
-                  borderRadius: '4px',
-                  padding: '4px 8px',
-                  fontSize: '12px',
-                  fontWeight: 500,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
                   cursor: 'pointer',
-                  outline: 'none',
+                  userSelect: 'none',
                 }}
               >
-                <option value="line">Line Chart</option>
-                <option value="bar">Bar Chart</option>
-                <option value="dot">Dot Chart</option>
-                <option value="none">Disabled</option>
-              </select>
-            </label>
-            <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
-              Choose the visualization style for 5-day price changes in the market tables, or disable it completely.
-            </p>
-          </div>
-
-          <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
-              Cloud Sync
-            </span>
-            {!configured ? (
+                <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+                  Enable Hover Preview Charts
+                </span>
+                <input
+                  type="checkbox"
+                  checked={enableHoverPreview}
+                  onChange={(e) => setEnableHoverPreview(e.target.checked)}
+                  onPointerUp={hoverPreviewPenToggle}
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    accentColor: 'var(--accent)',
+                    cursor: 'pointer',
+                  }}
+                />
+              </label>
               <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
-                Add Firebase environment variables to enable Google sign-in and automatic settings sync.
+                When enabled, hovering over any financial ticker symbol displays a 1-year daily historical line chart to the left or right of the symbol.
               </p>
-            ) : authLoading ? (
-              <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
-                Checking sign-in status…
-              </p>
-            ) : user ? (
-              <>
-                <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
-                  Signed in as <span style={{ color: 'var(--text)' }}>{user.email ?? user.displayName ?? 'Google account'}</span>.
-                  Changes sync in real time across devices.
-                </p>
-                {lastSyncedAt && status !== 'syncing' && !statusMessage && !authError && (
-                  <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
-                    Last synced {lastSyncedAt.toLocaleString(undefined, {
-                      month: 'short',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}.
-                  </p>
-                )}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
-                  <button type="button" className="btn" {...syncNowPenClick} disabled={status === 'syncing'}>
-                    {status === 'syncing' ? 'Syncing…' : 'Sync now'}
-                  </button>
-                  <button type="button" className="btn" {...signOutPenClick}>
-                    Sign out
-                  </button>
-                </div>
-                {(statusMessage || authError) && (
-                  <p
+
+              <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                  }}
+                >
+                  <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+                    Sparkline Display
+                  </span>
+                  <select
+                    value={sparklineMode}
+                    onChange={(e) => setSparklineMode(e.target.value as any)}
+                    onPointerUp={sparklineModePenActivate}
                     style={{
-                      margin: 0,
-                      fontSize: '11px',
-                      color: status === 'error' || authError ? 'var(--red)' : 'var(--text2)',
-                      lineHeight: '1.4',
+                      ...inputStyle,
+                      cursor: 'pointer',
                     }}
                   >
-                    {authError ?? statusMessage}
-                  </p>
-                )}
-              </>
-            ) : (
-              <>
+                    <option value="line">Line Chart</option>
+                    <option value="bar">Bar Chart</option>
+                    <option value="dot">Dot Chart</option>
+                    <option value="none">Disabled</option>
+                  </select>
+                </label>
                 <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
-                  Sign in with Google to back up and sync your dashboard settings and watchlists.
+                  Choose the visualization style for 5-day price changes in the market tables, or disable it completely.
                 </p>
-                <button type="button" className="btn" {...googleSignInPenClick}>
-                  Sign in with Google
-                </button>
-                {authError && (
-                  <p style={{ margin: 0, fontSize: '11px', color: 'var(--red)', lineHeight: '1.4' }}>
-                    {authError}
-                  </p>
-                )}
-              </>
-            )}
-          </div>
+              </div>
+            </>
+          )}
 
-          <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
-              Backup &amp; Restore
-            </span>
-            <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
-              Export or import all dashboard settings and watchlists as a JSON file.
-            </p>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-              <button type="button" className="btn" {...exportPenClick}>
-                Export JSON
-              </button>
-              <button type="button" className="btn" {...importPenClick}>
-                Import JSON
-              </button>
-              <input
-                ref={importInputRef}
-                type="file"
-                accept="application/json,.json"
-                onChange={handleImportFile}
-                style={{ display: 'none' }}
-              />
-            </div>
-            {importError && (
-              <p style={{ margin: 0, fontSize: '11px', color: 'var(--red)', lineHeight: '1.4' }}>
-                {importError}
+          {activeTab === 'charts' && (
+            <>
+              <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                Add, remove, and configure moving averages shown on chart modals.
               </p>
-            )}
-          </div>
+
+              {chartMaSettings.length === 0 && (
+                <p style={{ margin: 0, fontSize: '12px', color: 'var(--text3)' }}>
+                  No moving averages configured.
+                </p>
+              )}
+
+              {chartMaSettings.map((ma) => (
+                <div
+                  key={ma.id}
+                  style={{
+                    display: 'flex',
+                    flexWrap: 'nowrap',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '10px 12px',
+                    border: '1px solid var(--border)',
+                    borderRadius: '4px',
+                    background: 'var(--bg2)',
+                  }}
+                >
+                  <input
+                    type="checkbox"
+                    checked={ma.enabled}
+                    onChange={(e) => updateChartMa(ma.id, { enabled: e.target.checked })}
+                    aria-label="Enable moving average"
+                    style={{
+                      width: '16px',
+                      height: '16px',
+                      accentColor: 'var(--accent)',
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                    }}
+                  />
+
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text2)' }}>
+                    Type
+                    <select
+                      value={ma.type}
+                      onChange={(e) => updateChartMa(ma.id, { type: e.target.value as MaType })}
+                      style={{ ...inputStyle, cursor: 'pointer' }}
+                    >
+                      <option value="sma">SMA</option>
+                      <option value="ema">EMA</option>
+                    </select>
+                  </label>
+
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text2)' }}>
+                    Length
+                    <input
+                      type="number"
+                      min={2}
+                      max={500}
+                      value={ma.period}
+                      onChange={(e) => handleMaPeriodChange(ma.id, e.target.value)}
+                      style={{ ...inputStyle, width: '72px' }}
+                    />
+                  </label>
+
+                  <input
+                    type="color"
+                    value={ma.color}
+                    onChange={(e) => updateChartMa(ma.id, { color: e.target.value })}
+                    aria-label="Color"
+                    style={{
+                      width: '32px',
+                      height: '24px',
+                      padding: 0,
+                      border: '1px solid var(--border2)',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      background: 'transparent',
+                      flexShrink: 0,
+                    }}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveChartMa(ma.id)}
+                    aria-label="Remove moving average"
+                    style={{
+                      marginLeft: 'auto',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      width: '22px',
+                      height: '22px',
+                      padding: 0,
+                      border: 'none',
+                      borderRadius: '4px',
+                      background: 'transparent',
+                      color: 'var(--text3)',
+                      cursor: 'pointer',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Icon name="close" size="xs" />
+                  </button>
+                </div>
+              ))}
+
+              <button
+                type="button"
+                className="btn"
+                {...addChartMaPenClick}
+                disabled={chartMaSettings.length >= MAX_CHART_MAS}
+                style={{ alignSelf: 'flex-start' }}
+              >
+                Add MA
+              </button>
+              {chartMaSettings.length >= MAX_CHART_MAS && (
+                <p style={{ margin: 0, fontSize: '11px', color: 'var(--text3)' }}>
+                  Maximum of {MAX_CHART_MAS} moving averages.
+                </p>
+              )}
+            </>
+          )}
+
+          {activeTab === 'sync' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+                Cloud Sync
+              </span>
+              {!configured ? (
+                <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                  Add Firebase environment variables to enable Google sign-in and automatic settings sync.
+                </p>
+              ) : authLoading ? (
+                <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                  Checking sign-in status…
+                </p>
+              ) : user ? (
+                <>
+                  <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                    Signed in as <span style={{ color: 'var(--text)' }}>{user.email ?? user.displayName ?? 'Google account'}</span>.
+                    Changes sync in real time across devices.
+                  </p>
+                  {lastSyncedAt && status !== 'syncing' && !statusMessage && !authError && (
+                    <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                      Last synced {lastSyncedAt.toLocaleString(undefined, {
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                      })}.
+                    </p>
+                  )}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+                    <button type="button" className="btn" {...syncNowPenClick} disabled={status === 'syncing'}>
+                      {status === 'syncing' ? 'Syncing…' : 'Sync now'}
+                    </button>
+                    <button type="button" className="btn" {...signOutPenClick}>
+                      Sign out
+                    </button>
+                  </div>
+                  {(statusMessage || authError) && (
+                    <p
+                      style={{
+                        margin: 0,
+                        fontSize: '11px',
+                        color: status === 'error' || authError ? 'var(--red)' : 'var(--text2)',
+                        lineHeight: '1.4',
+                      }}
+                    >
+                      {authError ?? statusMessage}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                    Sign in with Google to back up and sync your dashboard settings and watchlists.
+                  </p>
+                  <button type="button" className="btn" {...googleSignInPenClick}>
+                    Sign in with Google
+                  </button>
+                  {authError && (
+                    <p style={{ margin: 0, fontSize: '11px', color: 'var(--red)', lineHeight: '1.4' }}>
+                      {authError}
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'backup' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+                Backup &amp; Restore
+              </span>
+              <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                Export or import all dashboard settings and watchlists as a JSON file.
+              </p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                <button type="button" className="btn" {...exportPenClick}>
+                  Export JSON
+                </button>
+                <button type="button" className="btn" {...importPenClick}>
+                  Import JSON
+                </button>
+                <input
+                  ref={importInputRef}
+                  type="file"
+                  accept="application/json,.json"
+                  onChange={handleImportFile}
+                  style={{ display: 'none' }}
+                />
+              </div>
+              {importError && (
+                <p style={{ margin: 0, fontSize: '11px', color: 'var(--red)', lineHeight: '1.4' }}>
+                  {importError}
+                </p>
+              )}
+            </div>
+          )}
         </div>
 
         <div

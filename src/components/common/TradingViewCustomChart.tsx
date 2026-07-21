@@ -2,7 +2,9 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isYieldSymbol } from '../../data/symbolMaps';
 import { createChart, ColorType, CandlestickSeries, LineSeries, CrosshairMode } from 'lightweight-charts';
 import { fetchYahooFinanceOhlcHistory, type DailyOhlcPoint } from '../../services/api';
+import { useSettings } from '../../context/SettingsContext';
 import { buildIndicatorSeries, calculateEMA, calculateSMA } from '../../utils/chartIndicators';
+import { formatMaLabel } from '../../types/chartMaSettings';
 import {
   buildLastTradeCrosshairInfo,
   createChartInteractionController,
@@ -21,12 +23,6 @@ interface TradingViewCustomChartProps {
   onReady?: () => void;
 }
 
-const INDICATORS = [
-  { label: 'EMA 20', period: 20, type: 'ema' as const, color: { dark: '#f5a623', light: '#e65100' } },
-  { label: 'SMA 50', period: 50, type: 'sma' as const, color: { dark: '#5b8cff', light: '#1f5aff' } },
-  { label: 'SMA 200', period: 200, type: 'sma' as const, color: { dark: '#c084fc', light: '#7c3aed' } },
-];
-
 /** ~6 months of trading days. */
 const DEFAULT_VISIBLE_BARS = 126;
 /** Empty bars to the right of the latest candle. */
@@ -37,6 +33,7 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
   theme,
   onReady,
 }: TradingViewCustomChartProps) {
+  const { chartMaSettings } = useSettings();
   const containerRef = useRef<HTMLDivElement>(null);
   const [data, setData] = useState<DailyOhlcPoint[] | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -45,6 +42,18 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
   const [interactionUi, setInteractionUi] = useState<ChartInteractionUi | null>(null);
   const isYield = isYieldSymbol(symbol);
   const priceDecimals = isYield ? 3 : 2;
+
+  const indicators = useMemo(() => {
+    return chartMaSettings
+      .filter((ma) => ma.enabled)
+      .map((ma) => ({
+        id: ma.id,
+        type: ma.type,
+        period: ma.period,
+        color: ma.color,
+        label: formatMaLabel(ma.type, ma.period),
+      }));
+  }, [chartMaSettings]);
 
   const toggleMeasure = useCallback(() => {
     interactionUi?.toggleMeasureMode();
@@ -135,14 +144,14 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
     const closes = data.map((point) => point.close);
     const times = data.map((point) => point.time);
 
-    for (const indicator of INDICATORS) {
+    for (const indicator of indicators) {
       const values =
         indicator.type === 'ema'
           ? calculateEMA(closes, indicator.period)
           : calculateSMA(closes, indicator.period);
 
       const lineSeries = chart.addSeries(LineSeries, {
-        color: indicator.color[theme],
+        color: indicator.color,
         lineWidth: 2,
         crosshairMarkerVisible: false,
         priceLineVisible: false,
@@ -187,7 +196,7 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
       setInteractionUi(null);
       chart.remove();
     };
-  }, [data, theme, onReady]);
+  }, [data, theme, onReady, indicators]);
 
   const isMeasuring = interactionUi?.mode === 'measuring';
   const lastTradeInfo = useMemo(
@@ -210,13 +219,13 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
           background: theme === 'dark' ? '#131722' : '#ffffff',
         }}
       >
-        {INDICATORS.map((indicator) => (
-          <span key={indicator.label} className="tv-chart-toolbar-item" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+        {indicators.map((indicator) => (
+          <span key={indicator.id} className="tv-chart-toolbar-item" style={{ display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
             <span
               style={{
                 width: '10px',
                 height: '2px',
-                background: indicator.color[theme],
+                background: indicator.color,
                 display: 'inline-block',
               }}
             />

@@ -4,6 +4,15 @@ import type { SparklineMode } from '../context/SettingsContext';
 import type { Theme } from '../context/ThemeContext';
 import { config } from '../config';
 import {
+  DEFAULT_CHART_MA_SETTINGS,
+  MAX_CHART_MAS,
+  clampMaPeriod,
+  createMaId,
+  type ChartMaSettings,
+  type MaType,
+  type MovingAverageConfig,
+} from '../types/chartMaSettings';
+import {
   REMOTE_SETTINGS_APPLIED_EVENT,
   setSettingsLastModified,
   touchAllSettingsModified,
@@ -16,6 +25,7 @@ export interface PreferencesSettings {
   theme: Theme;
   enableHoverPreview: boolean;
   sparklineMode: SparklineMode;
+  chartMaSettings: ChartMaSettings;
 }
 
 export interface CalculatorSettings {
@@ -29,6 +39,7 @@ export interface DashboardSettingsExport {
   theme: Theme;
   enableHoverPreview: boolean;
   sparklineMode: SparklineMode;
+  chartMaSettings: ChartMaSettings;
   calculator: CalculatorSettings;
   watchlists: WatchlistStorage;
 }
@@ -37,6 +48,7 @@ const STORAGE_KEYS = {
   theme: 'market-dashboard-theme',
   enableHoverPreview: 'enableHoverPreview',
   sparklineMode: 'sparklineMode',
+  chartMaSettings: 'chartMaSettings',
   calcEquity: 'agy_calc_equity',
   calcRiskPct: 'agy_calc_riskPct',
 } as const;
@@ -61,6 +73,88 @@ function readSparklineMode(): SparklineMode {
   return 'line';
 }
 
+function parseMaType(value: unknown): MaType {
+  return value === 'ema' ? 'ema' : 'sma';
+}
+
+function parseMaColor(value: unknown, fallback: string): string {
+  if (typeof value === 'string' && value.length > 0) return value;
+  return fallback;
+}
+
+function parseMovingAverageConfig(value: unknown, fallback: MovingAverageConfig): MovingAverageConfig | null {
+  if (!isRecord(value)) return null;
+
+  const period = clampMaPeriod(Number(value.period));
+  const type = parseMaType(value.type);
+  const enabled = typeof value.enabled === 'boolean' ? value.enabled : fallback.enabled;
+  const color = parseMaColor(
+    value.color ?? value.colorDark,
+    fallback.color,
+  );
+  const id = typeof value.id === 'string' && value.id.length > 0 ? value.id : createMaId();
+
+  return { id, type, period, color, enabled };
+}
+
+function migrateLegacyChartMaObject(value: Record<string, unknown>): ChartMaSettings {
+  const legacyEntries: { key: string; type: MaType; fallback: MovingAverageConfig }[] = [
+    { key: 'ema', type: 'ema', fallback: DEFAULT_CHART_MA_SETTINGS[0] },
+    { key: 'sma50', type: 'sma', fallback: DEFAULT_CHART_MA_SETTINGS[1] },
+    { key: 'sma200', type: 'sma', fallback: DEFAULT_CHART_MA_SETTINGS[2] },
+  ];
+
+  const migrated = legacyEntries
+    .map(({ key, type, fallback }) => {
+      const entry = value[key];
+      if (!isRecord(entry)) return null;
+
+      return parseMovingAverageConfig(
+        {
+          id: `legacy-${key}`,
+          type,
+          period: entry.period,
+          color: entry.color ?? entry.colorDark,
+          enabled: entry.enabled,
+        },
+        fallback,
+      );
+    })
+    .filter((entry): entry is MovingAverageConfig => entry !== null);
+
+  return migrated.length > 0 ? migrated : DEFAULT_CHART_MA_SETTINGS;
+}
+
+export function parseChartMaSettings(value: unknown): ChartMaSettings {
+  if (Array.isArray(value)) {
+    const parsed = value
+      .map((entry, index) =>
+        parseMovingAverageConfig(entry, DEFAULT_CHART_MA_SETTINGS[index] ?? DEFAULT_CHART_MA_SETTINGS[0]),
+      )
+      .filter((entry): entry is MovingAverageConfig => entry !== null)
+      .slice(0, MAX_CHART_MAS);
+
+    return parsed.length > 0 ? parsed : DEFAULT_CHART_MA_SETTINGS;
+  }
+
+  if (isRecord(value) && ('ema' in value || 'sma50' in value || 'sma200' in value)) {
+    return migrateLegacyChartMaObject(value);
+  }
+
+  return DEFAULT_CHART_MA_SETTINGS;
+}
+
+export function readChartMaSettings(): ChartMaSettings {
+  const stored = localStorage.getItem(STORAGE_KEYS.chartMaSettings);
+  if (!stored) return DEFAULT_CHART_MA_SETTINGS;
+
+  try {
+    return parseChartMaSettings(JSON.parse(stored));
+  } catch {
+    return DEFAULT_CHART_MA_SETTINGS;
+  }
+}
+
 function readCalculatorNumber(key: string, fallback: number): number {
   const stored = localStorage.getItem(key);
   const parsed = stored ? Number(stored) : NaN;
@@ -75,6 +169,7 @@ export function exportPreferencesSettings(): PreferencesSettings {
       config.tradingView.enableHoverPreview,
     ),
     sparklineMode: readSparklineMode(),
+    chartMaSettings: readChartMaSettings(),
   };
 }
 
@@ -90,6 +185,7 @@ export function getDefaultPreferencesSettings(): PreferencesSettings {
     theme: 'dark',
     enableHoverPreview: config.tradingView.enableHoverPreview,
     sparklineMode: 'line',
+    chartMaSettings: DEFAULT_CHART_MA_SETTINGS,
   };
 }
 
@@ -144,6 +240,7 @@ export function applyPreferencesSettings(
   localStorage.setItem(STORAGE_KEYS.theme, data.theme);
   localStorage.setItem(STORAGE_KEYS.enableHoverPreview, String(data.enableHoverPreview));
   localStorage.setItem(STORAGE_KEYS.sparklineMode, data.sparklineMode);
+  localStorage.setItem(STORAGE_KEYS.chartMaSettings, JSON.stringify(data.chartMaSettings));
   document.documentElement.setAttribute('data-theme', data.theme);
 
   if (options.source === 'remote') {
@@ -273,6 +370,7 @@ function parseSharedSettings(raw: Record<string, unknown>): Omit<DashboardSettin
     theme,
     enableHoverPreview: raw.enableHoverPreview,
     sparklineMode,
+    chartMaSettings: parseChartMaSettings(raw.chartMaSettings),
     calculator: { equity, riskPct },
     watchlists,
   };
@@ -306,6 +404,7 @@ export function importDashboardSettings(data: DashboardSettingsExport): void {
       theme: data.theme,
       enableHoverPreview: data.enableHoverPreview,
       sparklineMode: data.sparklineMode,
+      chartMaSettings: data.chartMaSettings,
     },
     { source: 'local' },
   );
@@ -350,6 +449,7 @@ export function parsePreferencesSettings(value: unknown): PreferencesSettings | 
     theme,
     enableHoverPreview: value.enableHoverPreview,
     sparklineMode,
+    chartMaSettings: parseChartMaSettings(value.chartMaSettings),
   };
 }
 
