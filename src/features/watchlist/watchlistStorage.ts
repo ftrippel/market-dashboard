@@ -51,9 +51,13 @@ export function loadWatchlistStorage(): WatchlistStorage {
   }
 }
 
-export function saveWatchlistStorage(state: WatchlistStorage): void {
+export function persistWatchlistStorage(state: WatchlistStorage): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  touchSettingsModified();
+}
+
+export function saveWatchlistStorage(state: WatchlistStorage): void {
+  persistWatchlistStorage(state);
+  touchSettingsModified('watchlists');
 }
 
 export function createWatchlist(name: string): Watchlist {

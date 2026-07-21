@@ -1,4 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  isRemoteSettingsAppliedEvent,
+  REMOTE_SETTINGS_APPLIED_EVENT,
+} from '../../services/settingsEvents';
 import {
   createWatchlist,
   loadWatchlistStorage,
@@ -9,10 +13,31 @@ import type { Watchlist, WatchlistItem, WatchlistStorage } from './types';
 
 export function useWatchlists() {
   const [storage, setStorage] = useState<WatchlistStorage>(() => loadWatchlistStorage());
+  const hasHydratedWatchlists = useRef(false);
+  const skipNextPersistRef = useRef(false);
 
   useEffect(() => {
+    if (!hasHydratedWatchlists.current) {
+      hasHydratedWatchlists.current = true;
+      return;
+    }
+    if (skipNextPersistRef.current) {
+      skipNextPersistRef.current = false;
+      return;
+    }
     saveWatchlistStorage(storage);
   }, [storage]);
+
+  useEffect(() => {
+    const handleRemoteApply = (event: Event) => {
+      if (!isRemoteSettingsAppliedEvent(event) || event.detail.domain !== 'watchlists') return;
+      skipNextPersistRef.current = true;
+      setStorage(loadWatchlistStorage());
+    };
+
+    window.addEventListener(REMOTE_SETTINGS_APPLIED_EVENT, handleRemoteApply);
+    return () => window.removeEventListener(REMOTE_SETTINGS_APPLIED_EVENT, handleRemoteApply);
+  }, []);
 
   const activeWatchlist = useMemo(
     () => storage.watchlists.find((w) => w.id === storage.activeId) ?? storage.watchlists[0],

@@ -1,6 +1,10 @@
-import React, { createContext, useCallback, useContext, useState, type ReactNode } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { config } from '../config';
-import { touchSettingsModified } from '../services/settingsEvents';
+import {
+  isRemoteSettingsAppliedEvent,
+  REMOTE_SETTINGS_APPLIED_EVENT,
+  touchSettingsModified,
+} from '../services/settingsEvents';
 
 export type SparklineMode = 'none' | 'line' | 'bar' | 'dot';
 
@@ -13,29 +17,43 @@ interface SettingsContextValue {
 
 const SettingsContext = createContext<SettingsContextValue | null>(null);
 
-export function SettingsProvider({ children }: { children: ReactNode }) {
-  const [enableHoverPreview, setEnableHoverPreviewState] = useState<boolean>(() => {
-    const stored = localStorage.getItem('enableHoverPreview');
-    if (stored !== null) return stored === 'true';
-    return config.tradingView.enableHoverPreview;
-  });
+function readHoverPreview(): boolean {
+  const stored = localStorage.getItem('enableHoverPreview');
+  if (stored !== null) return stored === 'true';
+  return config.tradingView.enableHoverPreview;
+}
 
-  const [sparklineMode, setSparklineModeState] = useState<SparklineMode>(() => {
-    const stored = localStorage.getItem('sparklineMode') as SparklineMode | null;
-    if (stored === 'none' || stored === 'line' || stored === 'bar' || stored === 'dot') return stored;
-    return 'line'; // default to line
-  });
+function readSparklineMode(): SparklineMode {
+  const stored = localStorage.getItem('sparklineMode') as SparklineMode | null;
+  if (stored === 'none' || stored === 'line' || stored === 'bar' || stored === 'dot') return stored;
+  return 'line';
+}
+
+export function SettingsProvider({ children }: { children: ReactNode }) {
+  const [enableHoverPreview, setEnableHoverPreviewState] = useState<boolean>(readHoverPreview);
+  const [sparklineMode, setSparklineModeState] = useState<SparklineMode>(readSparklineMode);
+
+  useEffect(() => {
+    const handleRemoteApply = (event: Event) => {
+      if (!isRemoteSettingsAppliedEvent(event) || event.detail.domain !== 'preferences') return;
+      setEnableHoverPreviewState(readHoverPreview());
+      setSparklineModeState(readSparklineMode());
+    };
+
+    window.addEventListener(REMOTE_SETTINGS_APPLIED_EVENT, handleRemoteApply);
+    return () => window.removeEventListener(REMOTE_SETTINGS_APPLIED_EVENT, handleRemoteApply);
+  }, []);
 
   const setEnableHoverPreview = useCallback((val: boolean) => {
     setEnableHoverPreviewState(val);
     localStorage.setItem('enableHoverPreview', String(val));
-    touchSettingsModified();
+    touchSettingsModified('preferences');
   }, []);
 
   const setSparklineMode = useCallback((mode: SparklineMode) => {
     setSparklineModeState(mode);
     localStorage.setItem('sparklineMode', mode);
-    touchSettingsModified();
+    touchSettingsModified('preferences');
   }, []);
 
   return (

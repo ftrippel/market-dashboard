@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedNumberInput, Icon, Section, Toast } from '../../components/common';
-import { touchSettingsModified } from '../../services/settingsEvents';
+import {
+  isRemoteSettingsAppliedEvent,
+  REMOTE_SETTINGS_APPLIED_EVENT,
+  touchSettingsModified,
+} from '../../services/settingsEvents';
 import { usePenCompatibleClick } from '../../utils/penClick';
 import { colors, formatUsCurrency, formatUsInteger } from '../../utils/formatting';
 
@@ -40,23 +44,48 @@ export function PositionCalculator() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const hasHydratedCalcSettings = useRef(false);
+  const skipNextCalcSyncRef = useRef(0);
 
   useEffect(() => {
     localStorage.setItem('agy_calc_equity', equity.toString());
+    if (skipNextCalcSyncRef.current > 0) {
+      skipNextCalcSyncRef.current -= 1;
+      return;
+    }
     if (hasHydratedCalcSettings.current) {
-      touchSettingsModified();
+      touchSettingsModified('calculator');
     }
   }, [equity]);
 
   useEffect(() => {
     localStorage.setItem('agy_calc_riskPct', riskPct.toString());
+    if (skipNextCalcSyncRef.current > 0) {
+      skipNextCalcSyncRef.current -= 1;
+      return;
+    }
     if (hasHydratedCalcSettings.current) {
-      touchSettingsModified();
+      touchSettingsModified('calculator');
     }
   }, [riskPct]);
 
   useEffect(() => {
     hasHydratedCalcSettings.current = true;
+  }, []);
+
+  useEffect(() => {
+    const handleRemoteApply = (event: Event) => {
+      if (!isRemoteSettingsAppliedEvent(event) || event.detail.domain !== 'calculator') return;
+      skipNextCalcSyncRef.current = 2;
+      const savedEquity = localStorage.getItem('agy_calc_equity');
+      const savedRiskPct = localStorage.getItem('agy_calc_riskPct');
+      const parsedEquity = savedEquity ? Number(savedEquity) : NaN;
+      const parsedRiskPct = savedRiskPct ? Number(savedRiskPct) : NaN;
+      if (Number.isFinite(parsedEquity)) setEquity(parsedEquity);
+      if (Number.isFinite(parsedRiskPct)) setRiskPct(parsedRiskPct);
+    };
+
+    window.addEventListener(REMOTE_SETTINGS_APPLIED_EVENT, handleRemoteApply);
+    return () => window.removeEventListener(REMOTE_SETTINGS_APPLIED_EVENT, handleRemoteApply);
   }, []);
 
   const calc = useMemo(() => {

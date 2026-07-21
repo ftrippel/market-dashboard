@@ -10,11 +10,14 @@ import {
 } from 'react';
 import { useAuth } from './AuthContext';
 import {
+  applyRemoteIfNewer,
   reconcileSettings,
-  SETTINGS_CHANGED_EVENT,
-  uploadSettings,
+  subscribeToRemoteSettings,
+  uploadDomain,
+  type SettingsDomain,
   type SettingsSyncResult,
 } from '../services/settingsSync';
+import { isSettingsChangedEvent, SETTINGS_CHANGED_EVENT } from '../services/settingsEvents';
 
 export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error';
 
@@ -22,6 +25,7 @@ interface SettingsSyncContextValue {
   enabled: boolean;
   status: SyncStatus;
   statusMessage: string | null;
+  lastSyncedAt: Date | null;
   lastSyncResult: SettingsSyncResult | null;
   syncNow: () => Promise<void>;
 }
@@ -30,6 +34,33 @@ const SettingsSyncContext = createContext<SettingsSyncContextValue | null>(null)
 
 const UPLOAD_DEBOUNCE_MS = 1500;
 
+function formatLastSyncedAt(date: Date | null): string | null {
+  if (!date) return null;
+  return date.toLocaleString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+function buildStatusMessage(result: SettingsSyncResult, lastSyncedAt: Date | null): string {
+  const stamp = formatLastSyncedAt(lastSyncedAt);
+  const suffix = stamp ? ` Last synced ${stamp}.` : '';
+
+  switch (result) {
+    case 'uploaded':
+      return `Settings saved to cloud.${suffix}`;
+    case 'downloaded':
+      return `Cloud settings applied.${suffix}`;
+    case 'mixed':
+      return `Settings synced.${suffix}`;
+    case 'unchanged':
+    default:
+      return `Settings are up to date.${suffix}`;
+  }
+}
+
 export function SettingsSyncProvider({ children }: { children: ReactNode }) {
   const { configured, user } = useAuth();
   const enabled = configured && user !== null;
@@ -37,40 +68,50 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
 
   const [status, setStatus] = useState<SyncStatus>('idle');
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null);
   const [lastSyncResult, setLastSyncResult] = useState<SettingsSyncResult | null>(null);
 
-  const uploadTimerRef = useRef<number | null>(null);
+  const uploadTimersRef = useRef<Partial<Record<SettingsDomain, number>>>({});
   const syncingRef = useRef(false);
+  const initialReconcileDoneRef = useRef(false);
 
-  const runSync = useCallback(
-    async (mode: 'reconcile' | 'upload') => {
-      if (!userId || syncingRef.current) return;
+  const markSynced = useCallback((result: SettingsSyncResult) => {
+    const now = new Date();
+    setLastSyncedAt(now);
+    setLastSyncResult(result);
+    setStatus('synced');
+    setStatusMessage(buildStatusMessage(result, now));
+  }, []);
+
+  const runReconcile = useCallback(async () => {
+    if (!userId || syncingRef.current) return;
+
+    syncingRef.current = true;
+    setStatus('syncing');
+    setStatusMessage('Syncing with cloud…');
+
+    try {
+      const result = await reconcileSettings(userId);
+      markSynced(result);
+    } catch (err) {
+      setStatus('error');
+      setStatusMessage(err instanceof Error ? err.message : 'Cloud sync failed.');
+    } finally {
+      syncingRef.current = false;
+    }
+  }, [markSynced, userId]);
+
+  const runUpload = useCallback(
+    async (domains: SettingsDomain[]) => {
+      if (!userId || syncingRef.current || domains.length === 0) return;
 
       syncingRef.current = true;
       setStatus('syncing');
-      setStatusMessage(null);
+      setStatusMessage('Saving to cloud…');
 
       try {
-        const result =
-          mode === 'reconcile' ? await reconcileSettings(userId) : await (async () => {
-            await uploadSettings(userId);
-            return 'uploaded' as const;
-          })();
-
-        setLastSyncResult(result);
-        setStatus('synced');
-
-        if (result === 'downloaded') {
-          setStatusMessage('Cloud settings applied. Reloading…');
-          window.setTimeout(() => window.location.reload(), 400);
-          return;
-        }
-
-        if (result === 'uploaded') {
-          setStatusMessage('Settings saved to cloud.');
-        } else {
-          setStatusMessage('Settings are up to date.');
-        }
+        await Promise.all(domains.map((domain) => uploadDomain(userId, domain)));
+        markSynced('uploaded');
       } catch (err) {
         setStatus('error');
         setStatusMessage(err instanceof Error ? err.message : 'Cloud sync failed.');
@@ -78,54 +119,82 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
         syncingRef.current = false;
       }
     },
-    [userId],
+    [markSynced, userId],
   );
 
   const syncNow = useCallback(async () => {
-    await runSync('reconcile');
-  }, [runSync]);
+    await runReconcile();
+  }, [runReconcile]);
 
   useEffect(() => {
     if (!userId) {
+      initialReconcileDoneRef.current = false;
       setStatus('idle');
       setStatusMessage(null);
+      setLastSyncedAt(null);
       setLastSyncResult(null);
       return;
     }
 
-    void runSync('reconcile');
-  }, [userId, runSync]);
+    if (initialReconcileDoneRef.current) return;
+
+    initialReconcileDoneRef.current = true;
+    void runReconcile();
+  }, [runReconcile, userId]);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    return subscribeToRemoteSettings(userId, (domain, data, updatedAt) => {
+      const applied = applyRemoteIfNewer(domain, data, updatedAt);
+      if (!applied) return;
+
+      const now = new Date();
+      setLastSyncedAt(now);
+      setLastSyncResult('downloaded');
+      setStatus('synced');
+      setStatusMessage(buildStatusMessage('downloaded', now));
+    });
+  }, [userId]);
 
   useEffect(() => {
     if (!enabled) return;
 
-    const scheduleUpload = () => {
-      if (uploadTimerRef.current !== null) {
-        window.clearTimeout(uploadTimerRef.current);
+    const scheduleUpload = (event: Event) => {
+      if (!isSettingsChangedEvent(event)) return;
+
+      const domain = event.detail.domain;
+      const existing = uploadTimersRef.current[domain];
+      if (existing !== undefined) {
+        window.clearTimeout(existing);
       }
-      uploadTimerRef.current = window.setTimeout(() => {
-        void runSync('upload');
+
+      uploadTimersRef.current[domain] = window.setTimeout(() => {
+        delete uploadTimersRef.current[domain];
+        void runUpload([domain]);
       }, UPLOAD_DEBOUNCE_MS);
     };
 
     window.addEventListener(SETTINGS_CHANGED_EVENT, scheduleUpload);
     return () => {
       window.removeEventListener(SETTINGS_CHANGED_EVENT, scheduleUpload);
-      if (uploadTimerRef.current !== null) {
-        window.clearTimeout(uploadTimerRef.current);
+      for (const timer of Object.values(uploadTimersRef.current)) {
+        if (timer !== undefined) window.clearTimeout(timer);
       }
+      uploadTimersRef.current = {};
     };
-  }, [enabled, runSync]);
+  }, [enabled, runUpload]);
 
   const value = useMemo(
     () => ({
       enabled,
       status,
       statusMessage,
+      lastSyncedAt,
       lastSyncResult,
       syncNow,
     }),
-    [enabled, status, statusMessage, lastSyncResult, syncNow],
+    [enabled, status, statusMessage, lastSyncedAt, lastSyncResult, syncNow],
   );
 
   return <SettingsSyncContext.Provider value={value}>{children}</SettingsSyncContext.Provider>;

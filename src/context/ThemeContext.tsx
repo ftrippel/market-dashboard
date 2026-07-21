@@ -1,5 +1,9 @@
-import React, { createContext, useContext, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { touchSettingsModified } from '../services/settingsEvents';
+import React, { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  isRemoteSettingsAppliedEvent,
+  REMOTE_SETTINGS_APPLIED_EVENT,
+  touchSettingsModified,
+} from '../services/settingsEvents';
 
 export type Theme = 'light' | 'dark';
 
@@ -25,16 +29,32 @@ function applyTheme(theme: Theme) {
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>(readStoredTheme);
   const hasHydratedTheme = useRef(false);
+  const applyingRemoteRef = useRef(false);
 
   useLayoutEffect(() => {
     applyTheme(theme);
     localStorage.setItem(STORAGE_KEY, theme);
+    if (applyingRemoteRef.current) {
+      applyingRemoteRef.current = false;
+      return;
+    }
     if (hasHydratedTheme.current) {
-      touchSettingsModified();
+      touchSettingsModified('preferences');
     } else {
       hasHydratedTheme.current = true;
     }
   }, [theme]);
+
+  useEffect(() => {
+    const handleRemoteApply = (event: Event) => {
+      if (!isRemoteSettingsAppliedEvent(event) || event.detail.domain !== 'preferences') return;
+      applyingRemoteRef.current = true;
+      setTheme(readStoredTheme());
+    };
+
+    window.addEventListener(REMOTE_SETTINGS_APPLIED_EVENT, handleRemoteApply);
+    return () => window.removeEventListener(REMOTE_SETTINGS_APPLIED_EVENT, handleRemoteApply);
+  }, []);
 
   const value = useMemo(
     () => ({

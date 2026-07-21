@@ -26,7 +26,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     setSparklineMode,
   } = useSettings();
   const { configured, user, loading: authLoading, signInWithGoogle, signOut } = useAuth();
-  const { status, statusMessage, syncNow } = useSettingsSync();
+  const { status, statusMessage, lastSyncedAt, syncNow } = useSettingsSync();
 
   const onCloseRef = useRef(onClose);
   onCloseRef.current = onClose;
@@ -245,8 +245,18 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               <>
                 <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
                   Signed in as <span style={{ color: 'var(--text)' }}>{user.email ?? user.displayName ?? 'Google account'}</span>.
-                  Settings sync automatically across devices.
+                  Changes sync in real time across devices.
                 </p>
+                {lastSyncedAt && status !== 'syncing' && !statusMessage && !authError && (
+                  <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                    Last synced {lastSyncedAt.toLocaleString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}.
+                  </p>
+                )}
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
                   <button type="button" className="btn" {...syncNowPenClick} disabled={status === 'syncing'}>
                     {status === 'syncing' ? 'Syncing…' : 'Sync now'}

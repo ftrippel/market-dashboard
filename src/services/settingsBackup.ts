@@ -1,11 +1,27 @@
-import { loadWatchlistStorage, saveWatchlistStorage } from '../features/watchlist/watchlistStorage';
+import { loadWatchlistStorage, persistWatchlistStorage } from '../features/watchlist/watchlistStorage';
 import type { Watchlist, WatchlistItem, WatchlistStorage } from '../features/watchlist/types';
 import type { SparklineMode } from '../context/SettingsContext';
 import type { Theme } from '../context/ThemeContext';
 import { config } from '../config';
-import { touchSettingsModified } from './settingsEvents';
+import {
+  REMOTE_SETTINGS_APPLIED_EVENT,
+  setSettingsLastModified,
+  touchAllSettingsModified,
+  type SettingsDomain,
+} from './settingsEvents';
 
 export const SETTINGS_EXPORT_VERSION = 2;
+
+export interface PreferencesSettings {
+  theme: Theme;
+  enableHoverPreview: boolean;
+  sparklineMode: SparklineMode;
+}
+
+export interface CalculatorSettings {
+  equity: number;
+  riskPct: number;
+}
 
 export interface DashboardSettingsExport {
   version: typeof SETTINGS_EXPORT_VERSION;
@@ -13,10 +29,7 @@ export interface DashboardSettingsExport {
   theme: Theme;
   enableHoverPreview: boolean;
   sparklineMode: SparklineMode;
-  calculator: {
-    equity: number;
-    riskPct: number;
-  };
+  calculator: CalculatorSettings;
   watchlists: WatchlistStorage;
 }
 
@@ -54,22 +67,80 @@ function readCalculatorNumber(key: string, fallback: number): number {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
-export function exportDashboardSettings(): DashboardSettingsExport {
+export function exportPreferencesSettings(): PreferencesSettings {
   return {
-    version: SETTINGS_EXPORT_VERSION,
-    exportedAt: new Date().toISOString(),
     theme: readTheme(),
     enableHoverPreview: readBoolean(
       STORAGE_KEYS.enableHoverPreview,
       config.tradingView.enableHoverPreview,
     ),
     sparklineMode: readSparklineMode(),
-    calculator: {
-      equity: readCalculatorNumber(STORAGE_KEYS.calcEquity, 10_000_000),
-      riskPct: readCalculatorNumber(STORAGE_KEYS.calcRiskPct, 0.3),
-    },
-    watchlists: loadWatchlistStorage(),
   };
+}
+
+export function exportCalculatorSettings(): CalculatorSettings {
+  return {
+    equity: readCalculatorNumber(STORAGE_KEYS.calcEquity, 10_000_000),
+    riskPct: readCalculatorNumber(STORAGE_KEYS.calcRiskPct, 0.3),
+  };
+}
+
+export function exportWatchlistsSettings(): WatchlistStorage {
+  return loadWatchlistStorage();
+}
+
+export function exportDashboardSettings(): DashboardSettingsExport {
+  return {
+    version: SETTINGS_EXPORT_VERSION,
+    exportedAt: new Date().toISOString(),
+    ...exportPreferencesSettings(),
+    calculator: exportCalculatorSettings(),
+    watchlists: exportWatchlistsSettings(),
+  };
+}
+
+function dispatchRemoteApplied(domain: SettingsDomain): void {
+  window.dispatchEvent(new CustomEvent(REMOTE_SETTINGS_APPLIED_EVENT, { detail: { domain } }));
+}
+
+export function applyPreferencesSettings(
+  data: PreferencesSettings,
+  options: { source: 'local' | 'remote'; updatedAt?: string },
+): void {
+  localStorage.setItem(STORAGE_KEYS.theme, data.theme);
+  localStorage.setItem(STORAGE_KEYS.enableHoverPreview, String(data.enableHoverPreview));
+  localStorage.setItem(STORAGE_KEYS.sparklineMode, data.sparklineMode);
+  document.documentElement.setAttribute('data-theme', data.theme);
+
+  if (options.source === 'remote') {
+    setSettingsLastModified('preferences', options.updatedAt ?? new Date().toISOString());
+    dispatchRemoteApplied('preferences');
+  }
+}
+
+export function applyCalculatorSettings(
+  data: CalculatorSettings,
+  options: { source: 'local' | 'remote'; updatedAt?: string },
+): void {
+  localStorage.setItem(STORAGE_KEYS.calcEquity, String(data.equity));
+  localStorage.setItem(STORAGE_KEYS.calcRiskPct, String(data.riskPct));
+
+  if (options.source === 'remote') {
+    setSettingsLastModified('calculator', options.updatedAt ?? new Date().toISOString());
+    dispatchRemoteApplied('calculator');
+  }
+}
+
+export function applyWatchlistsSettings(
+  data: WatchlistStorage,
+  options: { source: 'local' | 'remote'; updatedAt?: string },
+): void {
+  persistWatchlistStorage(data);
+
+  if (options.source === 'remote') {
+    setSettingsLastModified('watchlists', options.updatedAt ?? new Date().toISOString());
+    dispatchRemoteApplied('watchlists');
+  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -178,16 +249,20 @@ export function parseDashboardSettingsExport(raw: unknown): DashboardSettingsExp
 }
 
 export function importDashboardSettings(data: DashboardSettingsExport): void {
-  localStorage.setItem(STORAGE_KEYS.theme, data.theme);
-  localStorage.setItem(STORAGE_KEYS.enableHoverPreview, String(data.enableHoverPreview));
-  localStorage.setItem(STORAGE_KEYS.sparklineMode, data.sparklineMode);
-  localStorage.setItem(STORAGE_KEYS.calcEquity, String(data.calculator.equity));
-  localStorage.setItem(STORAGE_KEYS.calcRiskPct, String(data.calculator.riskPct));
+  applyPreferencesSettings(
+    {
+      theme: data.theme,
+      enableHoverPreview: data.enableHoverPreview,
+      sparklineMode: data.sparklineMode,
+    },
+    { source: 'local' },
+  );
+  applyCalculatorSettings(data.calculator, { source: 'local' });
+  applyWatchlistsSettings(data.watchlists, { source: 'local' });
   for (const key of OBSOLETE_STORAGE_KEYS) {
     localStorage.removeItem(key);
   }
-  saveWatchlistStorage(data.watchlists);
-  touchSettingsModified();
+  touchAllSettingsModified();
 }
 
 export function downloadDashboardSettings(): void {
@@ -212,4 +287,28 @@ export async function importDashboardSettingsFromFile(file: File): Promise<void>
   }
   const data = parseDashboardSettingsExport(parsed);
   importDashboardSettings(data);
+}
+
+export function parsePreferencesSettings(value: unknown): PreferencesSettings | null {
+  if (!isRecord(value)) return null;
+  const theme = parseTheme(value.theme);
+  const sparklineMode = parseSparklineMode(value.sparklineMode);
+  if (!theme || !sparklineMode || typeof value.enableHoverPreview !== 'boolean') return null;
+  return {
+    theme,
+    enableHoverPreview: value.enableHoverPreview,
+    sparklineMode,
+  };
+}
+
+export function parseCalculatorSettings(value: unknown): CalculatorSettings | null {
+  if (!isRecord(value)) return null;
+  const equity = Number(value.equity);
+  const riskPct = Number(value.riskPct);
+  if (!Number.isFinite(equity) || !Number.isFinite(riskPct)) return null;
+  return { equity, riskPct };
+}
+
+export function parseWatchlistsSettings(value: unknown): WatchlistStorage | null {
+  return parseWatchlistStorage(value);
 }
