@@ -60,6 +60,12 @@ export function persistWatchlistStorage(state: WatchlistStorage): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
+/** Replace watchlist storage entirely (used when applying cloud data). */
+export function replaceWatchlistStorage(state: WatchlistStorage): void {
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
 export function saveWatchlistStorage(state: WatchlistStorage): void {
   persistWatchlistStorage(state);
   touchSettingsModified('watchlists');

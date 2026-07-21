@@ -25,7 +25,9 @@ import {
 } from './settingsBackup';
 import { createDefaultWatchlistStorage } from '../features/watchlist/watchlistStorage';
 import {
+  EPOCH_ISO,
   getSettingsLastModified,
+  hasCloudBaseline,
   setSettingsLastModified,
   SETTINGS_DOMAINS,
   type SettingsDomain,
@@ -45,18 +47,12 @@ export interface ReconcileResult {
 
 export type SettingsSyncResult = 'uploaded' | 'downloaded' | 'unchanged' | 'mixed';
 
-export interface ReconcileOptions {
-  /** On sign-in: always apply cloud data locally; never upload local state. */
-  preferCloud?: boolean;
-}
-
 interface RemoteDocPayload {
   data: unknown;
   updatedAt?: Timestamp | string;
 }
 
 const REMOTE_APPLY_PAUSE_MS = 2500;
-const EPOCH_ISO = '1970-01-01T00:00:00.000Z';
 const pausedRemoteApply = new Set<SettingsDomain>();
 
 function settingsDocRef(userId: string, domain: SettingsDomain) {
@@ -178,6 +174,8 @@ function exportDomain(domain: SettingsDomain): unknown {
 }
 
 export async function uploadDomain(userId: string, domain: SettingsDomain): Promise<void> {
+  if (!hasCloudBaseline(domain)) return;
+
   pauseRemoteApply(domain);
 
   const docRef = settingsDocRef(userId, domain);
@@ -200,7 +198,8 @@ export async function uploadDomains(userId: string, domains: SettingsDomain[]): 
   await Promise.all(domains.map((domain) => uploadDomain(userId, domain)));
 }
 
-async function reconcileDomainFromCloud(
+/** First sync for a domain: always take cloud (or empty defaults). Never upload local. */
+async function adoptDomainFromCloud(
   userId: string,
   domain: SettingsDomain,
 ): Promise<DomainSyncResult> {
@@ -220,13 +219,9 @@ async function reconcileDomainFromCloud(
   return 'downloaded';
 }
 
-async function reconcileDomain(
-  userId: string,
-  domain: SettingsDomain,
-  preferCloud: boolean,
-): Promise<DomainSyncResult> {
-  if (preferCloud) {
-    return reconcileDomainFromCloud(userId, domain);
+async function reconcileDomain(userId: string, domain: SettingsDomain): Promise<DomainSyncResult> {
+  if (!hasCloudBaseline(domain)) {
+    return adoptDomainFromCloud(userId, domain);
   }
 
   const localModified = getSettingsLastModified(domain);
@@ -237,8 +232,7 @@ async function reconcileDomain(
     return 'uploaded';
   }
 
-  const contentDiffers = remoteContentDiffers(domain, remote.data);
-  if (!contentDiffers) {
+  if (!remoteContentDiffers(domain, remote.data)) {
     return 'unchanged';
   }
 
@@ -261,11 +255,6 @@ async function migrateLegacyDashboardDoc(userId: string): Promise<boolean> {
   const legacy = snapshot.data();
   const settings = legacy.settings as DashboardSettingsExport | undefined;
   if (!settings) return false;
-
-  const updatedAt =
-    timestampToIso(legacy.updatedAt as Timestamp | string | undefined) ??
-    settings.exportedAt ??
-    new Date().toISOString();
 
   const preferences: PreferencesSettings = {
     theme: settings.theme,
@@ -293,25 +282,16 @@ async function migrateLegacyDashboardDoc(userId: string): Promise<boolean> {
     }),
   ]);
 
-  setSettingsLastModified('preferences', updatedAt);
-  setSettingsLastModified('calculator', updatedAt);
-  setSettingsLastModified('watchlists', updatedAt);
-
   return true;
 }
 
-export async function reconcileSettings(
-  userId: string,
-  options?: ReconcileOptions,
-): Promise<ReconcileResult> {
+export async function reconcileSettings(userId: string): Promise<ReconcileResult> {
   await migrateLegacyDashboardDoc(userId);
 
-  const preferCloud = options?.preferCloud ?? false;
-
   return {
-    preferences: await reconcileDomain(userId, 'preferences', preferCloud),
-    calculator: await reconcileDomain(userId, 'calculator', preferCloud),
-    watchlists: await reconcileDomain(userId, 'watchlists', preferCloud),
+    preferences: await reconcileDomain(userId, 'preferences'),
+    calculator: await reconcileDomain(userId, 'calculator'),
+    watchlists: await reconcileDomain(userId, 'watchlists'),
   };
 }
 
@@ -326,6 +306,10 @@ export function applyRemoteIfNewer(
 ): boolean {
   if (isRemoteApplyPaused(domain)) return false;
   if (!remoteContentDiffers(domain, data)) return false;
+
+  if (!hasCloudBaseline(domain)) {
+    return applyRemoteDomain(domain, data, updatedAt);
+  }
 
   const localModified = getSettingsLastModified(domain);
   if (Date.parse(updatedAt) <= Date.parse(localModified)) return false;

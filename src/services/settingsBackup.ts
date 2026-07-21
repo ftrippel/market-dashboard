@@ -1,4 +1,4 @@
-import { createDefaultWatchlistStorage, loadWatchlistStorage, persistWatchlistStorage } from '../features/watchlist/watchlistStorage';
+import { createDefaultWatchlistStorage, loadWatchlistStorage, persistWatchlistStorage, replaceWatchlistStorage } from '../features/watchlist/watchlistStorage';
 import type { Watchlist, WatchlistItem, WatchlistStorage } from '../features/watchlist/types';
 import type { SparklineMode } from '../context/SettingsContext';
 import type { Theme } from '../context/ThemeContext';
@@ -212,13 +212,6 @@ export function watchlistsContentEqual(a: Watchlist[], b: Watchlist[]): boolean 
   return JSON.stringify(a) === JSON.stringify(b);
 }
 
-function resolveLocalActiveId(watchlists: Watchlist[], preferredActiveId: string): string {
-  if (watchlists.some((watchlist) => watchlist.id === preferredActiveId)) {
-    return preferredActiveId;
-  }
-  return watchlists[0]?.id ?? preferredActiveId;
-}
-
 export function exportDashboardSettings(): DashboardSettingsExport {
   return {
     version: SETTINGS_EXPORT_VERSION,
@@ -278,18 +271,21 @@ export function applyWatchlistsFromSync(
   data: WatchlistsSyncPayload,
   options: { source: 'local' | 'remote'; updatedAt?: string },
 ): void {
-  const local = loadWatchlistStorage();
   const watchlists =
     data.watchlists.length > 0 ? data.watchlists : createDefaultWatchlistStorage().watchlists;
-  persistWatchlistStorage({
+  const storage: WatchlistStorage = {
     watchlists,
-    activeId: resolveLocalActiveId(watchlists, local.activeId),
-  });
+    activeId: watchlists[0]?.id ?? createDefaultWatchlistStorage().activeId,
+  };
 
   if (options.source === 'remote') {
+    replaceWatchlistStorage(storage);
     setSettingsLastModified('watchlists', options.updatedAt ?? new Date().toISOString());
     dispatchRemoteApplied('watchlists');
+    return;
   }
+
+  persistWatchlistStorage(storage);
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

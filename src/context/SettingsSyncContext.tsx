@@ -19,9 +19,13 @@ import {
   type SettingsSyncResult,
 } from '../services/settingsSync';
 import {
+  clearSyncUser,
+  hasCloudBaseline,
   isSettingsChangedEvent,
+  prepareSyncForUser,
   REMOTE_SETTINGS_APPLIED_EVENT,
   SETTINGS_CHANGED_EVENT,
+  SETTINGS_DOMAINS,
 } from '../services/settingsEvents';
 
 export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error';
@@ -93,7 +97,8 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
     async (domains: SettingsDomain[]) => {
       if (!userId || domains.length === 0) return;
 
-      const uniqueDomains = [...new Set(domains)];
+      const uniqueDomains = [...new Set(domains)].filter((domain) => hasCloudBaseline(domain));
+      if (uniqueDomains.length === 0) return;
 
       if (syncingRef.current) {
         for (const domain of uniqueDomains) {
@@ -139,39 +144,33 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
     pendingUploadsRef.current.clear();
   }, []);
 
-  const runReconcile = useCallback(
-    async (options?: { preferCloud?: boolean }) => {
-      if (!userId || syncingRef.current) return;
+  const runReconcile = useCallback(async () => {
+    if (!userId || syncingRef.current) return;
 
-      if (options?.preferCloud) {
-        clearPendingUploads();
-      }
+    clearPendingUploads();
+    syncingRef.current = true;
+    setStatus('syncing');
+    setStatusMessage('Syncing with cloud…');
 
-      syncingRef.current = true;
-      setStatus('syncing');
-      setStatusMessage(options?.preferCloud ? 'Loading cloud settings…' : 'Syncing with cloud…');
+    try {
+      const result = await reconcileSettings(userId);
+      markSynced(summarizeReconcileResult(result));
 
-      try {
-        const result = await reconcileSettings(userId, { preferCloud: options?.preferCloud });
-        markSynced(summarizeReconcileResult(result));
-
-        if (result.watchlists !== 'unchanged') {
+      for (const domain of SETTINGS_DOMAINS) {
+        if (result[domain] === 'downloaded') {
           window.dispatchEvent(
-            new CustomEvent(REMOTE_SETTINGS_APPLIED_EVENT, { detail: { domain: 'watchlists' } }),
+            new CustomEvent(REMOTE_SETTINGS_APPLIED_EVENT, { detail: { domain } }),
           );
         }
-      } catch (err) {
-        setStatus('error');
-        setStatusMessage(err instanceof Error ? err.message : 'Cloud sync failed.');
-      } finally {
-        syncingRef.current = false;
-        if (!options?.preferCloud) {
-          flushPendingUploads();
-        }
       }
-    },
-    [clearPendingUploads, flushPendingUploads, markSynced, userId],
-  );
+    } catch (err) {
+      setStatus('error');
+      setStatusMessage(err instanceof Error ? err.message : 'Cloud sync failed.');
+    } finally {
+      syncingRef.current = false;
+      flushPendingUploads();
+    }
+  }, [clearPendingUploads, flushPendingUploads, markSynced, userId]);
 
   const syncNow = useCallback(async () => {
     await runReconcile();
@@ -179,6 +178,7 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (!userId) {
+      clearSyncUser();
       initialReconcileDoneRef.current = false;
       setStatus('idle');
       setStatusMessage(null);
@@ -187,10 +187,12 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
       return;
     }
 
+    prepareSyncForUser(userId);
+
     if (initialReconcileDoneRef.current) return;
 
     initialReconcileDoneRef.current = true;
-    void runReconcile({ preferCloud: true });
+    void runReconcile();
   }, [runReconcile, userId]);
 
   useEffect(() => {
@@ -199,6 +201,10 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
     return subscribeToRemoteSettings(userId, (domain, data, updatedAt) => {
       const applied = applyRemoteIfNewer(domain, data, updatedAt);
       if (!applied) return;
+
+      window.dispatchEvent(
+        new CustomEvent(REMOTE_SETTINGS_APPLIED_EVENT, { detail: { domain } }),
+      );
 
       const now = new Date();
       setLastSyncedAt(now);
@@ -257,8 +263,7 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
 
       const domain = event.detail.domain;
 
-      if (!userId) {
-        pendingUploadsRef.current.add(domain);
+      if (!userId || !hasCloudBaseline(domain)) {
         return;
       }
 
