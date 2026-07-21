@@ -14,8 +14,10 @@ import {
 } from '../types/chartMaSettings';
 import {
   REMOTE_SETTINGS_APPLIED_EVENT,
+  SETTINGS_DOMAINS,
   setSettingsLastModified,
   touchAllSettingsModified,
+  touchSettingsModified,
   type SettingsDomain,
 } from './settingsEvents';
 
@@ -410,6 +412,25 @@ export function importDashboardSettings(data: DashboardSettingsExport): void {
     localStorage.removeItem(key);
   }
   touchAllSettingsModified();
+}
+
+export function resetWatchlistsToDefault(): void {
+  replaceWatchlistStorage(createDefaultWatchlistStorage());
+  touchSettingsModified('watchlists');
+  dispatchRemoteApplied('watchlists');
+}
+
+export function resetAllSettingsToDefaults(): void {
+  applyPreferencesSettings(getDefaultPreferencesSettings(), { source: 'local' });
+  applyCalculatorSettings(getDefaultCalculatorSettings(), { source: 'local' });
+  replaceWatchlistStorage(createDefaultWatchlistStorage());
+  for (const key of OBSOLETE_STORAGE_KEYS) {
+    localStorage.removeItem(key);
+  }
+  touchAllSettingsModified();
+  for (const domain of SETTINGS_DOMAINS) {
+    dispatchRemoteApplied(domain);
+  }
 }
 
 export function downloadDashboardSettings(): void {

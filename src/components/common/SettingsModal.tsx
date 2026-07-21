@@ -7,7 +7,10 @@ import { useScrollLock } from '../../hooks/useScrollLock';
 import {
   downloadDashboardSettings,
   importDashboardSettingsFromFile,
+  resetAllSettingsToDefaults,
+  resetWatchlistsToDefault,
 } from '../../services/settingsBackup';
+import { loadWatchlistStorage } from '../../features/watchlist/watchlistStorage';
 import {
   MAX_CHART_MAS,
   clampMaPeriod,
@@ -24,11 +27,12 @@ interface SettingsModalProps {
   onClose: () => void;
 }
 
-type SettingsTab = 'display' | 'charts' | 'sync' | 'backup';
+type SettingsTab = 'display' | 'charts' | 'watchlist' | 'sync' | 'backup';
 
 const SETTINGS_TABS: { id: SettingsTab; label: string }[] = [
   { id: 'display', label: 'Display' },
   { id: 'charts', label: 'Charts' },
+  { id: 'watchlist', label: 'Watchlist' },
   { id: 'sync', label: 'Sync' },
   { id: 'backup', label: 'Backup' },
 ];
@@ -133,9 +137,47 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     await syncNow();
   }, [syncNow]);
 
+  const handleClearWatchlists = useCallback(() => {
+    const storage = loadWatchlistStorage();
+    const symbolCount = storage.watchlists.reduce((sum, list) => sum + list.items.length, 0);
+
+    if (
+      !window.confirm(
+        symbolCount === 0 && storage.watchlists.length <= 1
+          ? 'Watchlists are already empty. Reset to a single default watchlist anyway?'
+          : `Delete all watchlists and ${symbolCount} symbol${symbolCount === 1 ? '' : 's'}? This cannot be undone locally.`,
+      )
+    ) {
+      return;
+    }
+
+    resetWatchlistsToDefault();
+  }, []);
+
+  const handleResetAllSettings = useCallback(() => {
+    if (
+      !window.confirm(
+        'Reset all dashboard settings to defaults? This clears watchlists, chart preferences, calculator values, and display options.',
+      )
+    ) {
+      return;
+    }
+
+    resetAllSettingsToDefaults();
+    setActiveTab('display');
+  }, []);
+
   const googleSignInPenClick = usePenCompatibleClick(handleGoogleSignIn);
   const signOutPenClick = usePenCompatibleClick(handleSignOut);
   const syncNowPenClick = usePenCompatibleClick(handleSyncNow);
+  const clearWatchlistsPenClick = usePenCompatibleClick(handleClearWatchlists);
+  const resetAllSettingsPenClick = usePenCompatibleClick(handleResetAllSettings);
+
+  const watchlistStorage = loadWatchlistStorage();
+  const watchlistSymbolCount = watchlistStorage.watchlists.reduce(
+    (sum, list) => sum + list.items.length,
+    0,
+  );
 
   const handleMaPeriodChange = useCallback((id: string, rawValue: string) => {
     const parsed = Number.parseInt(rawValue, 10);
@@ -412,6 +454,31 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             </>
           )}
 
+          {activeTab === 'watchlist' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+                Watchlists
+              </span>
+              <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                {watchlistStorage.watchlists.length} watchlist
+                {watchlistStorage.watchlists.length === 1 ? '' : 's'} with {watchlistSymbolCount} symbol
+                {watchlistSymbolCount === 1 ? '' : 's'} stored on this device.
+              </p>
+              <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                Clear everything and restore a single empty default watchlist. If cloud sync is enabled,
+                the change uploads automatically.
+              </p>
+              <button
+                type="button"
+                className="btn"
+                {...clearWatchlistsPenClick}
+                style={{ alignSelf: 'flex-start', color: 'var(--red)', borderColor: 'var(--red)' }}
+              >
+                Clear all watchlists
+              </button>
+            </div>
+          )}
+
           {activeTab === 'sync' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
@@ -508,6 +575,23 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                   {importError}
                 </p>
               )}
+
+              <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '8px 0' }} />
+
+              <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+                Reset
+              </span>
+              <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                Restore all dashboard settings to factory defaults — display, charts, calculator, and watchlists.
+              </p>
+              <button
+                type="button"
+                className="btn"
+                {...resetAllSettingsPenClick}
+                style={{ alignSelf: 'flex-start', color: 'var(--red)', borderColor: 'var(--red)' }}
+              >
+                Reset all settings
+              </button>
             </div>
           )}
         </div>
