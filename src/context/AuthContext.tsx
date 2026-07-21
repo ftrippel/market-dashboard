@@ -8,18 +8,13 @@ import {
   type ReactNode,
 } from 'react';
 import {
-  browserLocalPersistence,
   GoogleAuthProvider,
-  getRedirectResult,
   onAuthStateChanged,
-  setPersistence,
   signInWithPopup,
-  signInWithRedirect,
   signOut as firebaseSignOut,
   type User,
 } from 'firebase/auth';
 import { getFirebaseAuth, isFirebaseConfigured } from '../services/firebase';
-import { isMobileAuthDevice } from '../utils/device';
 
 interface AuthContextValue {
   configured: boolean;
@@ -33,10 +28,6 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 const googleProvider = new GoogleAuthProvider();
 
-async function ensureAuthPersistence(): Promise<void> {
-  await setPersistence(getFirebaseAuth(), browserLocalPersistence);
-}
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const configured = isFirebaseConfigured();
   const [user, setUser] = useState<User | null>(null);
@@ -49,46 +40,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     const auth = getFirebaseAuth();
-    let active = true;
-
-    void (async () => {
-      try {
-        await ensureAuthPersistence();
-        await getRedirectResult(auth);
-      } catch (err) {
-        console.error('Firebase redirect sign-in failed:', err);
-      } finally {
-        if (active) {
-          setLoading(false);
-        }
-      }
-    })();
-
-    const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
+    return onAuthStateChanged(auth, (nextUser) => {
       setUser(nextUser);
       setLoading(false);
     });
-
-    return () => {
-      active = false;
-      unsubscribe();
-    };
   }, [configured]);
 
   const signInWithGoogle = useCallback(async () => {
     if (!configured) {
       throw new Error('Firebase is not configured.');
     }
-
-    const auth = getFirebaseAuth();
-    await ensureAuthPersistence();
-
-    if (isMobileAuthDevice()) {
-      await signInWithRedirect(auth, googleProvider);
-      return;
-    }
-
-    await signInWithPopup(auth, googleProvider);
+    await signInWithPopup(getFirebaseAuth(), googleProvider);
   }, [configured]);
 
   const signOut = useCallback(async () => {

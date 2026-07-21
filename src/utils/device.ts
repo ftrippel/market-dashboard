@@ -37,10 +37,3 @@ export function isHoverPointer(pointerType: string): boolean {
 export function isTouchLikePointer(pointerType: string): boolean {
   return isTouchPointer(pointerType) || isPenPointer(pointerType);
 }
-
-/** Phones/tablets where Firebase popup sign-in is unreliable. */
-export function isMobileAuthDevice(): boolean {
-  if (typeof window === 'undefined') return false;
-  if (isCoarsePointerDevice()) return true;
-  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-}
