@@ -547,13 +547,11 @@ function EditableWatchlistComment({
 }
 
 function WatchlistCommentDialog({
-  open,
   symbol,
   comment,
   onSave,
   onClose,
 }: {
-  open: boolean;
   symbol: string;
   comment: string;
   onSave: (comment: string) => void;
@@ -563,10 +561,9 @@ function WatchlistCommentDialog({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (!open) return;
-    setDraft(comment);
-    window.requestAnimationFrame(() => textareaRef.current?.focus());
-  }, [comment, open]);
+    const focusFrame = window.requestAnimationFrame(() => textareaRef.current?.focus());
+    return () => window.cancelAnimationFrame(focusFrame);
+  }, []);
 
   const close = useCallback(() => dismissOverlay(onClose), [onClose]);
   const save = useCallback(() => {
@@ -574,11 +571,9 @@ function WatchlistCommentDialog({
     dismissOverlay(onClose);
   }, [draft, onClose, onSave]);
 
-  useOverlayDismiss(open, close);
+  useOverlayDismiss(true, close);
   const closePenClick = usePenCompatibleClick(close);
   const savePenClick = usePenCompatibleClick(save);
-
-  if (!open) return null;
 
   return createPortal(
     <div
@@ -1139,13 +1134,14 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
           </div>
         </div>
       </Card>
-      <WatchlistCommentDialog
-        open={expandedCommentItem !== undefined}
-        symbol={expandedCommentItem?.sym ?? ''}
-        comment={expandedCommentItem?.comment ?? ''}
-        onSave={handleSaveExpandedComment}
-        onClose={handleCloseExpandedComment}
-      />
+      {expandedCommentItem && (
+        <WatchlistCommentDialog
+          symbol={expandedCommentItem.sym}
+          comment={expandedCommentItem.comment ?? ''}
+          onSave={handleSaveExpandedComment}
+          onClose={handleCloseExpandedComment}
+        />
+      )}
     </Section>
   );
 }
