@@ -42,7 +42,7 @@ interface SettingsSyncContextValue {
 
 const SettingsSyncContext = createContext<SettingsSyncContextValue | null>(null);
 
-const UPLOAD_DEBOUNCE_MS = 1500;
+const UPLOAD_DEBOUNCE_MS = 300;
 const INITIAL_SYNC_ATTEMPTS = 3;
 
 async function withInitialSyncRetry<T>(fn: () => Promise<T>): Promise<T> {

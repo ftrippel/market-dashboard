@@ -28,6 +28,7 @@ import {
   CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN,
   getLocalEditSequence,
   getServerRevisionMs,
+  getServerWriteId,
   getSyncBase,
   hasCloudBaseline,
   hasPendingUpload,
@@ -36,6 +37,7 @@ import {
   setLocalBuildNumber,
   setLocalSchemaVersion,
   setServerRevision,
+  setServerWriteId,
   setSyncBase,
   SETTINGS_DOMAINS,
   type SettingsDomain,
@@ -66,8 +68,9 @@ interface RemoteDocPayload {
   writeId?: string;
 }
 
-const REMOTE_APPLY_PAUSE_MS = 2500;
+const REMOTE_APPLY_PAUSE_FALLBACK_MS = 10_000;
 const pausedRemoteApply = new Set<SettingsDomain>();
+const remoteApplyPauseTimers = new Map<SettingsDomain, number>();
 const pendingRemoteSnapshots = new Map<
   SettingsDomain,
   { data: unknown; updatedAt: string; metadata: DomainSyncMetadata }
@@ -76,6 +79,7 @@ const pendingRemoteSnapshots = new Map<
 interface DomainSyncMetadata {
   schemaVersion: number;
   buildNumber: string;
+  writeId: string | null;
 }
 
 function settingsDocRef(userId: string, domain: SettingsDomain) {
@@ -102,12 +106,13 @@ function getCurrentMetadata(domain: SettingsDomain): DomainSyncMetadata {
   return {
     schemaVersion: CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN[domain],
     buildNumber: CURRENT_SYNC_BUILD_NUMBER,
+    writeId: null,
   };
 }
 
 function normalizeRemoteMetadata(
   domain: SettingsDomain,
-  payload: Pick<RemoteDocPayload, 'schemaVersion' | 'buildNumber'>,
+  payload: Pick<RemoteDocPayload, 'schemaVersion' | 'buildNumber' | 'writeId'>,
 ): DomainSyncMetadata {
   const fallback = getCurrentMetadata(domain);
   return {
@@ -116,34 +121,55 @@ function normalizeRemoteMetadata(
         ? Math.max(0, Math.floor(payload.schemaVersion))
         : 0,
     buildNumber: typeof payload.buildNumber === 'string' ? payload.buildNumber : fallback.buildNumber,
+    writeId: typeof payload.writeId === 'string' ? payload.writeId : null,
   };
 }
 
 function stampLocalMetadata(domain: SettingsDomain, metadata: DomainSyncMetadata): void {
   setLocalSchemaVersion(domain, metadata.schemaVersion);
   setLocalBuildNumber(domain, metadata.buildNumber);
+  if (metadata.writeId) setServerWriteId(domain, metadata.writeId);
 }
 
-function isRemoteNewer(domain: SettingsDomain, remoteUpdatedAt: string): boolean {
+function isRemoteNewer(
+  domain: SettingsDomain,
+  remoteUpdatedAt: string,
+  metadata: DomainSyncMetadata,
+): boolean {
+  if (metadata.writeId && metadata.writeId !== getServerWriteId(domain)) return true;
   const remoteMs = Date.parse(remoteUpdatedAt);
   if (!Number.isFinite(remoteMs)) return false;
   return remoteMs > getServerRevisionMs(domain);
 }
 
-export function pauseRemoteApply(domain: SettingsDomain, ms = REMOTE_APPLY_PAUSE_MS): void {
+function flushPendingRemoteSnapshot(domain: SettingsDomain): void {
+  const queued = pendingRemoteSnapshots.get(domain);
+  if (!queued) return;
+  pendingRemoteSnapshots.delete(domain);
+  const applied = applyRemoteSnapshot(domain, queued.data, queued.updatedAt, queued.metadata);
+  if (applied) {
+    window.dispatchEvent(
+      new CustomEvent(REMOTE_SETTINGS_APPLIED_EVENT, { detail: { domain } }),
+    );
+  }
+}
+
+function resumeRemoteApply(domain: SettingsDomain): void {
+  const timer = remoteApplyPauseTimers.get(domain);
+  if (timer !== undefined) window.clearTimeout(timer);
+  remoteApplyPauseTimers.delete(domain);
+  pausedRemoteApply.delete(domain);
+  flushPendingRemoteSnapshot(domain);
+}
+
+export function pauseRemoteApply(domain: SettingsDomain): void {
   pausedRemoteApply.add(domain);
-  window.setTimeout(() => {
-    pausedRemoteApply.delete(domain);
-    const queued = pendingRemoteSnapshots.get(domain);
-    if (!queued) return;
-    pendingRemoteSnapshots.delete(domain);
-    const applied = applyRemoteSnapshot(domain, queued.data, queued.updatedAt, queued.metadata);
-    if (applied) {
-      window.dispatchEvent(
-        new CustomEvent(REMOTE_SETTINGS_APPLIED_EVENT, { detail: { domain } }),
-      );
-    }
-  }, ms);
+  const existingTimer = remoteApplyPauseTimers.get(domain);
+  if (existingTimer !== undefined) window.clearTimeout(existingTimer);
+  remoteApplyPauseTimers.set(
+    domain,
+    window.setTimeout(() => resumeRemoteApply(domain), REMOTE_APPLY_PAUSE_FALLBACK_MS),
+  );
 }
 
 export function isRemoteApplyPaused(domain: SettingsDomain): boolean {
@@ -264,7 +290,6 @@ function applyCloudEmptyDomain(
   updatedAt: string,
   metadata: DomainSyncMetadata = getCurrentMetadata(domain),
 ): void {
-  pauseRemoteApply(domain);
   setServerRevision(domain, updatedAt);
   stampLocalMetadata(domain, metadata);
 
@@ -293,9 +318,11 @@ function exportDomain(domain: SettingsDomain): unknown {
   return exportWatchlistsForSync();
 }
 
-export async function uploadDomain(userId: string, domain: SettingsDomain): Promise<void> {
+async function uploadDomainWhileRemoteApplyPaused(
+  userId: string,
+  domain: SettingsDomain,
+): Promise<void> {
   const editSeqAtStart = getLocalEditSequence(domain);
-  pauseRemoteApply(domain);
   const metadata = getCurrentMetadata(domain);
   const localData = exportDomain(domain);
   const baseData = getSyncBase(domain);
@@ -358,13 +385,14 @@ export async function uploadDomain(userId: string, domain: SettingsDomain): Prom
   const updatedAt = timestampToIso(payload?.updatedAt);
   if (updatedAt) {
     const confirmedData = payload?.data ?? uploadedData;
+    const confirmedMetadata = normalizeRemoteMetadata(domain, payload ?? {});
     const editSequenceUnchanged = getLocalEditSequence(domain) === editSeqAtStart;
     setServerRevision(domain, updatedAt);
     setSyncBase(domain, confirmedData);
-    stampLocalMetadata(domain, metadata);
+    stampLocalMetadata(domain, confirmedMetadata);
     if (editSequenceUnchanged) {
       if (JSON.stringify(exportDomain(domain)) !== JSON.stringify(confirmedData)) {
-        applyRemoteDomain(domain, confirmedData, updatedAt, metadata);
+        applyRemoteDomain(domain, confirmedData, updatedAt, confirmedMetadata);
       }
       markPendingUpload(domain, false);
     } else if (domain === 'watchlists') {
@@ -373,11 +401,20 @@ export async function uploadDomain(userId: string, domain: SettingsDomain): Prom
       const currentRemote = parseWatchlistsSyncPayload(confirmedData);
       if (uploadStart && currentLocal && currentRemote) {
         const mergedLocal = mergeWatchlistsForUpload(uploadStart, currentLocal, currentRemote);
-        applyRemoteDomain(domain, mergedLocal, updatedAt, metadata);
+        applyRemoteDomain(domain, mergedLocal, updatedAt, confirmedMetadata);
         setSyncBase(domain, confirmedData);
         markPendingUpload(domain, true);
       }
     }
+  }
+}
+
+export async function uploadDomain(userId: string, domain: SettingsDomain): Promise<void> {
+  pauseRemoteApply(domain);
+  try {
+    await uploadDomainWhileRemoteApplyPaused(userId, domain);
+  } finally {
+    resumeRemoteApply(domain);
   }
 }
 
@@ -460,7 +497,7 @@ async function reconcileDomain(userId: string, domain: SettingsDomain): Promise<
     return 'unchanged';
   }
 
-  if (isRemoteNewer(domain, remote.updatedAt)) {
+  if (isRemoteNewer(domain, remote.updatedAt, remote.metadata)) {
     if (hasPendingUpload(domain)) {
       await uploadDomain(userId, domain);
       return 'uploaded';
@@ -567,7 +604,7 @@ export function applyRemoteSnapshot(
     return applyRemoteDomain(domain, data, updatedAt, remoteMetadata);
   }
 
-  if (!isRemoteNewer(domain, updatedAt)) return false;
+  if (!isRemoteNewer(domain, updatedAt, remoteMetadata)) return false;
   if (hasPendingUpload(domain)) return false;
   if (!remoteContentDiffers(domain, data)) {
     setServerRevision(domain, updatedAt);

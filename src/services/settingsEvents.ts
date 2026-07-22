@@ -7,6 +7,7 @@ export const REMOTE_SETTINGS_APPLIED_EVENT = 'dashboard-settings-remote-applied'
 
 const REVISION_PREFIX = 'dashboard-settings-revision-';
 const REVISION_MS_PREFIX = 'dashboard-settings-revision-ms-';
+const REVISION_WRITE_ID_PREFIX = 'dashboard-settings-revision-write-id-';
 const PENDING_PREFIX = 'dashboard-settings-pending-';
 const LOCAL_SCHEMA_PREFIX = 'dashboard-settings-local-schema-';
 const LOCAL_BUILD_PREFIX = 'dashboard-settings-local-build-';
@@ -39,6 +40,10 @@ function revisionKey(domain: SettingsDomain): string {
 
 function revisionMsKey(domain: SettingsDomain): string {
   return `${REVISION_MS_PREFIX}${domain}`;
+}
+
+function revisionWriteIdKey(domain: SettingsDomain): string {
+  return `${REVISION_WRITE_ID_PREFIX}${domain}`;
 }
 
 function pendingKey(domain: SettingsDomain): string {
@@ -88,6 +93,14 @@ export function getServerRevisionMs(domain: SettingsDomain): number {
 export function setServerRevisionMs(domain: SettingsDomain, ms: number): void {
   if (!Number.isFinite(ms)) return;
   localStorage.setItem(revisionMsKey(domain), String(Math.max(0, Math.floor(ms))));
+}
+
+export function getServerWriteId(domain: SettingsDomain): string | null {
+  return localStorage.getItem(revisionWriteIdKey(domain));
+}
+
+export function setServerWriteId(domain: SettingsDomain, writeId: string): void {
+  localStorage.setItem(revisionWriteIdKey(domain), writeId);
 }
 
 export function hasPendingUpload(domain: SettingsDomain): boolean {
@@ -147,6 +160,7 @@ export function resetSyncState(): void {
   for (const domain of SETTINGS_DOMAINS) {
     localStorage.setItem(revisionKey(domain), EPOCH_ISO);
     localStorage.setItem(revisionMsKey(domain), '0');
+    localStorage.removeItem(revisionWriteIdKey(domain));
     localStorage.removeItem(pendingKey(domain));
     localStorage.removeItem(syncBaseKey(domain));
     localStorage.removeItem(`${LEGACY_LAST_MODIFIED_PREFIX}${domain}`);

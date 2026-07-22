@@ -273,11 +273,14 @@ export function applyWatchlistsFromSync(
   data: WatchlistsSyncPayload,
   options: { source: 'local' | 'remote'; updatedAt?: string },
 ): void {
+  const current = loadWatchlistStorage();
   const watchlists =
     data.watchlists.length > 0 ? data.watchlists : createDefaultWatchlistStorage().watchlists;
   const storage: WatchlistStorage = {
     watchlists,
-    activeId: watchlists[0]?.id ?? createDefaultWatchlistStorage().activeId,
+    activeId: watchlists.some((watchlist) => watchlist.id === current.activeId)
+      ? current.activeId
+      : watchlists[0].id,
   };
 
   if (options.source === 'remote') {

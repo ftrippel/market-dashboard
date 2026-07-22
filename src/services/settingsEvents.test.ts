@@ -3,7 +3,9 @@ import {
   beginCloudSession,
   endCloudSession,
   hasPendingUpload,
+  getServerWriteId,
   markPendingUpload,
+  setServerWriteId,
   setSyncBase,
 } from './settingsEvents';
 
@@ -61,5 +63,16 @@ describe('cloud session state', () => {
     beginCloudSession('user-b');
 
     expect(hasPendingUpload('watchlists')).toBe(false);
+  });
+
+  it('tracks the exact cloud write and clears it when the account changes', () => {
+    beginCloudSession('user-a');
+    setServerWriteId('watchlists', 'write-a');
+
+    expect(getServerWriteId('watchlists')).toBe('write-a');
+
+    beginCloudSession('user-b');
+
+    expect(getServerWriteId('watchlists')).toBeNull();
   });
 });
