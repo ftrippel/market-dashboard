@@ -70,18 +70,28 @@ export function useWatchlists() {
     [storage],
   );
 
-  const setActiveId = useCallback((id: string) => {
-    setStorage((prev) => ({ ...prev, activeId: id }));
-  }, []);
+  const setActiveId = useCallback(
+    (id: string) => {
+      const next = { ...storage, activeId: id };
+      persistWatchlistStorage(next);
+      setStorage(next);
+    },
+    [storage],
+  );
 
-  const createNewWatchlist = useCallback((name: string) => {
-    const watchlist = createWatchlist(name);
-    setStorage((prev) => ({
-      watchlists: [...prev.watchlists, watchlist],
-      activeId: watchlist.id,
-    }));
-    return watchlist.id;
-  }, []);
+  const createNewWatchlist = useCallback(
+    (name: string) => {
+      const watchlist = createWatchlist(name);
+      const next = {
+        watchlists: [...storage.watchlists, watchlist],
+        activeId: watchlist.id,
+      };
+      persistWatchlistStorage(next);
+      setStorage(next);
+      return watchlist.id;
+    },
+    [storage.watchlists],
+  );
 
   const deleteWatchlist = useCallback((id: string) => {
     setStorage((prev) => {
@@ -112,6 +122,15 @@ export function useWatchlists() {
     setStorage((prev) => ({
       ...prev,
       watchlists: prev.watchlists.map((w) => (w.id === id ? { ...w, name: trimmed } : w)),
+    }));
+  }, []);
+
+  const setWatchlistComment = useCallback((id: string, comment: string) => {
+    setStorage((prev) => ({
+      ...prev,
+      watchlists: prev.watchlists.map((watchlist) =>
+        watchlist.id === id ? { ...watchlist, comment } : watchlist,
+      ),
     }));
   }, []);
 
@@ -197,6 +216,7 @@ export function useWatchlists() {
     deleteWatchlist,
     reorderWatchlists,
     renameWatchlist,
+    setWatchlistComment,
     addItem,
     removeItem,
     setItemTags,

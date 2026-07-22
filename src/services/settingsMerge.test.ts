@@ -6,8 +6,8 @@ function item(sym: string, comment = ''): WatchlistItem {
   return { sym, tags: [], comment };
 }
 
-function payload(items: WatchlistItem[]): { watchlists: Watchlist[] } {
-  return { watchlists: [{ id: 'main', name: 'Main', items }] };
+function payload(items: WatchlistItem[], comment = ''): { watchlists: Watchlist[] } {
+  return { watchlists: [{ id: 'main', name: 'Main', comment, items }] };
 }
 
 describe('mergeWatchlistsForUpload', () => {
@@ -50,5 +50,21 @@ describe('mergeWatchlistsForUpload', () => {
     const merged = mergeWatchlistsForUpload(null, local, remote);
 
     expect(merged.watchlists.map(({ id }) => id)).toEqual(['remote', 'local']);
+  });
+
+  it('takes a remote watchlist comment when the local comment is unchanged', () => {
+    const base = payload([item('AAPL')], 'Original');
+    const remote = payload([item('AAPL')], 'Remote note');
+
+    expect(mergeWatchlistsForUpload(base, base, remote).watchlists[0].comment).toBe(
+      'Remote note',
+    );
+  });
+
+  it('keeps a local watchlist comment when the remote comment is unchanged', () => {
+    const base = payload([item('AAPL')], 'Original');
+    const local = payload([item('AAPL')], 'Local note');
+
+    expect(mergeWatchlistsForUpload(base, local, base).watchlists[0].comment).toBe('Local note');
   });
 });

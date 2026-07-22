@@ -89,6 +89,7 @@ function mergeWatchlist(
     return {
       id: local.id,
       name: local.name || remote.name,
+      comment: local.comment || remote.comment || '',
       items: mergeItems([], local.items, remote.items),
     };
   }
@@ -99,6 +100,7 @@ function mergeWatchlist(
   return {
     id: local.id,
     name: mergeValue(base.name, local.name, remote.name),
+    comment: mergeValue(base.comment ?? '', local.comment ?? '', remote.comment ?? ''),
     items: mergeItems(base.items, local.items, remote.items),
   };
 }

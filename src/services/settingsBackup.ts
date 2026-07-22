@@ -327,7 +327,8 @@ function parseWatchlistStorage(value: unknown): WatchlistStorage | null {
           .map(parseWatchlistItem)
           .filter((item): item is WatchlistItem => item !== null)
       : [];
-    watchlists.push({ id: entry.id, name: entry.name, items });
+    const comment = typeof entry.comment === 'string' ? entry.comment : '';
+    watchlists.push({ id: entry.id, name: entry.name, comment, items });
   }
 
   if (watchlists.length === 0) return null;
@@ -494,7 +495,8 @@ export function parseWatchlistsSyncPayload(value: unknown): WatchlistsSyncPayloa
           .map(parseWatchlistItem)
           .filter((item): item is WatchlistItem => item !== null)
       : [];
-    watchlists.push({ id: entry.id, name: entry.name, items });
+    const comment = typeof entry.comment === 'string' ? entry.comment : '';
+    watchlists.push({ id: entry.id, name: entry.name, comment, items });
   }
 
   if (watchlists.length === 0) return { watchlists: [] };

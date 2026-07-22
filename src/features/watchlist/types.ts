@@ -7,6 +7,7 @@ export interface WatchlistItem {
 export interface Watchlist {
   id: string;
   name: string;
+  comment?: string;
   items: WatchlistItem[];
 }
 

@@ -11,6 +11,7 @@ function createDefaultWatchlist(): Watchlist {
   return {
     id: createId(),
     name: 'Default',
+    comment: '',
     items: [],
   };
 }
@@ -42,6 +43,7 @@ export function loadWatchlistStorage(): WatchlistStorage {
       watchlists: parsed.watchlists.map((w) => ({
         id: w.id,
         name: w.name || 'Untitled',
+        comment: w.comment ?? '',
         items: (w.items ?? []).map((item) => ({
           sym: item.sym.toUpperCase(),
           tags: item.tags ?? [],
@@ -75,6 +77,7 @@ export function createWatchlist(name: string): Watchlist {
   return {
     id: createId(),
     name: name.trim() || 'Untitled',
+    comment: '',
     items: [],
   };
 }

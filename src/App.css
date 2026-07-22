@@ -1423,6 +1423,20 @@ body::before {
   font-size: 10px;
 }
 
+.watchlist-note {
+  margin-bottom: 12px;
+}
+
+.watchlist-note-input {
+  display: block;
+  width: 100%;
+  min-height: 64px;
+  padding: 8px 10px;
+  resize: vertical;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
 .watchlist-filters {
   display: flex;
   flex-direction: column;
@@ -1665,4 +1679,3 @@ body::before {
   font-size: 10px;
   letter-spacing: 0.3px;
 }
-

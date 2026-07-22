@@ -634,6 +634,7 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
     deleteWatchlist,
     reorderWatchlists,
     renameWatchlist,
+    setWatchlistComment,
     addItem,
     removeItem,
     setItemTags,
@@ -811,6 +812,20 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
             onRename={renameWatchlist}
             onReorder={reorderWatchlists}
           />
+
+          <div className="watchlist-note">
+            <label className="fl" htmlFor={`watchlist-note-${activeWatchlist.id}`}>
+              Watchlist comment
+            </label>
+            <textarea
+              id={`watchlist-note-${activeWatchlist.id}`}
+              className="fi watchlist-note-input"
+              rows={3}
+              placeholder="Add notes for this watchlist…"
+              value={activeWatchlist.comment ?? ''}
+              onChange={(event) => setWatchlistComment(activeWatchlist.id, event.target.value)}
+            />
+          </div>
 
           <div className="watchlist-filters">
             <div className="watchlist-search-wrap">

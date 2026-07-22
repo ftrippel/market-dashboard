@@ -18,7 +18,7 @@ const LEGACY_LAST_MODIFIED_PREFIX = 'dashboard-settings-last-modified-';
 export const CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN: Record<SettingsDomain, number> = {
   preferences: 2,
   calculator: 2,
-  watchlists: 2,
+  watchlists: 3,
 };
 // Expected to be numeric for cross-build ordering; non-numeric values are treated as unordered.
 export const CURRENT_SYNC_BUILD_NUMBER = import.meta.env.VITE_BUILD_NUMBER ?? 'dev';

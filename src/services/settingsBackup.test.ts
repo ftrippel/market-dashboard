@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { loadWatchlistStorage } from '../features/watchlist/watchlistStorage';
-import { applyWatchlistsFromSync } from './settingsBackup';
+import { applyWatchlistsFromSync, parseWatchlistsSyncPayload } from './settingsBackup';
 
 class MemoryStorage implements Storage {
   private readonly values = new Map<string, string>();
@@ -61,5 +61,11 @@ describe('applyWatchlistsFromSync', () => {
     applyWatchlistsFromSync({ watchlists: [first] }, { source: 'local' });
 
     expect(loadWatchlistStorage().activeId).toBe('first');
+  });
+
+  it('loads older synced watchlists without a comment', () => {
+    const parsed = parseWatchlistsSyncPayload({ watchlists: [first] });
+
+    expect(parsed?.watchlists[0].comment).toBe('');
   });
 });
