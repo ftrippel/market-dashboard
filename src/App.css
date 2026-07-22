@@ -1500,14 +1500,28 @@ body::before {
   margin-bottom: 12px;
 }
 
+.watchlist-note-editor {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+}
+
 .watchlist-note-input {
+  flex: 1;
   display: block;
   width: 100%;
   min-height: 64px;
   padding: 8px 10px;
-  resize: vertical;
+  resize: none;
+  overflow-y: hidden;
   font-size: 11px;
   line-height: 1.45;
+}
+
+.watchlist-note-expand-btn {
+  flex: 0 0 auto;
+  margin-top: 4px;
+  padding: 3px 5px;
 }
 
 .watchlist-filters {
