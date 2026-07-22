@@ -9,6 +9,7 @@ import { getDisplayName, getSymbolMeta } from '../../data/symbolMaps';
 import { useMarketStore } from '../../store/marketStore';
 import type { MarketState } from '../../types';
 import { colors } from '../../utils/formatting';
+import { useScrollLock } from '../../hooks/useScrollLock';
 import { dismissOverlay } from '../../utils/focus';
 import { useOverlayDismiss } from '../../utils/overlayStack';
 import { usePenCompatibleClick } from '../../utils/penClick';
@@ -26,6 +27,8 @@ import type { WatchlistItem } from './types';
 import type { WatchlistQuote } from './useWatchlistQuotes';
 
 type WatchlistSortKey = 'name' | 'd1' | 'w1' | 'hi52' | 'ytd' | 'tags' | 'comment';
+
+const WATCHLIST_NOTE_MAX_INLINE_HEIGHT = 128;
 
 function compareWatchlistItems(
   a: WatchlistItem,
@@ -546,19 +549,26 @@ function EditableWatchlistComment({
   );
 }
 
-function WatchlistCommentDialog({
-  symbol,
+function CommentEditorDialog({
+  title,
   comment,
+  placeholder,
+  unsavedMessage,
   onSave,
   onClose,
 }: {
-  symbol: string;
+  title: string;
   comment: string;
+  placeholder: string;
+  unsavedMessage: string;
   onSave: (comment: string) => void;
   onClose: () => void;
 }) {
+  const confirm = useConfirm();
   const [draft, setDraft] = useState(comment);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const savedComment = comment.trim();
+  const titleId = 'comment-editor-dialog-title';
 
   useEffect(() => {
     const focusFrame = window.requestAnimationFrame(() => textareaRef.current?.focus());
@@ -566,30 +576,55 @@ function WatchlistCommentDialog({
   }, []);
 
   const close = useCallback(() => dismissOverlay(onClose), [onClose]);
+
+  const requestClose = useCallback(async () => {
+    if (draft.trim() === savedComment) {
+      close();
+      return;
+    }
+
+    if (
+      await confirm({
+        title: 'Unsaved changes',
+        message: unsavedMessage,
+        confirmLabel: 'Save',
+        cancelLabel: 'Discard',
+      })
+    ) {
+      onSave(draft);
+    }
+    close();
+  }, [close, confirm, draft, onSave, savedComment, unsavedMessage]);
+
   const save = useCallback(() => {
     onSave(draft);
-    dismissOverlay(onClose);
-  }, [draft, onClose, onSave]);
+    close();
+  }, [close, draft, onSave]);
 
-  useOverlayDismiss(true, close);
-  const closePenClick = usePenCompatibleClick(close);
+  useOverlayDismiss(true, () => {
+    void requestClose();
+  });
+  useScrollLock(true);
+
+  const closePenClick = usePenCompatibleClick(() => {
+    void requestClose();
+  });
   const savePenClick = usePenCompatibleClick(save);
 
   return createPortal(
     <div
       className="tv-modal open watchlist-comment-dialog"
       data-scroll-lock-overlay
-      onClick={close}
     >
       <div
         className="watchlist-comment-dialog-box"
         role="dialog"
         aria-modal="true"
-        aria-labelledby="watchlist-comment-dialog-title"
+        aria-labelledby={titleId}
         onClick={(event) => event.stopPropagation()}
       >
         <div className="watchlist-comment-dialog-header">
-          <div id="watchlist-comment-dialog-title">{symbol} comment</div>
+          <div id={titleId}>{title}</div>
           <button type="button" aria-label="Close comment editor" {...closePenClick}>
             <Icon name="close" size="xs" />
           </button>
@@ -606,8 +641,8 @@ function WatchlistCommentDialog({
                 save();
               }
             }}
-            placeholder={`Add notes for ${symbol}…`}
-            aria-label={`${symbol} comment`}
+            placeholder={placeholder}
+            aria-label={title}
           />
         </div>
         <div className="watchlist-comment-dialog-actions">
@@ -622,6 +657,65 @@ function WatchlistCommentDialog({
       </div>
     </div>,
     document.body,
+  );
+}
+
+function WatchlistNoteEditor({
+  id,
+  comment,
+  onChange,
+  onExpand,
+}: {
+  id: string;
+  comment: string;
+  onChange: (comment: string) => void;
+  onExpand: () => void;
+}) {
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [showExpand, setShowExpand] = useState(false);
+
+  const syncHeight = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    textarea.style.height = 'auto';
+    const scrollHeight = textarea.scrollHeight;
+    const overflows = scrollHeight > WATCHLIST_NOTE_MAX_INLINE_HEIGHT;
+    setShowExpand(overflows);
+    textarea.style.height = `${Math.min(scrollHeight, WATCHLIST_NOTE_MAX_INLINE_HEIGHT)}px`;
+    textarea.style.overflowY = overflows ? 'auto' : 'hidden';
+  }, []);
+
+  useEffect(() => {
+    syncHeight();
+  }, [comment, syncHeight]);
+
+  const expandPenClick = usePenCompatibleClick(onExpand);
+
+  return (
+    <div className="watchlist-note-editor">
+      <textarea
+        ref={textareaRef}
+        id={id}
+        className="fi watchlist-note-input"
+        rows={1}
+        value={comment}
+        onChange={(event) => onChange(event.target.value)}
+        onInput={syncHeight}
+        placeholder="Add notes for this watchlist…"
+      />
+      {showExpand && (
+        <button
+          type="button"
+          className="table-expand-btn watchlist-note-expand-btn"
+          title="Open watchlist comment editor"
+          aria-label="Open watchlist comment editor"
+          {...expandPenClick}
+        >
+          <Icon name="open_in_full" size="xs" />
+        </button>
+      )}
+    </div>
   );
 }
 
@@ -746,6 +840,7 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
   const [addTags, setAddTags] = useState<string[]>([]);
   const [commentInput, setCommentInput] = useState('');
   const [expandedCommentSymbol, setExpandedCommentSymbol] = useState<string | null>(null);
+  const [watchlistCommentExpanded, setWatchlistCommentExpanded] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [sort, setSort] = useState<{ key: WatchlistSortKey; order: SortOrder }>({
     key: 'w1',
@@ -899,6 +994,17 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
     [expandedCommentSymbol, setItemComment],
   );
   const handleCloseExpandedComment = useCallback(() => setExpandedCommentSymbol(null), []);
+  const handleSaveWatchlistComment = useCallback(
+    (comment: string) => {
+      if (activeWatchlist) setWatchlistComment(activeWatchlist.id, comment);
+    },
+    [activeWatchlist, setWatchlistComment],
+  );
+  const handleCloseWatchlistComment = useCallback(() => setWatchlistCommentExpanded(false), []);
+
+  useEffect(() => {
+    setWatchlistCommentExpanded(false);
+  }, [activeId]);
 
   const addPenClick = usePenCompatibleClick(handleAdd);
   const deleteWatchlistPenClick = usePenCompatibleClick(() => handleDeleteWatchlist(activeId));
@@ -926,13 +1032,11 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
             <label className="fl" htmlFor={`watchlist-note-${activeWatchlist.id}`}>
               Watchlist comment
             </label>
-            <textarea
+            <WatchlistNoteEditor
               id={`watchlist-note-${activeWatchlist.id}`}
-              className="fi watchlist-note-input"
-              rows={3}
-              placeholder="Add notes for this watchlist…"
-              value={activeWatchlist.comment ?? ''}
-              onChange={(event) => setWatchlistComment(activeWatchlist.id, event.target.value)}
+              comment={activeWatchlist.comment ?? ''}
+              onChange={(value) => setWatchlistComment(activeWatchlist.id, value)}
+              onExpand={() => setWatchlistCommentExpanded(true)}
             />
           </div>
 
@@ -1135,11 +1239,23 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
         </div>
       </Card>
       {expandedCommentItem && (
-        <WatchlistCommentDialog
-          symbol={expandedCommentItem.sym}
+        <CommentEditorDialog
+          title={`${expandedCommentItem.sym} comment`}
           comment={expandedCommentItem.comment ?? ''}
+          placeholder={`Add notes for ${expandedCommentItem.sym}…`}
+          unsavedMessage={`Save your comment for ${expandedCommentItem.sym} before closing?`}
           onSave={handleSaveExpandedComment}
           onClose={handleCloseExpandedComment}
+        />
+      )}
+      {watchlistCommentExpanded && activeWatchlist && (
+        <CommentEditorDialog
+          title="Watchlist comment"
+          comment={activeWatchlist.comment ?? ''}
+          placeholder="Add notes for this watchlist…"
+          unsavedMessage="Save your watchlist comment before closing?"
+          onSave={handleSaveWatchlistComment}
+          onClose={handleCloseWatchlistComment}
         />
       )}
     </Section>
