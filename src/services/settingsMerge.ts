@@ -11,6 +11,22 @@ function mergeValue<T>(base: T, local: T, remote: T): T {
   return local;
 }
 
+function mergeOrder(
+  baseIds: string[] | null,
+  localIds: string[],
+  remoteIds: string[],
+  availableIds: Set<string>,
+): string[] {
+  const preferredIds = baseIds === null
+    ? remoteIds
+    : mergeValue(baseIds, localIds, remoteIds);
+  const orderedIds = [...preferredIds, ...remoteIds, ...localIds];
+
+  return orderedIds.filter((id, index) =>
+    availableIds.has(id) && orderedIds.indexOf(id) === index,
+  );
+}
+
 function mergeTags(base: string[], local: string[], remote: string[]): string[] {
   const keys = new Set([...base, ...local, ...remote].map((tag) => tag.toLowerCase()));
   const result: string[] = [];
@@ -117,11 +133,20 @@ export function mergeWatchlistsForUpload(
     ...remote.watchlists.map((watchlist) => watchlist.id),
     ...local.watchlists.map((watchlist) => watchlist.id).filter((id) => !remoteById.has(id)),
   ];
+  const mergedById = new Map(
+    ids.flatMap((id) => {
+      const watchlist = mergeWatchlist(baseById.get(id), localById.get(id), remoteById.get(id));
+      return watchlist ? [[id, watchlist] as const] : [];
+    }),
+  );
+  const orderedIds = mergeOrder(
+    base ? base.watchlists.map((watchlist) => watchlist.id) : null,
+    local.watchlists.map((watchlist) => watchlist.id),
+    remote.watchlists.map((watchlist) => watchlist.id),
+    new Set(mergedById.keys()),
+  );
 
   return {
-    watchlists: ids.flatMap((id) => {
-      const watchlist = mergeWatchlist(baseById.get(id), localById.get(id), remoteById.get(id));
-      return watchlist ? [watchlist] : [];
-    }),
+    watchlists: orderedIds.map((id) => mergedById.get(id)!),
   };
 }

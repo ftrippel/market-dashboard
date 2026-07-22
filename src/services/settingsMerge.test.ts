@@ -10,6 +10,12 @@ function payload(items: WatchlistItem[], comment = ''): { watchlists: Watchlist[
   return { watchlists: [{ id: 'main', name: 'Main', comment, items }] };
 }
 
+function watchlists(...ids: string[]): { watchlists: Watchlist[] } {
+  return {
+    watchlists: ids.map((id) => ({ id, name: id.toUpperCase(), comment: '', items: [] })),
+  };
+}
+
 describe('mergeWatchlistsForUpload', () => {
   it('preserves remote and local entries when an old device has no sync base', () => {
     const merged = mergeWatchlistsForUpload(null, payload([item('AAPL')]), payload([item('MSFT')]));
@@ -50,6 +56,34 @@ describe('mergeWatchlistsForUpload', () => {
     const merged = mergeWatchlistsForUpload(null, local, remote);
 
     expect(merged.watchlists.map(({ id }) => id)).toEqual(['remote', 'local']);
+  });
+
+  it('keeps a local tab reorder when the remote order is unchanged', () => {
+    const base = watchlists('one', 'two', 'three');
+    const local = watchlists('three', 'one', 'two');
+
+    const merged = mergeWatchlistsForUpload(base, local, base);
+
+    expect(merged.watchlists.map(({ id }) => id)).toEqual(['three', 'one', 'two']);
+  });
+
+  it('takes a remote tab reorder when the local order is unchanged', () => {
+    const base = watchlists('one', 'two', 'three');
+    const remote = watchlists('two', 'three', 'one');
+
+    const merged = mergeWatchlistsForUpload(base, base, remote);
+
+    expect(merged.watchlists.map(({ id }) => id)).toEqual(['two', 'three', 'one']);
+  });
+
+  it('retains remote tabs added while a local reorder is pending', () => {
+    const base = watchlists('one', 'two', 'three');
+    const local = watchlists('three', 'one', 'two');
+    const remote = watchlists('one', 'two', 'three', 'remote');
+
+    const merged = mergeWatchlistsForUpload(base, local, remote);
+
+    expect(merged.watchlists.map(({ id }) => id)).toEqual(['three', 'one', 'two', 'remote']);
   });
 
   it('takes a remote watchlist comment when the local comment is unchanged', () => {
