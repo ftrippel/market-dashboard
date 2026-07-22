@@ -21,6 +21,7 @@ export type MaterialIconName =
   | 'show_chart'
   | 'straighten'
   | 'swap_vert'
+  | 'sync_problem'
   | 'unfold_more';
 
 type IconSize = 'xs' | 'sm' | 'md' | 'lg';

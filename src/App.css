@@ -566,6 +566,65 @@ body::before {
   overflow: hidden;
 }
 
+.sync-error-banner {
+  position: fixed;
+  top: calc(10px + env(safe-area-inset-top));
+  left: 50%;
+  z-index: 9970;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: min(calc(100vw - 28px), 1652px);
+  max-height: calc(100vh - 20px - env(safe-area-inset-top));
+  padding: 11px 14px;
+  overflow: auto;
+  transform: translateX(-50%);
+  border: 1px solid var(--red);
+  border-radius: 4px;
+  background: linear-gradient(var(--red-dim-bg), var(--red-dim-bg)), var(--bg2);
+  color: var(--text);
+  box-shadow: inset 3px 0 0 var(--red), 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+.sync-error-banner-icon {
+  flex: 0 0 auto;
+  color: var(--red);
+}
+
+.sync-error-banner-content {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.sync-error-banner-content strong {
+  color: var(--red);
+  font-size: 12px;
+  letter-spacing: 0.7px;
+  text-transform: uppercase;
+}
+
+.sync-error-banner-content small {
+  overflow-wrap: anywhere;
+  color: var(--text2);
+  font-size: 9px;
+}
+
+.sync-error-banner-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 7px;
+}
+
+.sync-error-retry-btn {
+  border-color: var(--red);
+  color: var(--red);
+}
+
 .quote-bar::before {
   content: '';
   position: absolute;
@@ -1105,6 +1164,20 @@ body::before {
 }
 
 @media (max-width: 768px) {
+  .sync-error-banner {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .sync-error-banner-content {
+    flex-basis: calc(100% - 40px);
+  }
+
+  .sync-error-banner-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
   .quote-bar {
     flex-direction: column;
     gap: 8px;

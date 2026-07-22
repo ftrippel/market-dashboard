@@ -6,7 +6,7 @@ import { ConfirmDialogProvider } from './context/ConfirmDialogContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { SettingsProvider } from './context/SettingsContext';
 import { AuthProvider } from './context/AuthContext';
-import { SettingsSyncProvider } from './context/SettingsSyncContext';
+import { SettingsSyncProvider, useSettingsSync } from './context/SettingsSyncContext';
 import { SymbolPreviewProvider } from './context/SymbolPreviewContext';
 import { MacroDivider, MacroSection } from './features/macro/MacroSection';
 import { EquitiesSection } from './features/equities/EquitiesSection';
@@ -57,6 +57,7 @@ function DashboardContent() {
   const store = useMarketStore();
   const updatePrice = useMarketStore((state) => state.updatePrice);
   const { error: dataError } = useMarketData();
+  const { status: syncStatus, statusMessage: syncStatusMessage, syncNow } = useSettingsSync();
   const wrapRef = useRef<HTMLDivElement>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastDuration, setToastDuration] = useState(3200);
@@ -186,6 +187,27 @@ function DashboardContent() {
           onCopy={handleCopy}
           onOpenSettings={() => setSettingsOpen(true)}
         />
+
+        {syncStatus === 'error' && (
+          <div className="sync-error-banner" role="alert" aria-live="assertive">
+            <Icon name="sync_problem" size="md" className="sync-error-banner-icon" />
+            <div className="sync-error-banner-content">
+              <strong>Cloud sync failed</strong>
+              <span>Your latest changes may only be stored on this device.</span>
+              {syncStatusMessage && <small>{syncStatusMessage}</small>}
+            </div>
+            <div className="sync-error-banner-actions">
+              <button type="button" className="btn sync-error-retry-btn" onClick={() => void syncNow()}>
+                <Icon name="refresh" size="xs" />
+                Retry
+              </button>
+              <button type="button" className="btn" onClick={() => setSettingsOpen(true)}>
+                <Icon name="settings" size="xs" />
+                Settings
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="quote-bar">
           <div className="quote-icon">
