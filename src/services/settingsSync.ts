@@ -391,7 +391,7 @@ async function uploadDomainWhileRemoteApplyPaused(
     setSyncBase(domain, confirmedData);
     stampLocalMetadata(domain, confirmedMetadata);
     if (editSequenceUnchanged) {
-      if (JSON.stringify(exportDomain(domain)) !== JSON.stringify(confirmedData)) {
+      if (remoteContentDiffers(domain, confirmedData)) {
         applyRemoteDomain(domain, confirmedData, updatedAt, confirmedMetadata);
       }
       markPendingUpload(domain, false);

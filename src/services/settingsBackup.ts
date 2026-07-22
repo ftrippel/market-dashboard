@@ -211,7 +211,18 @@ export function exportWatchlistsForSync(): WatchlistsSyncPayload {
 }
 
 export function watchlistsContentEqual(a: Watchlist[], b: Watchlist[]): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
+  const normalize = (watchlists: Watchlist[]) =>
+    watchlists.map((watchlist) => ({
+      id: watchlist.id,
+      name: watchlist.name,
+      comment: watchlist.comment ?? '',
+      items: watchlist.items.map((item) => ({
+        sym: item.sym,
+        tags: item.tags,
+        comment: item.comment ?? '',
+      })),
+    }));
+  return JSON.stringify(normalize(a)) === JSON.stringify(normalize(b));
 }
 
 export function exportDashboardSettings(): DashboardSettingsExport {

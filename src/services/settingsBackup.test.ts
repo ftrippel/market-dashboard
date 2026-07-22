@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { loadWatchlistStorage } from '../features/watchlist/watchlistStorage';
-import { applyWatchlistsFromSync, parseWatchlistsSyncPayload } from './settingsBackup';
+import {
+  applyWatchlistsFromSync,
+  parseWatchlistsSyncPayload,
+  watchlistsContentEqual,
+} from './settingsBackup';
 
 class MemoryStorage implements Storage {
   private readonly values = new Map<string, string>();
@@ -67,5 +71,12 @@ describe('applyWatchlistsFromSync', () => {
     const parsed = parseWatchlistsSyncPayload({ watchlists: [first] });
 
     expect(parsed?.watchlists[0].comment).toBe('');
+  });
+
+  it('treats reordered Firestore fields as identical watchlist content', () => {
+    const local = [{ id: 'first', name: 'First', comment: 'Note', items: [] }];
+    const remote = [{ comment: 'Note', items: [], name: 'First', id: 'first' }];
+
+    expect(watchlistsContentEqual(local, remote)).toBe(true);
   });
 });
