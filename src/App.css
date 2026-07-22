@@ -1663,9 +1663,95 @@ body::before {
 }
 
 .watchlist-comment-input {
+  flex: 1;
+  height: 28px;
   padding: 4px 8px;
   font-size: 11px;
   min-width: 140px;
+}
+
+.watchlist-comment-editor {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 180px;
+}
+
+.watchlist-comment-expand-btn {
+  flex: 0 0 auto;
+  padding: 3px 5px;
+}
+
+.watchlist-comment-dialog {
+  z-index: 10200;
+}
+
+.watchlist-comment-dialog-box {
+  width: min(680px, 94vw);
+  max-height: 86vh;
+  background: var(--bg);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+  touch-action: manipulation;
+}
+
+.watchlist-comment-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.watchlist-comment-dialog-header button {
+  display: inline-flex;
+  padding: 4px 6px;
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+}
+
+.watchlist-comment-dialog-body {
+  padding: 14px;
+}
+
+.watchlist-comment-dialog-textarea {
+  width: 100%;
+  min-height: min(360px, 55vh);
+  padding: 10px 12px;
+  resize: vertical;
+  font-size: 12px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.watchlist-comment-dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--bg2);
+  border-top: 1px solid var(--border);
+}
+
+.watchlist-comment-dialog-actions span {
+  margin-right: auto;
+  color: var(--text3);
+  font-size: 9px;
 }
 
 .watchlist-remove-btn {

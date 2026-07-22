@@ -79,4 +79,17 @@ describe('applyWatchlistsFromSync', () => {
 
     expect(watchlistsContentEqual(local, remote)).toBe(true);
   });
+
+  it('preserves line breaks in individual symbol comments', () => {
+    const parsed = parseWatchlistsSyncPayload({
+      watchlists: [
+        {
+          ...first,
+          items: [{ sym: 'AAPL', tags: [], comment: 'First line\nSecond line' }],
+        },
+      ],
+    });
+
+    expect(parsed?.watchlists[0].items[0].comment).toBe('First line\nSecond line');
+  });
 });
