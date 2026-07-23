@@ -201,6 +201,9 @@ function DashboardContent() {
                 <Icon name="refresh" size="xs" />
                 Retry
               </button>
+              <button type="button" className="btn" onClick={() => window.location.reload()}>
+                Reload app
+              </button>
               <button type="button" className="btn" onClick={() => setSettingsOpen(true)}>
                 <Icon name="settings" size="xs" />
                 Settings
