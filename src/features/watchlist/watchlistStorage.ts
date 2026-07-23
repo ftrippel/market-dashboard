@@ -2,6 +2,8 @@ import { touchSettingsModified } from '../../services/settingsEvents';
 import type { Watchlist, WatchlistStorage } from './types';
 
 const STORAGE_KEY = 'agy_watchlists';
+const DEFAULT_WATCHLIST_NAME = 'DEFAULT';
+const UNTITLED_WATCHLIST_NAME = 'UNTITLED';
 
 function createId(): string {
   return crypto.randomUUID();
@@ -10,10 +12,32 @@ function createId(): string {
 function createDefaultWatchlist(): Watchlist {
   return {
     id: createId(),
-    name: 'Default',
+    name: DEFAULT_WATCHLIST_NAME,
     comment: '',
     items: [],
   };
+}
+
+export function normalizeWatchlistName(name: string): string {
+  return (name.trim() || UNTITLED_WATCHLIST_NAME).toUpperCase();
+}
+
+export function normalizeWatchlistStorage(state: WatchlistStorage): WatchlistStorage {
+  const watchlists = state.watchlists.map((watchlist) => ({
+    ...watchlist,
+    name: normalizeWatchlistName(watchlist.name),
+    comment: watchlist.comment ?? '',
+    items: (watchlist.items ?? []).map((item) => ({
+      sym: item.sym.toUpperCase(),
+      tags: item.tags ?? [],
+      comment: item.comment ?? '',
+    })),
+  }));
+  const activeId = watchlists.some((watchlist) => watchlist.id === state.activeId)
+    ? state.activeId
+    : watchlists[0]?.id ?? state.activeId;
+
+  return { watchlists, activeId };
 }
 
 export function createDefaultWatchlistStorage(): WatchlistStorage {
@@ -35,23 +59,11 @@ export function loadWatchlistStorage(): WatchlistStorage {
       return { watchlists: [watchlist], activeId: watchlist.id };
     }
 
-    const activeId = parsed.watchlists.some((w) => w.id === parsed.activeId)
-      ? parsed.activeId
-      : parsed.watchlists[0].id;
-
-    return {
-      watchlists: parsed.watchlists.map((w) => ({
-        id: w.id,
-        name: w.name || 'Untitled',
-        comment: w.comment ?? '',
-        items: (w.items ?? []).map((item) => ({
-          sym: item.sym.toUpperCase(),
-          tags: item.tags ?? [],
-          comment: item.comment ?? '',
-        })),
-      })),
-      activeId,
-    };
+    const normalized = normalizeWatchlistStorage(parsed);
+    if (JSON.stringify(normalized) !== JSON.stringify(parsed)) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+    }
+    return normalized;
   } catch {
     const watchlist = createDefaultWatchlist();
     return { watchlists: [watchlist], activeId: watchlist.id };
@@ -59,7 +71,7 @@ export function loadWatchlistStorage(): WatchlistStorage {
 }
 
 export function persistWatchlistStorage(state: WatchlistStorage): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(normalizeWatchlistStorage(state)));
 }
 
 export function moveWatchlistItem(
@@ -98,7 +110,7 @@ export function moveWatchlistItem(
 /** Replace watchlist storage entirely (used when applying cloud data). */
 export function replaceWatchlistStorage(state: WatchlistStorage): void {
   localStorage.removeItem(STORAGE_KEY);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  persistWatchlistStorage(state);
 }
 
 export function saveWatchlistStorage(state: WatchlistStorage): void {
@@ -109,7 +121,7 @@ export function saveWatchlistStorage(state: WatchlistStorage): void {
 export function createWatchlist(name: string): Watchlist {
   return {
     id: createId(),
-    name: name.trim() || 'Untitled',
+    name: normalizeWatchlistName(name),
     comment: '',
     items: [],
   };

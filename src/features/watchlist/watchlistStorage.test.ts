@@ -1,6 +1,46 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import type { WatchlistStorage } from './types';
-import { moveWatchlistItem } from './watchlistStorage';
+import {
+  createWatchlist,
+  loadWatchlistStorage,
+  moveWatchlistItem,
+  persistWatchlistStorage,
+} from './watchlistStorage';
+
+class MemoryStorage implements Storage {
+  private readonly values = new Map<string, string>();
+
+  get length(): number {
+    return this.values.size;
+  }
+
+  clear(): void {
+    this.values.clear();
+  }
+
+  getItem(key: string): string | null {
+    return this.values.get(key) ?? null;
+  }
+
+  key(index: number): string | null {
+    return [...this.values.keys()][index] ?? null;
+  }
+
+  removeItem(key: string): void {
+    this.values.delete(key);
+  }
+
+  setItem(key: string, value: string): void {
+    this.values.set(key, value);
+  }
+}
+
+beforeEach(() => {
+  Object.defineProperty(globalThis, 'localStorage', {
+    configurable: true,
+    value: new MemoryStorage(),
+  });
+});
 
 function createStorage(): WatchlistStorage {
   return {
@@ -65,5 +105,30 @@ describe('moveWatchlistItem', () => {
     expect(moveWatchlistItem(storage, 'missing', 'target', 'AAPL')).toBe(storage);
     expect(moveWatchlistItem(storage, 'source', 'missing', 'AAPL')).toBe(storage);
     expect(moveWatchlistItem(storage, 'source', 'source', 'AAPL')).toBe(storage);
+  });
+});
+
+describe('watchlist name normalization', () => {
+  it('uppercases newly created watchlist names', () => {
+    expect(createWatchlist('  Growth picks  ').name).toBe('GROWTH PICKS');
+  });
+
+  it('normalizes names before persisting', () => {
+    const storage = createStorage();
+    persistWatchlistStorage(storage);
+
+    const persisted = JSON.parse(localStorage.getItem('agy_watchlists') ?? '{}') as WatchlistStorage;
+    expect(persisted.watchlists.map(({ name }) => name)).toEqual(['SOURCE', 'TARGET']);
+  });
+
+  it('migrates mixed-case names already in storage', () => {
+    const storage = createStorage();
+    localStorage.setItem('agy_watchlists', JSON.stringify(storage));
+
+    const loaded = loadWatchlistStorage();
+    const migrated = JSON.parse(localStorage.getItem('agy_watchlists') ?? '{}') as WatchlistStorage;
+
+    expect(loaded.watchlists.map(({ name }) => name)).toEqual(['SOURCE', 'TARGET']);
+    expect(migrated.watchlists.map(({ name }) => name)).toEqual(['SOURCE', 'TARGET']);
   });
 });

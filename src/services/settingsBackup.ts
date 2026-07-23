@@ -1,4 +1,10 @@
-import { createDefaultWatchlistStorage, loadWatchlistStorage, persistWatchlistStorage, replaceWatchlistStorage } from '../features/watchlist/watchlistStorage';
+import {
+  createDefaultWatchlistStorage,
+  loadWatchlistStorage,
+  normalizeWatchlistName,
+  persistWatchlistStorage,
+  replaceWatchlistStorage,
+} from '../features/watchlist/watchlistStorage';
 import type { Watchlist, WatchlistItem, WatchlistStorage } from '../features/watchlist/types';
 import type { SparklineMode } from '../context/SettingsContext';
 import type { Theme } from '../context/ThemeContext';
@@ -225,6 +231,16 @@ export function watchlistsContentEqual(a: Watchlist[], b: Watchlist[]): boolean 
   return JSON.stringify(normalize(a)) === JSON.stringify(normalize(b));
 }
 
+export function watchlistNamesNeedNormalization(value: unknown): boolean {
+  if (!isRecord(value) || !Array.isArray(value.watchlists)) return false;
+  return value.watchlists.some(
+    (entry) =>
+      isRecord(entry) &&
+      typeof entry.name === 'string' &&
+      entry.name !== normalizeWatchlistName(entry.name),
+  );
+}
+
 export function exportDashboardSettings(): DashboardSettingsExport {
   return {
     version: SETTINGS_EXPORT_VERSION,
@@ -339,7 +355,12 @@ function parseWatchlistStorage(value: unknown): WatchlistStorage | null {
           .filter((item): item is WatchlistItem => item !== null)
       : [];
     const comment = typeof entry.comment === 'string' ? entry.comment : '';
-    watchlists.push({ id: entry.id, name: entry.name, comment, items });
+    watchlists.push({
+      id: entry.id,
+      name: normalizeWatchlistName(entry.name),
+      comment,
+      items,
+    });
   }
 
   if (watchlists.length === 0) return null;
@@ -507,7 +528,12 @@ export function parseWatchlistsSyncPayload(value: unknown): WatchlistsSyncPayloa
           .filter((item): item is WatchlistItem => item !== null)
       : [];
     const comment = typeof entry.comment === 'string' ? entry.comment : '';
-    watchlists.push({ id: entry.id, name: entry.name, comment, items });
+    watchlists.push({
+      id: entry.id,
+      name: normalizeWatchlistName(entry.name),
+      comment,
+      items,
+    });
   }
 
   if (watchlists.length === 0) return { watchlists: [] };

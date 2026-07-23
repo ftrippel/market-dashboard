@@ -3,6 +3,7 @@ import { loadWatchlistStorage } from '../features/watchlist/watchlistStorage';
 import {
   applyWatchlistsFromSync,
   parseWatchlistsSyncPayload,
+  watchlistNamesNeedNormalization,
   watchlistsContentEqual,
 } from './settingsBackup';
 
@@ -71,6 +72,17 @@ describe('applyWatchlistsFromSync', () => {
     const parsed = parseWatchlistsSyncPayload({ watchlists: [first] });
 
     expect(parsed?.watchlists[0].comment).toBe('');
+  });
+
+  it('normalizes mixed-case synced watchlist names', () => {
+    const payload = {
+      watchlists: [{ ...first, name: 'Growth Picks' }],
+    };
+    const parsed = parseWatchlistsSyncPayload(payload);
+
+    expect(parsed?.watchlists[0].name).toBe('GROWTH PICKS');
+    expect(watchlistNamesNeedNormalization(payload)).toBe(true);
+    expect(watchlistNamesNeedNormalization(parsed)).toBe(false);
   });
 
   it('treats reordered Firestore fields as identical watchlist content', () => {

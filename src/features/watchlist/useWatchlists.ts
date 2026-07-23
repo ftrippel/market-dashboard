@@ -9,6 +9,7 @@ import {
   loadWatchlistStorage,
   moveWatchlistItem,
   normalizeSymbol,
+  normalizeWatchlistName,
   persistWatchlistStorage,
 } from './watchlistStorage';
 import { touchSettingsModified } from '../../services/settingsEvents';
@@ -120,9 +121,12 @@ export function useWatchlists() {
   const renameWatchlist = useCallback((id: string, name: string) => {
     const trimmed = name.trim();
     if (!trimmed) return;
+    const normalizedName = normalizeWatchlistName(trimmed);
     setStorage((prev) => ({
       ...prev,
-      watchlists: prev.watchlists.map((w) => (w.id === id ? { ...w, name: trimmed } : w)),
+      watchlists: prev.watchlists.map((w) =>
+        w.id === id ? { ...w, name: normalizedName } : w,
+      ),
     }));
   }, []);
 

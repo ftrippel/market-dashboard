@@ -18,6 +18,7 @@ import {
   parseCalculatorSettings,
   parsePreferencesSettings,
   parseWatchlistsSyncPayload,
+  watchlistNamesNeedNormalization,
   watchlistsContentEqual,
   type DashboardSettingsExport,
   type PreferencesSettings,
@@ -40,6 +41,7 @@ import {
   setServerWriteId,
   setSyncBase,
   SETTINGS_DOMAINS,
+  touchSettingsModified,
   type SettingsDomain,
 } from './settingsEvents';
 import { getFirebaseDb } from './firebase';
@@ -189,6 +191,7 @@ function summarizeResults(result: ReconcileResult): SettingsSyncResult {
 
 function remoteContentDiffers(domain: SettingsDomain, data: unknown): boolean {
   if (domain === 'watchlists') {
+    if (watchlistNamesNeedNormalization(data)) return true;
     const remote = parseWatchlistsSyncPayload(data);
     if (!remote) return true;
     return !watchlistsContentEqual(exportWatchlistsForSync().watchlists, remote.watchlists);
@@ -277,11 +280,13 @@ function applyRemoteDomain(
     return true;
   }
 
+  const namesNeedNormalization = watchlistNamesNeedNormalization(data);
   const parsed = parseWatchlistsSyncPayload(data);
   if (!parsed) return false;
   applyWatchlistsFromSync(parsed, { source: 'remote', updatedAt });
   setSyncBase(domain, data);
   stampLocalMetadata(domain, metadata);
+  if (namesNeedNormalization) touchSettingsModified(domain);
   return true;
 }
 
