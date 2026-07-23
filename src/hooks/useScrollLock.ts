@@ -7,7 +7,7 @@ const SCROLL_LOCK_TARGET_ID = 'root';
 const OVERLAY_SELECTOR = '[data-scroll-lock-overlay]';
 
 const SCROLLABLE_SELECTOR =
-  '.table-flyover-body, .table-scroll, .tv-chart-toolbar, #tv-modal-hdr, .table-flyover-hdr';
+  '.table-flyover-body, .table-scroll, .tv-chart-toolbar, #tv-modal-hdr, .table-flyover-hdr, .watchlist-move-dialog-list';
 
 const SCROLL_KEYS = new Set([
   'ArrowUp',

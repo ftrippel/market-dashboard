@@ -62,6 +62,39 @@ export function persistWatchlistStorage(state: WatchlistStorage): void {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
+export function moveWatchlistItem(
+  state: WatchlistStorage,
+  sourceWatchlistId: string,
+  targetWatchlistId: string,
+  sym: string,
+): WatchlistStorage {
+  if (sourceWatchlistId === targetWatchlistId) return state;
+
+  const source = state.watchlists.find((watchlist) => watchlist.id === sourceWatchlistId);
+  const target = state.watchlists.find((watchlist) => watchlist.id === targetWatchlistId);
+  const item = source?.items.find((candidate) => candidate.sym === sym);
+
+  if (!source || !target || !item || target.items.some((candidate) => candidate.sym === sym)) {
+    return state;
+  }
+
+  return {
+    ...state,
+    watchlists: state.watchlists.map((watchlist) => {
+      if (watchlist.id === sourceWatchlistId) {
+        return {
+          ...watchlist,
+          items: watchlist.items.filter((candidate) => candidate.sym !== sym),
+        };
+      }
+      if (watchlist.id === targetWatchlistId) {
+        return { ...watchlist, items: [...watchlist.items, item] };
+      }
+      return watchlist;
+    }),
+  };
+}
+
 /** Replace watchlist storage entirely (used when applying cloud data). */
 export function replaceWatchlistStorage(state: WatchlistStorage): void {
   localStorage.removeItem(STORAGE_KEY);

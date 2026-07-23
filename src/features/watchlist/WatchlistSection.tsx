@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from 'react';
 import { createPortal } from 'react-dom';
 import { Card, CardLabel, Icon, Section } from '../../components/common';
 import { useConfirm } from '../../context/ConfirmDialogContext';
@@ -10,7 +18,7 @@ import { useMarketStore } from '../../store/marketStore';
 import type { MarketState } from '../../types';
 import { colors } from '../../utils/formatting';
 import { useScrollLock } from '../../hooks/useScrollLock';
-import { dismissOverlay } from '../../utils/focus';
+import { blurActiveElement, dismissOverlay } from '../../utils/focus';
 import { useOverlayDismiss } from '../../utils/overlayStack';
 import { usePenCompatibleClick } from '../../utils/penClick';
 import {
@@ -29,6 +37,11 @@ import type { WatchlistQuote } from './useWatchlistQuotes';
 type WatchlistSortKey = 'name' | 'd1' | 'w1' | 'hi52' | 'ytd' | 'tags' | 'comment';
 
 const WATCHLIST_NOTE_MAX_INLINE_HEIGHT = 128;
+const WATCHLIST_ITEM_MENU_VIEWPORT_MARGIN = 8;
+const HIDDEN_WATCHLIST_ITEM_MENU_STYLE: CSSProperties = {
+  position: 'fixed',
+  visibility: 'hidden',
+};
 
 function compareWatchlistItems(
   a: WatchlistItem,
@@ -719,12 +732,267 @@ function WatchlistNoteEditor({
   );
 }
 
+function WatchlistItemMenu({
+  item,
+  onRequestMove,
+  onRemove,
+}: {
+  item: WatchlistItem;
+  onRequestMove: (sym: string) => void;
+  onRemove: (sym: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [menuStyle, setMenuStyle] = useState<CSSProperties>(
+    HIDDEN_WATCHLIST_ITEM_MENU_STYLE,
+  );
+  const rootRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  const closeMenu = useCallback(() => {
+    blurActiveElement();
+    setOpen(false);
+  }, []);
+
+  useOverlayDismiss(open, closeMenu);
+
+  useEffect(() => {
+    setOpen(false);
+  }, [item.sym]);
+
+  const updateMenuPosition = useCallback(() => {
+    const trigger = rootRef.current;
+    const menu = menuRef.current;
+    if (!trigger || !menu) return;
+
+    const triggerRect = trigger.getBoundingClientRect();
+    const menuRect = menu.getBoundingClientRect();
+    const margin = WATCHLIST_ITEM_MENU_VIEWPORT_MARGIN;
+    const left = Math.max(
+      margin,
+      Math.min(triggerRect.right - menuRect.width, window.innerWidth - menuRect.width - margin),
+    );
+    const belowTop = triggerRect.bottom + 4;
+    const aboveTop = triggerRect.top - menuRect.height - 4;
+    const top =
+      belowTop + menuRect.height <= window.innerHeight - margin
+        ? belowTop
+        : Math.max(margin, aboveTop);
+
+    setMenuStyle({ position: 'fixed', top, left, visibility: 'visible' });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    updateMenuPosition();
+
+    window.addEventListener('resize', updateMenuPosition);
+    window.addEventListener('scroll', updateMenuPosition, true);
+    return () => {
+      window.removeEventListener('resize', updateMenuPosition);
+      window.removeEventListener('scroll', updateMenuPosition, true);
+    };
+  }, [open, updateMenuPosition]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (!rootRef.current?.contains(target) && !menuRef.current?.contains(target)) {
+        closeMenu();
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    return () => document.removeEventListener('pointerdown', handlePointerDown);
+  }, [open, closeMenu]);
+
+  const toggleMenu = useCallback(() => {
+    if (!open) setMenuStyle(HIDDEN_WATCHLIST_ITEM_MENU_STYLE);
+    setOpen(!open);
+  }, [open]);
+  const triggerPenClick = usePenCompatibleClick(toggleMenu);
+  const movePenClick = usePenCompatibleClick(() => {
+    closeMenu();
+    onRequestMove(item.sym);
+  });
+  const removePenClick = usePenCompatibleClick(() => {
+    closeMenu();
+    onRemove(item.sym);
+  });
+
+  return (
+    <div ref={rootRef} className="watchlist-item-menu">
+      <button
+        type="button"
+        className="table-expand-btn watchlist-item-menu-trigger"
+        title={`Actions for ${item.sym}`}
+        aria-label={`Actions for ${item.sym}`}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        {...triggerPenClick}
+      >
+        …
+      </button>
+      {open &&
+        createPortal(
+          <div
+            ref={menuRef}
+            className="watchlist-item-menu-dropdown"
+            style={menuStyle}
+            role="menu"
+            aria-label={`Actions for ${item.sym}`}
+          >
+            <button
+              type="button"
+              className="watchlist-item-menu-action"
+              role="menuitem"
+              {...movePenClick}
+            >
+              Move
+            </button>
+            <div className="watchlist-item-menu-divider" />
+            <button
+              type="button"
+              className="watchlist-item-menu-action watchlist-item-menu-delete"
+              role="menuitem"
+              {...removePenClick}
+            >
+              Delete
+            </button>
+          </div>,
+          document.body,
+        )}
+    </div>
+  );
+}
+
+function WatchlistMoveDialogOption({
+  name,
+  alreadyContainsSymbol,
+  onSelect,
+}: {
+  name: string;
+  alreadyContainsSymbol: boolean;
+  onSelect: () => void;
+}) {
+  const selectPenClick = usePenCompatibleClick(onSelect);
+
+  return (
+    <button
+      type="button"
+      className="watchlist-move-dialog-option"
+      disabled={alreadyContainsSymbol}
+      title={alreadyContainsSymbol ? `${name} already contains this symbol` : `Move to ${name}`}
+      {...selectPenClick}
+    >
+      <span>{name}</span>
+      {alreadyContainsSymbol && (
+        <span className="watchlist-move-dialog-hint">Already added</span>
+      )}
+    </button>
+  );
+}
+
+function WatchlistMoveDialog({
+  item,
+  watchlists,
+  sourceWatchlistId,
+  onMove,
+  onClose,
+}: {
+  item: WatchlistItem;
+  watchlists: { id: string; name: string; items: WatchlistItem[] }[];
+  sourceWatchlistId: string;
+  onMove: (targetWatchlistId: string) => void;
+  onClose: () => void;
+}) {
+  const listRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const targets = watchlists.filter((watchlist) => watchlist.id !== sourceWatchlistId);
+  const titleId = 'watchlist-move-dialog-title';
+  const descriptionId = 'watchlist-move-dialog-description';
+  const close = useCallback(() => dismissOverlay(onClose), [onClose]);
+
+  useEffect(() => {
+    const focusFrame = window.requestAnimationFrame(() => {
+      const firstAvailableTarget =
+        listRef.current?.querySelector<HTMLButtonElement>('button:not(:disabled)');
+      (firstAvailableTarget ?? closeButtonRef.current)?.focus();
+    });
+    return () => window.cancelAnimationFrame(focusFrame);
+  }, []);
+
+  useOverlayDismiss(true, close);
+  useScrollLock(true);
+
+  const closePenClick = usePenCompatibleClick(close);
+  const backdropPenClick = usePenCompatibleClick((event) => {
+    if (event.target === event.currentTarget) close();
+  });
+
+  return createPortal(
+    <div
+      className="tv-modal open watchlist-move-dialog"
+      data-scroll-lock-overlay
+      {...backdropPenClick}
+    >
+      <div
+        className="watchlist-move-dialog-box"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className="watchlist-move-dialog-header">
+          <div id={titleId}>Move {item.sym}</div>
+          <button
+            ref={closeButtonRef}
+            type="button"
+            aria-label="Close move dialog"
+            {...closePenClick}
+          >
+            <Icon name="close" size="xs" />
+          </button>
+        </div>
+        <div id={descriptionId} className="watchlist-move-dialog-description">
+          Choose a destination watchlist.
+        </div>
+        <div ref={listRef} className="watchlist-move-dialog-list">
+          {targets.length === 0 ? (
+            <div className="watchlist-move-dialog-empty">No other watchlists available.</div>
+          ) : (
+            targets.map((target) => (
+              <WatchlistMoveDialogOption
+                key={target.id}
+                name={target.name}
+                alreadyContainsSymbol={target.items.some(
+                  (candidate) => candidate.sym === item.sym,
+                )}
+                onSelect={() => dismissOverlay(() => onMove(target.id))}
+              />
+            ))
+          )}
+        </div>
+        <div className="watchlist-move-dialog-actions">
+          <button type="button" className="btn" {...closePenClick}>
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
 function WatchlistRow({
   item,
   activeTags,
   siblings,
   quotes,
   onRemove,
+  onRequestMove,
   onUpdateTags,
   onUpdateComment,
   onExpandComment,
@@ -734,6 +1002,7 @@ function WatchlistRow({
   siblings: { sym: string; name: string }[];
   quotes: Record<string, WatchlistQuote>;
   onRemove: (sym: string) => void;
+  onRequestMove: (sym: string) => void;
   onUpdateTags: (sym: string, tags: string[]) => void;
   onUpdateComment: (sym: string, comment: string) => void;
   onExpandComment: (sym: string) => void;
@@ -748,7 +1017,6 @@ function WatchlistRow({
   const ytd = existing?.ytd ?? quote?.ytd;
   const meta = getSymbolMeta(item.sym);
   const displayName = getDisplayName(item.sym, data.name);
-  const removePenClick = usePenCompatibleClick(() => onRemove(item.sym));
   const expandCommentPenClick = usePenCompatibleClick(() => onExpandComment(item.sym));
   const handleSetTags = useCallback(
     (tags: string[]) => onUpdateTags(item.sym, tags),
@@ -800,15 +1068,11 @@ function WatchlistRow({
         </div>
       </td>
       <td className="watchlist-td" style={{ textAlign: 'center' }}>
-        <button
-          type="button"
-          className="table-expand-btn watchlist-remove-btn"
-          title="Remove from watchlist"
-          aria-label={`Remove ${item.sym}`}
-          {...removePenClick}
-        >
-          <Icon name="close" size="xs" />
-        </button>
+        <WatchlistItemMenu
+          item={item}
+          onRequestMove={onRequestMove}
+          onRemove={onRemove}
+        />
       </td>
     </tr>
   );
@@ -828,6 +1092,7 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
     setWatchlistComment,
     addItem,
     removeItem,
+    moveItem,
     setItemTags,
     setItemComment,
     allTags,
@@ -840,6 +1105,7 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
   const [addTags, setAddTags] = useState<string[]>([]);
   const [commentInput, setCommentInput] = useState('');
   const [expandedCommentSymbol, setExpandedCommentSymbol] = useState<string | null>(null);
+  const [movingSymbol, setMovingSymbol] = useState<string | null>(null);
   const [watchlistCommentExpanded, setWatchlistCommentExpanded] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [sort, setSort] = useState<{ key: WatchlistSortKey; order: SortOrder }>({
@@ -987,6 +1253,16 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
   const expandedCommentItem = activeWatchlist?.items.find(
     (item) => item.sym === expandedCommentSymbol,
   );
+  const movingItem = activeWatchlist?.items.find((item) => item.sym === movingSymbol);
+  const handleMoveItem = useCallback(
+    (targetWatchlistId: string) => {
+      if (!movingSymbol) return;
+      moveItem(movingSymbol, targetWatchlistId);
+      setMovingSymbol(null);
+    },
+    [moveItem, movingSymbol],
+  );
+  const handleCloseMoveDialog = useCallback(() => setMovingSymbol(null), []);
   const handleSaveExpandedComment = useCallback(
     (comment: string) => {
       if (expandedCommentSymbol) setItemComment(expandedCommentSymbol, comment);
@@ -1004,6 +1280,7 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
 
   useEffect(() => {
     setWatchlistCommentExpanded(false);
+    setMovingSymbol(null);
   }, [activeId]);
 
   const addPenClick = usePenCompatibleClick(handleAdd);
@@ -1192,6 +1469,7 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
                         siblings={siblings}
                         quotes={quotes}
                         onRemove={handleRemoveItem}
+                        onRequestMove={setMovingSymbol}
                         onUpdateTags={setItemTags}
                         onUpdateComment={setItemComment}
                         onExpandComment={setExpandedCommentSymbol}
@@ -1238,6 +1516,15 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
           </div>
         </div>
       </Card>
+      {movingItem && (
+        <WatchlistMoveDialog
+          item={movingItem}
+          watchlists={watchlists}
+          sourceWatchlistId={activeId}
+          onMove={handleMoveItem}
+          onClose={handleCloseMoveDialog}
+        />
+      )}
       {expandedCommentItem && (
         <CommentEditorDialog
           title={`${expandedCommentItem.sym} comment`}

@@ -7,6 +7,7 @@ import {
 import {
   createWatchlist,
   loadWatchlistStorage,
+  moveWatchlistItem,
   normalizeSymbol,
   persistWatchlistStorage,
 } from './watchlistStorage';
@@ -166,6 +167,12 @@ export function useWatchlists() {
     }));
   }, []);
 
+  const moveItem = useCallback((sym: string, targetWatchlistId: string) => {
+    setStorage((prev) =>
+      moveWatchlistItem(prev, prev.activeId, targetWatchlistId, sym),
+    );
+  }, []);
+
   const setItemTags = useCallback((sym: string, tags: string[]) => {
     setStorage((prev) => ({
       ...prev,
@@ -219,6 +226,7 @@ export function useWatchlists() {
     setWatchlistComment,
     addItem,
     removeItem,
+    moveItem,
     setItemTags,
     setItemComment,
     allTags,

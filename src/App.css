@@ -1841,8 +1841,208 @@ body::before {
   font-size: 9px;
 }
 
-.watchlist-remove-btn {
-  padding: 2px 6px;
+.watchlist-item-menu {
+  display: inline-flex;
+}
+
+.watchlist-item-menu-trigger {
+  width: 28px;
+  min-height: 24px;
+  padding: 0 5px 4px;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.watchlist-item-menu-trigger[aria-expanded='true'] {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-subtle-bg);
+}
+
+.watchlist-item-menu-dropdown {
+  z-index: 10001;
+  min-width: 130px;
+  padding: 5px;
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  background: var(--bg2);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+  touch-action: manipulation;
+}
+
+.watchlist-item-menu-action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  line-height: 1.35;
+  text-align: left;
+  cursor: pointer;
+}
+
+.watchlist-item-menu-action:hover,
+.watchlist-item-menu-action:focus-visible {
+  outline: none;
+  color: var(--accent);
+  background: var(--accent-subtle-bg);
+}
+
+.watchlist-item-menu-divider {
+  height: 1px;
+  margin: 5px 3px;
+  background: var(--border);
+}
+
+.watchlist-item-menu-delete {
+  color: var(--red);
+}
+
+.watchlist-item-menu-delete:hover,
+.watchlist-item-menu-delete:focus-visible {
+  color: var(--red);
+  background: var(--red-dim-bg);
+}
+
+.watchlist-move-dialog {
+  z-index: 10200;
+}
+
+.watchlist-move-dialog-box {
+  width: min(440px, 94vw);
+  max-height: min(620px, 86dvh);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  background: var(--bg);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+  touch-action: manipulation;
+}
+
+.watchlist-move-dialog-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.watchlist-move-dialog-header button {
+  display: inline-flex;
+  padding: 4px 6px;
+  border: 1px solid var(--border2);
+  border-radius: 2px;
+  background: transparent;
+  color: var(--text3);
+  cursor: pointer;
+}
+
+.watchlist-move-dialog-description {
+  flex: 0 0 auto;
+  padding: 12px 14px 8px;
+  color: var(--text2);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+}
+
+.watchlist-move-dialog-list {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 5px;
+  min-height: 0;
+  padding: 4px 14px 14px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.watchlist-move-dialog-option {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--border2);
+  border-radius: 3px;
+  background: var(--bg3);
+  color: var(--text);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.watchlist-move-dialog-option > span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.watchlist-move-dialog-option:hover,
+.watchlist-move-dialog-option:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-subtle-bg);
+}
+
+.watchlist-move-dialog-option:disabled {
+  border-color: var(--border);
+  background: var(--bg2);
+  color: var(--text3);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.watchlist-move-dialog-option:disabled:hover {
+  border-color: var(--border);
+  background: var(--bg2);
+  color: var(--text3);
+}
+
+.watchlist-move-dialog-hint {
+  flex: 0 0 auto;
+  color: var(--text3);
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.watchlist-move-dialog-empty {
+  padding: 18px 10px;
+  color: var(--text3);
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  text-align: center;
+}
+
+.watchlist-move-dialog-actions {
+  display: flex;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+  background: var(--bg2);
 }
 
 .build-footer {
