@@ -35,9 +35,52 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Resolve code build number
+        id: build-number
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" != "workflow_run" ]]; then
+            echo "value=$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # A market-data refresh redeploys the existing app. Reuse the most
+          # recent code deployment's build number instead of counting it as a
+          # new app build.
+          latest_push="$(
+            gh api --method GET \
+              "repos/$GITHUB_REPOSITORY/actions/workflows/deploy.yml/runs" \
+              -f branch=main \
+              -f event=push \
+              -f status=success \
+              -F per_page=1 \
+              --jq '.workflow_runs[0].run_number // 0'
+          )"
+          latest_dispatch="$(
+            gh api --method GET \
+              "repos/$GITHUB_REPOSITORY/actions/workflows/deploy.yml/runs" \
+              -f branch=main \
+              -f event=workflow_dispatch \
+              -f status=success \
+              -F per_page=1 \
+              --jq '.workflow_runs[0].run_number // 0'
+          )"
+
+          build_number="$latest_push"
+          if (( latest_dispatch > build_number )); then
+            build_number="$latest_dispatch"
+          fi
+          if (( build_number == 0 )); then
+            echo "No successful code deployment was found." >&2
+            exit 1
+          fi
+
+          echo "value=$build_number" >> "$GITHUB_OUTPUT"
+
       - name: Build
         env:
-          VITE_BUILD_NUMBER: ${{ github.run_number }}
+          VITE_BUILD_NUMBER: ${{ steps.build-number.outputs.value }}
           VITE_FIREBASE_API_KEY: AIzaSyBY8nKYYGMcxxmhLpFF1V-LMFQiBgrTYns
           VITE_FIREBASE_AUTH_DOMAIN: market-dashboard-f832e.firebaseapp.com
           VITE_FIREBASE_PROJECT_ID: market-dashboard-f832e
