@@ -8,6 +8,9 @@ export interface MarketData {
   price?: number;
   d1: number;
   w1: number;
+  m1?: number;
+  m3?: number;
+  m6?: number;
   hi52: number;
   ytd: number;
   spark: number[];
@@ -126,7 +129,7 @@ export interface MarketTableOptions {
   showTrend?: boolean;
   showHoldings?: boolean;
   benchmarkSym?: string;
-  sortBy?: keyof MarketData | string;
+  sortBy?: keyof MarketData | 'trend' | string;
   sortOrder?: 'asc' | 'desc';
   nameLabel?: string;
   priceLabel?: string;

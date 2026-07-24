@@ -8,7 +8,20 @@ interface MarketStore extends MarketState {
   updatePrice: (sym: string, price: number, d1: number, updatedAt?: number) => void;
   updateMetrics: (
     sym: string,
-    metrics: Pick<MarketData, 'price' | 'd1' | 'w1' | 'hi52' | 'ytd' | 'spark' | 'updatedAt'>,
+    metrics: Pick<
+      MarketData,
+      | 'price'
+      | 'd1'
+      | 'w1'
+      | 'm1'
+      | 'm3'
+      | 'm6'
+      | 'hi52'
+      | 'ytd'
+      | 'spark'
+      | 'ema_uptrend'
+      | 'updatedAt'
+    >,
   ) => void;
 }
 
@@ -103,9 +116,13 @@ export const useMarketStore = create<MarketStore>((set) => ({
                 price: metrics.price,
                 d1: metrics.d1,
                 w1: metrics.w1,
+                m1: metrics.m1,
+                m3: metrics.m3,
+                m6: metrics.m6,
                 hi52: metrics.hi52,
                 ytd: metrics.ytd,
                 spark: metrics.spark,
+                ema_uptrend: metrics.ema_uptrend,
                 updatedAt: timestamp,
               }
             : item,

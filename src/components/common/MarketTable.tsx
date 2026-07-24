@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { getDisplayName, getSymbolMeta } from '../../data/symbolMaps';
 import { colors, formatPrice, formatHoverTimestamp } from '../../utils/formatting';
 import type { Holding, MarketData, MarketTableOptions } from '../../types';
@@ -13,8 +13,14 @@ import { Icon } from './Icon';
 import { SymbolLink } from './TradingViewModal';
 import { HoldingsFlyover } from './HoldingsFlyover';
 import { CardSearchContext } from './CardSearchContext';
+import {
+  resolveDefaultSortColumn,
+  resolveMarketColumns,
+  type MarketColumnKey,
+  type SortableMarketColumnKey,
+} from '../../types/tableColumnSettings';
 
-type SortKey = 'name' | 'price' | 'd1' | 'w1' | 'hi52' | 'ytd' | 'ema_uptrend';
+type SortKey = 'name' | SortableMarketColumnKey;
 
 interface MarketTableProps extends MarketTableOptions {
   data: MarketData[];
@@ -46,7 +52,7 @@ function compareRows(a: MarketData, b: MarketData, key: SortKey, order: SortOrde
 
   if (key === 'name') {
     cmp = resolveDisplayName(a).localeCompare(resolveDisplayName(b));
-  } else if (key === 'ema_uptrend') {
+  } else if (key === 'trend') {
     const score = (v?: boolean) => (v === true ? 1 : v === false ? 0 : -1);
     cmp = score(a.ema_uptrend) - score(b.ema_uptrend);
   } else {
@@ -63,7 +69,7 @@ function compareRows(a: MarketData, b: MarketData, key: SortKey, order: SortOrde
   return order === 'asc' ? cmp : -cmp;
 }
 
-function TrendCell({ value }: { value?: boolean }) {
+export function TrendCell({ value }: { value?: boolean }) {
   if (value === true) {
     return (
       <span className="ema-up" title="10-EMA > 20-EMA · Short-term uptrend" style={{ color: colors.green, fontSize: '13px', fontWeight: 600 }}>
@@ -107,14 +113,31 @@ export const MarketTable: React.FC<MarketTableProps> = ({
   showTrend = false,
   showHoldings = false,
   benchmarkSym,
-  sortBy = 'w1',
+  sortBy,
   sortOrder = 'desc',
   nameLabel = 'Name',
   priceLabel = 'Price',
   maxRows,
 }) => {
-  const { sparklineMode } = useSettings();
-  const shouldShowSpark = showSpark && sparklineMode !== 'none';
+  const { sparklineMode, marketColumns, defaultMarketSortColumn } = useSettings();
+  const sectionColumns = useMemo<MarketColumnKey[]>(() => {
+    const columns: MarketColumnKey[] = [];
+    if (hasPrice) columns.push('price');
+    if (showSpark) columns.push('spark');
+    if (showTrend) columns.push('trend');
+    return columns;
+  }, [hasPrice, showSpark, showTrend]);
+  const visibleColumns = useMemo(
+    () =>
+      resolveMarketColumns(marketColumns, sectionColumns).filter(
+        (column) => column !== 'spark' || sparklineMode !== 'none',
+      ),
+    [marketColumns, sectionColumns, sparklineMode],
+  );
+  const preferredSort = (
+    sortBy === 'ema_uptrend' ? 'trend' : sortBy ?? defaultMarketSortColumn
+  ) as SortableMarketColumnKey;
+  const initialSortKey = resolveDefaultSortColumn(preferredSort, visibleColumns);
 
   const [holdingsFlyout, setHoldingsFlyout] = useState<{
     sym: string;
@@ -123,9 +146,13 @@ export const MarketTable: React.FC<MarketTableProps> = ({
   } | null>(null);
   const closeHoldingsFlyout = useCallback(() => setHoldingsFlyout(null), []);
   const [sort, setSort] = useState<{ key: SortKey; order: SortOrder }>({
-    key: (sortBy as SortKey) || 'w1',
+    key: initialSortKey,
     order: sortOrder,
   });
+
+  useEffect(() => {
+    setSort({ key: resolveDefaultSortColumn(preferredSort, visibleColumns), order: sortOrder });
+  }, [preferredSort, sortOrder, visibleColumns]);
 
   const handleSort = (key: SortKey) => {
     setSort((prev) => ({
@@ -178,60 +205,39 @@ export const MarketTable: React.FC<MarketTableProps> = ({
             onSort={handleSort}
             thStyle={thStyle}
           />
-          {hasPrice && (
-            <SortableHeader
-              label={isYield ? 'Yield%' : priceLabel}
-              sortKey="price"
-              activeKey={sort.key}
-              order={sort.order}
-              onSort={handleSort}
-              thStyle={thStyle}
-            />
-          )}
-          <SortableHeader
-            label={isYield ? '1D (bps)' : '1D%'}
-            sortKey="d1"
-            activeKey={sort.key}
-            order={sort.order}
-            onSort={handleSort}
-            thStyle={thStyle}
-          />
-          <SortableHeader
-            label={isYield ? '1W (bps)' : '1W%'}
-            sortKey="w1"
-            activeKey={sort.key}
-            order={sort.order}
-            onSort={handleSort}
-            thStyle={thStyle}
-          />
-          <SortableHeader
-            label={isYield ? '52W Hi (bps)' : '52W Hi%'}
-            sortKey="hi52"
-            activeKey={sort.key}
-            order={sort.order}
-            onSort={handleSort}
-            thStyle={thStyle}
-          />
-          <SortableHeader
-            label={isYield ? 'YTD (bps)' : 'YTD%'}
-            sortKey="ytd"
-            activeKey={sort.key}
-            order={sort.order}
-            onSort={handleSort}
-            thStyle={thStyle}
-          />
-          {shouldShowSpark && <th style={{ ...thStyle, textAlign: 'center' }}>5D</th>}
-          {showTrend && (
-            <SortableHeader
-              label="Trend"
-              sortKey="ema_uptrend"
-              activeKey={sort.key}
-              order={sort.order}
-              align="center"
-              onSort={handleSort}
-              thStyle={thStyle}
-            />
-          )}
+          {visibleColumns.map((column) => {
+            if (column === 'spark') {
+              return (
+                <th key={column} style={{ ...thStyle, textAlign: 'center' }}>
+                  5D
+                </th>
+              );
+            }
+
+            const labels: Record<SortableMarketColumnKey, string> = {
+              price: isYield ? 'Yield%' : priceLabel,
+              d1: isYield ? '1D (bps)' : '1D%',
+              w1: isYield ? '1W (bps)' : '1W%',
+              m1: isYield ? '1M (bps)' : '1M%',
+              m3: isYield ? '3M (bps)' : '3M%',
+              m6: isYield ? '6M (bps)' : '6M%',
+              ytd: isYield ? 'YTD (bps)' : 'YTD%',
+              hi52: isYield ? '52W Hi (bps)' : '52W Hi%',
+              trend: 'Trend',
+            };
+            return (
+              <SortableHeader
+                key={column}
+                label={labels[column]}
+                sortKey={column}
+                activeKey={sort.key}
+                order={sort.order}
+                align={column === 'trend' ? 'center' : undefined}
+                onSort={handleSort}
+                thStyle={thStyle}
+              />
+            );
+          })}
           {showHoldings && <th style={{ ...thStyle, textAlign: 'left' }}>Holdings</th>}
         </tr>
       </thead>
@@ -258,50 +264,80 @@ export const MarketTable: React.FC<MarketTableProps> = ({
                     {meta.sym || item.sym}
                   </span>
                 </td>
-                {hasPrice && item.price !== undefined && (
-                  <td
-                    style={{ ...tdStyle, textAlign: 'right', color: colors.text }}
-                    className="price-cell-tooltip-container"
-                  >
-                    {formatPrice(item.price)}
-                    {item.updatedAt && (
-                      <span className="price-cell-tooltip">
-                        {formatHoverTimestamp(item.updatedAt)}
-                      </span>
-                    )}
-                  </td>
-                )}
-                {hasPrice && item.price === undefined && (
-                  <td style={{ ...tdStyle, textAlign: 'right', color: colors.text3 }}>—</td>
-                )}
-                <td style={{ ...tdStyle, textAlign: 'right' }}>
-                  {isYield ? <BpsCell value={item.d1} maxBps={25} /> : <PctCell value={item.d1} />}
-                </td>
-                <td style={{ ...tdStyle, textAlign: 'right' }}>
-                  {isYield ? <BpsCell value={item.w1} maxBps={50} /> : <PctCell value={item.w1} />}
-                </td>
-                <td style={{ ...tdStyle, textAlign: 'right' }}>
-                  {isYield ? <BpsCell value={item.hi52} maxBps={150} /> : <PctCell value={item.hi52} maxPct={30} />}
-                </td>
-                <td style={{ ...tdStyle, textAlign: 'right' }}>
-                  {isYield ? <BpsCell value={item.ytd} maxBps={100} /> : <PctCell value={item.ytd} maxPct={20} />}
-                </td>
-                 {shouldShowSpark && (
-                  <td style={{ ...tdStyle, textAlign: 'center', padding: '4px 8px' }}>
-                    {sparklineMode === 'bar' ? (
-                      <Sparkbar data={item.spark ?? []} />
-                    ) : sparklineMode === 'dot' ? (
-                      <Sparkdots data={item.spark ?? []} />
+                {visibleColumns.map((column) => {
+                  if (column === 'price') {
+                    return item.price !== undefined ? (
+                      <td
+                        key={column}
+                        style={{ ...tdStyle, textAlign: 'right', color: colors.text }}
+                        className="price-cell-tooltip-container"
+                      >
+                        {formatPrice(item.price)}
+                        {item.updatedAt && (
+                          <span className="price-cell-tooltip">
+                            {formatHoverTimestamp(item.updatedAt)}
+                          </span>
+                        )}
+                      </td>
                     ) : (
-                      <Sparkline data={item.spark ?? []} />
-                    )}
-                  </td>
-                )}
-                {showTrend && (
-                  <td style={{ ...tdStyle, textAlign: 'center', padding: '3px 8px' }}>
-                    <TrendCell value={item.ema_uptrend} />
-                  </td>
-                )}
+                      <td
+                        key={column}
+                        style={{ ...tdStyle, textAlign: 'right', color: colors.text3 }}
+                      >
+                        —
+                      </td>
+                    );
+                  }
+                  if (column === 'spark') {
+                    return (
+                      <td
+                        key={column}
+                        style={{ ...tdStyle, textAlign: 'center', padding: '4px 8px' }}
+                      >
+                        {sparklineMode === 'bar' ? (
+                          <Sparkbar data={item.spark ?? []} />
+                        ) : sparklineMode === 'dot' ? (
+                          <Sparkdots data={item.spark ?? []} />
+                        ) : (
+                          <Sparkline data={item.spark ?? []} />
+                        )}
+                      </td>
+                    );
+                  }
+                  if (column === 'trend') {
+                    return (
+                      <td
+                        key={column}
+                        style={{ ...tdStyle, textAlign: 'center', padding: '3px 8px' }}
+                      >
+                        <TrendCell value={item.ema_uptrend} />
+                      </td>
+                    );
+                  }
+
+                  const value = item[column];
+                  const maxPct =
+                    column === 'hi52' ? 30 : column === 'ytd' ? 20 : undefined;
+                  const maxBps =
+                    column === 'd1'
+                      ? 25
+                      : column === 'w1'
+                        ? 50
+                        : column === 'hi52'
+                          ? 150
+                          : column === 'ytd'
+                            ? 100
+                            : undefined;
+                  return (
+                    <td key={column} style={{ ...tdStyle, textAlign: 'right' }}>
+                      {isYield ? (
+                        <BpsCell value={value} maxBps={maxBps} />
+                      ) : (
+                        <PctCell value={value} maxPct={maxPct} />
+                      )}
+                    </td>
+                  );
+                })}
                 {showHoldings && (
                   <td style={{ ...tdStyle, textAlign: 'left' }}>
                     {symHoldings?.length ? (

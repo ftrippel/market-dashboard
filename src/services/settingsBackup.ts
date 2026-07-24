@@ -19,6 +19,14 @@ import {
   type MovingAverageConfig,
 } from '../types/chartMaSettings';
 import {
+  DEFAULT_MARKET_COLUMNS,
+  DEFAULT_MARKET_SORT_COLUMN,
+  isSortableMarketColumnKey,
+  parseMarketColumns,
+  type MarketColumnKey,
+  type SortableMarketColumnKey,
+} from '../types/tableColumnSettings';
+import {
   REMOTE_SETTINGS_APPLIED_EVENT,
   SETTINGS_DOMAINS,
   setSettingsLastModified,
@@ -27,12 +35,14 @@ import {
   type SettingsDomain,
 } from './settingsEvents';
 
-export const SETTINGS_EXPORT_VERSION = 2;
+export const SETTINGS_EXPORT_VERSION = 3;
 
 export interface PreferencesSettings {
   theme: Theme;
   enableHoverPreview: boolean;
   sparklineMode: SparklineMode;
+  marketColumns: MarketColumnKey[];
+  defaultMarketSortColumn: SortableMarketColumnKey;
   chartMaSettings: ChartMaSettings;
 }
 
@@ -47,6 +57,8 @@ export interface DashboardSettingsExport {
   theme: Theme;
   enableHoverPreview: boolean;
   sparklineMode: SparklineMode;
+  marketColumns: MarketColumnKey[];
+  defaultMarketSortColumn: SortableMarketColumnKey;
   chartMaSettings: ChartMaSettings;
   calculator: CalculatorSettings;
   watchlists: WatchlistStorage;
@@ -56,6 +68,8 @@ const STORAGE_KEYS = {
   theme: 'market-dashboard-theme',
   enableHoverPreview: 'enableHoverPreview',
   sparklineMode: 'sparklineMode',
+  marketColumns: 'marketColumns',
+  defaultMarketSortColumn: 'defaultMarketSortColumn',
   chartMaSettings: 'chartMaSettings',
   calcEquity: 'agy_calc_equity',
   calcRiskPct: 'agy_calc_riskPct',
@@ -79,6 +93,21 @@ function readSparklineMode(): SparklineMode {
   const stored = localStorage.getItem(STORAGE_KEYS.sparklineMode);
   if (stored === 'none' || stored === 'line' || stored === 'bar' || stored === 'dot') return stored;
   return 'line';
+}
+
+function readMarketColumns(): MarketColumnKey[] {
+  const stored = localStorage.getItem(STORAGE_KEYS.marketColumns);
+  if (!stored) return [...DEFAULT_MARKET_COLUMNS];
+  try {
+    return parseMarketColumns(JSON.parse(stored));
+  } catch {
+    return [...DEFAULT_MARKET_COLUMNS];
+  }
+}
+
+function readDefaultMarketSortColumn(): SortableMarketColumnKey {
+  const stored = localStorage.getItem(STORAGE_KEYS.defaultMarketSortColumn);
+  return isSortableMarketColumnKey(stored) ? stored : DEFAULT_MARKET_SORT_COLUMN;
 }
 
 function parseMaType(value: unknown): MaType {
@@ -177,6 +206,8 @@ export function exportPreferencesSettings(): PreferencesSettings {
       config.tradingView.enableHoverPreview,
     ),
     sparklineMode: readSparklineMode(),
+    marketColumns: readMarketColumns(),
+    defaultMarketSortColumn: readDefaultMarketSortColumn(),
     chartMaSettings: readChartMaSettings(),
   };
 }
@@ -193,6 +224,8 @@ export function getDefaultPreferencesSettings(): PreferencesSettings {
     theme: 'dark',
     enableHoverPreview: config.tradingView.enableHoverPreview,
     sparklineMode: 'line',
+    marketColumns: [...DEFAULT_MARKET_COLUMNS],
+    defaultMarketSortColumn: DEFAULT_MARKET_SORT_COLUMN,
     chartMaSettings: DEFAULT_CHART_MA_SETTINGS,
   };
 }
@@ -262,6 +295,11 @@ export function applyPreferencesSettings(
   localStorage.setItem(STORAGE_KEYS.theme, data.theme);
   localStorage.setItem(STORAGE_KEYS.enableHoverPreview, String(data.enableHoverPreview));
   localStorage.setItem(STORAGE_KEYS.sparklineMode, data.sparklineMode);
+  localStorage.setItem(STORAGE_KEYS.marketColumns, JSON.stringify(data.marketColumns));
+  localStorage.setItem(
+    STORAGE_KEYS.defaultMarketSortColumn,
+    data.defaultMarketSortColumn,
+  );
   localStorage.setItem(STORAGE_KEYS.chartMaSettings, JSON.stringify(data.chartMaSettings));
   document.documentElement.setAttribute('data-theme', data.theme);
 
@@ -404,6 +442,10 @@ function parseSharedSettings(raw: Record<string, unknown>): Omit<DashboardSettin
     theme,
     enableHoverPreview: raw.enableHoverPreview,
     sparklineMode,
+    marketColumns: parseMarketColumns(raw.marketColumns),
+    defaultMarketSortColumn: isSortableMarketColumnKey(raw.defaultMarketSortColumn)
+      ? raw.defaultMarketSortColumn
+      : DEFAULT_MARKET_SORT_COLUMN,
     chartMaSettings: parseChartMaSettings(raw.chartMaSettings),
     calculator: { equity, riskPct },
     watchlists,
@@ -416,7 +458,7 @@ export function parseDashboardSettingsExport(raw: unknown): DashboardSettingsExp
   }
 
   const version = raw.version;
-  if (version !== 1 && version !== 2) {
+  if (version !== 1 && version !== 2 && version !== 3) {
     throw new Error(`Unsupported settings version: ${String(raw.version)}`);
   }
 
@@ -438,6 +480,8 @@ export function importDashboardSettings(data: DashboardSettingsExport): void {
       theme: data.theme,
       enableHoverPreview: data.enableHoverPreview,
       sparklineMode: data.sparklineMode,
+      marketColumns: data.marketColumns,
+      defaultMarketSortColumn: data.defaultMarketSortColumn,
       chartMaSettings: data.chartMaSettings,
     },
     { source: 'local' },
@@ -502,6 +546,10 @@ export function parsePreferencesSettings(value: unknown): PreferencesSettings | 
     theme,
     enableHoverPreview: value.enableHoverPreview,
     sparklineMode,
+    marketColumns: parseMarketColumns(value.marketColumns),
+    defaultMarketSortColumn: isSortableMarketColumnKey(value.defaultMarketSortColumn)
+      ? value.defaultMarketSortColumn
+      : DEFAULT_MARKET_SORT_COLUMN,
     chartMaSettings: parseChartMaSettings(value.chartMaSettings),
   };
 }

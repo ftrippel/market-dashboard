@@ -87,4 +87,38 @@ describe('fetchYahooFinanceMarketMetrics', () => {
     expect(metrics?.price).toBe(4.7);
     expect(metrics?.d1).toBe(10);
   });
+
+  it('calculates 1M, 3M, 6M and trend metrics from daily history', async () => {
+    const closes = Array.from({ length: 127 }, (_, index) => 100 + index);
+    mockYahooChart({ closes });
+
+    const metrics = await fetchYahooFinanceMarketMetrics('TEST');
+
+    expect(metrics?.m1).toBe(10.24);
+    expect(metrics?.m3).toBe(38.65);
+    expect(metrics?.m6).toBe(126);
+    expect(metrics?.ema_uptrend).toBe(true);
+  });
+
+  it('returns unavailable long-period metrics for a newly listed symbol', async () => {
+    mockYahooChart({ closes: [100, 101, 102, 103, 104] });
+
+    const metrics = await fetchYahooFinanceMarketMetrics('NEW');
+
+    expect(metrics?.m1).toBeUndefined();
+    expect(metrics?.m3).toBeUndefined();
+    expect(metrics?.m6).toBeUndefined();
+    expect(metrics?.ema_uptrend).toBeUndefined();
+  });
+
+  it('calculates longer yield periods in basis points', async () => {
+    const closes = Array.from({ length: 127 }, (_, index) => 4 + index * 0.01);
+    mockYahooChart({ closes });
+
+    const metrics = await fetchYahooFinanceMarketMetrics('^TNX');
+
+    expect(metrics?.m1).toBe(21);
+    expect(metrics?.m3).toBe(63);
+    expect(metrics?.m6).toBe(126);
+  });
 });

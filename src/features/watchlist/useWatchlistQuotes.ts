@@ -96,9 +96,13 @@ export function useWatchlistQuotes(
                   d1: res.d1,
                   updatedAt: res.updatedAt,
                   w1: prev[nextSym]?.w1 ?? 0,
+                  m1: prev[nextSym]?.m1,
+                  m3: prev[nextSym]?.m3,
+                  m6: prev[nextSym]?.m6,
                   hi52: prev[nextSym]?.hi52 ?? 0,
                   ytd: prev[nextSym]?.ytd ?? 0,
                   spark: prev[nextSym]?.spark ?? [],
+                  ema_uptrend: prev[nextSym]?.ema_uptrend,
                 },
               }));
             }

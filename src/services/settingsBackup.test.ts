@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { loadWatchlistStorage } from '../features/watchlist/watchlistStorage';
 import {
   applyWatchlistsFromSync,
+  parsePreferencesSettings,
   parseWatchlistsSyncPayload,
   watchlistNamesNeedNormalization,
   watchlistsContentEqual,
@@ -103,5 +104,31 @@ describe('applyWatchlistsFromSync', () => {
     });
 
     expect(parsed?.watchlists[0].items[0].comment).toBe('First line\nSecond line');
+  });
+
+  it('migrates older Firebase preferences to the legacy-visible column defaults', () => {
+    const parsed = parsePreferencesSettings({
+      theme: 'dark',
+      enableHoverPreview: true,
+      sparklineMode: 'line',
+      chartMaSettings: [],
+    });
+
+    expect(parsed?.marketColumns).toEqual(['d1', 'w1', 'hi52', 'ytd']);
+    expect(parsed?.defaultMarketSortColumn).toBe('w1');
+  });
+
+  it('normalizes configured Firebase columns and default sorting', () => {
+    const parsed = parsePreferencesSettings({
+      theme: 'dark',
+      enableHoverPreview: true,
+      sparklineMode: 'line',
+      marketColumns: ['m6', 'price', 'm1', 'bad'],
+      defaultMarketSortColumn: 'm6',
+      chartMaSettings: [],
+    });
+
+    expect(parsed?.marketColumns).toEqual(['price', 'm1', 'm6']);
+    expect(parsed?.defaultMarketSortColumn).toBe('m6');
   });
 });

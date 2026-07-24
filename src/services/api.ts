@@ -244,10 +244,25 @@ export interface YahooMarketMetrics {
   price: number;
   d1: number;
   w1: number;
+  m1?: number;
+  m3?: number;
+  m6?: number;
   hi52: number;
   ytd: number;
   spark: number[];
+  ema_uptrend?: boolean;
   updatedAt?: number;
+}
+
+function ema(values: number[], period: number): number | null {
+  if (values.length < period) return null;
+  const multiplier = 2 / (period + 1);
+  let result =
+    values.slice(0, period).reduce((sum, value) => sum + value, 0) / period;
+  for (let i = period; i < values.length; i++) {
+    result = values[i] * multiplier + result * (1 - multiplier);
+  }
+  return result;
 }
 
 function computeMetricsFromChartResult(
@@ -310,8 +325,19 @@ function computeMetricsFromChartResult(
 
   let d1: number;
   let w1: number;
+  let m1: number | undefined;
+  let m3: number | undefined;
+  let m6: number | undefined;
   let hi52: number;
   let ytd: number;
+
+  const periodChange = (sessionsAgo: number): number | undefined => {
+    const baselineIndex = closes.length - 1 - sessionsAgo;
+    if (baselineIndex < 0) return undefined;
+    return isYield
+      ? roundToDecimals((closes[closes.length - 1] - closes[baselineIndex]) * 100, 1)
+      : pctChange(closes[closes.length - 1], closes[baselineIndex]);
+  };
 
   if (isYield) {
     d1 = snapshotPreviousClose != null
@@ -328,6 +354,9 @@ function computeMetricsFromChartResult(
     hi52 = pctChange(price, hi52Price);
     ytd = ytdStart != null ? pctChange(price, ytdStart) : 0;
   }
+  m1 = periodChange(21);
+  m3 = periodChange(63);
+  m6 = periodChange(126);
 
   const spark: number[] = [];
   for (let i = Math.max(1, closes.length - 5); i < closes.length; i++) {
@@ -342,8 +371,24 @@ function computeMetricsFromChartResult(
   }
 
   const updatedAt = meta?.regularMarketTime ? meta.regularMarketTime * 1000 : undefined;
+  const ema10 = ema(closes, 10);
+  const ema20 = ema(closes, 20);
+  const ema_uptrend =
+    ema10 != null && ema20 != null ? ema10 > ema20 : undefined;
 
-  return { price, d1, w1, hi52, ytd, spark, updatedAt };
+  return {
+    price,
+    d1,
+    w1,
+    m1,
+    m3,
+    m6,
+    hi52,
+    ytd,
+    spark,
+    ema_uptrend,
+    updatedAt,
+  };
 }
 
 export async function fetchYahooFinanceMarketMetrics(sym: string): Promise<YahooMarketMetrics | null> {

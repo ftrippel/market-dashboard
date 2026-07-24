@@ -530,6 +530,11 @@ async function migrateLegacyDashboardDoc(userId: string): Promise<boolean> {
     theme: settings.theme,
     enableHoverPreview: settings.enableHoverPreview,
     sparklineMode: settings.sparklineMode,
+    marketColumns:
+      settings.marketColumns ?? getDefaultPreferencesSettings().marketColumns,
+    defaultMarketSortColumn:
+      settings.defaultMarketSortColumn ??
+      getDefaultPreferencesSettings().defaultMarketSortColumn,
     chartMaSettings: settings.chartMaSettings ?? getDefaultPreferencesSettings().chartMaSettings,
   };
 

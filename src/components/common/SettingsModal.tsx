@@ -17,6 +17,12 @@ import {
   clampMaPeriod,
   type MaType,
 } from '../../types/chartMaSettings';
+import {
+  MARKET_COLUMN_DEFINITIONS,
+  SORTABLE_MARKET_COLUMN_KEYS,
+  type MarketColumnKey,
+  type SortableMarketColumnKey,
+} from '../../types/tableColumnSettings';
 import { dismissOverlay } from '../../utils/focus';
 import { formatAuthError } from '../../utils/authErrors';
 import { useOverlayDismiss } from '../../utils/overlayStack';
@@ -55,6 +61,10 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     setEnableHoverPreview,
     sparklineMode,
     setSparklineMode,
+    marketColumns,
+    setMarketColumns,
+    defaultMarketSortColumn,
+    setDefaultMarketSortColumn,
     chartMaSettings,
     updateChartMa,
     addChartMa,
@@ -197,6 +207,34 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
     if (!Number.isFinite(parsed)) return;
     updateChartMa(id, { period: clampMaPeriod(parsed) });
   }, [updateChartMa]);
+
+  const handleMarketColumnChange = useCallback(
+    (column: MarketColumnKey, enabled: boolean) => {
+      const selected = new Set(marketColumns);
+      if (enabled) selected.add(column);
+      else selected.delete(column);
+      setMarketColumns(
+        MARKET_COLUMN_DEFINITIONS
+          .map(({ key }) => key)
+          .filter((key) => selected.has(key)),
+      );
+    },
+    [marketColumns, setMarketColumns],
+  );
+
+  const handleDefaultSortColumnChange = useCallback(
+    (column: SortableMarketColumnKey) => {
+      if (!marketColumns.includes(column)) {
+        handleMarketColumnChange(column, true);
+      }
+      setDefaultMarketSortColumn(column);
+    },
+    [
+      handleMarketColumnChange,
+      marketColumns,
+      setDefaultMarketSortColumn,
+    ],
+  );
 
   const handleRemoveChartMa = useCallback(async (id: string) => {
     if (
@@ -349,6 +387,94 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                 <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
                   Choose the visualization style for 5-day price changes in the market tables, or disable it completely.
                 </p>
+              </div>
+
+              <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div>
+                  <div style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+                    Standard Market Columns
+                  </div>
+                  <p style={{ margin: '4px 0 0', fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                    These columns are added to every market table. Sections keep their specialized
+                    Price, Sparkline, Trend, Holdings, Tags, and Comment columns.
+                  </p>
+                </div>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(105px, 1fr))',
+                    gap: '8px',
+                  }}
+                >
+                  {MARKET_COLUMN_DEFINITIONS.map(({ key, label }) => (
+                    <label
+                      key={key}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '7px',
+                        padding: '7px 8px',
+                        border: '1px solid var(--border)',
+                        borderRadius: '4px',
+                        background: 'var(--bg2)',
+                        cursor: 'pointer',
+                        fontSize: '11px',
+                        color: 'var(--text)',
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={marketColumns.includes(key)}
+                        onChange={(event) =>
+                          handleMarketColumnChange(key, event.target.checked)
+                        }
+                        style={{
+                          width: '15px',
+                          height: '15px',
+                          accentColor: 'var(--accent)',
+                          cursor: 'pointer',
+                        }}
+                      />
+                      {label}
+                    </label>
+                  ))}
+                </div>
+
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px',
+                  }}
+                >
+                  <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+                    Default Sort Column
+                  </span>
+                  <select
+                    value={defaultMarketSortColumn}
+                    onChange={(event) =>
+                      handleDefaultSortColumnChange(
+                        event.target.value as SortableMarketColumnKey,
+                      )
+                    }
+                    onPointerUp={sparklineModePenActivate}
+                    style={{ ...inputStyle, cursor: 'pointer' }}
+                  >
+                    {SORTABLE_MARKET_COLUMN_KEYS.map((key) => {
+                      const definition = MARKET_COLUMN_DEFINITIONS.find(
+                        (candidate) => candidate.key === key,
+                      );
+                      return (
+                        <option key={key} value={key}>
+                          {definition?.label ?? key}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </label>
               </div>
             </>
           )}

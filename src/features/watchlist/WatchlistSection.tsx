@@ -8,21 +8,30 @@ import {
   type CSSProperties,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { Card, CardLabel, Icon, Section } from '../../components/common';
+import {
+  Card,
+  CardLabel,
+  Icon,
+  Section,
+  Sparkbar,
+  Sparkdots,
+  Sparkline,
+} from '../../components/common';
 import { useConfirm } from '../../context/ConfirmDialogContext';
+import { useSettings } from '../../context/SettingsContext';
 import { SortableHeader, type SortOrder } from '../../components/common/SortableHeader';
 import { PctCell } from '../../components/common/PctCell';
+import { TrendCell } from '../../components/common/MarketTable';
 import { SymbolLink } from '../../components/common/TradingViewModal';
 import { getDisplayName, getSymbolMeta } from '../../data/symbolMaps';
 import { useMarketStore } from '../../store/marketStore';
 import type { MarketState } from '../../types';
-import { colors } from '../../utils/formatting';
+import { colors, formatHoverTimestamp, formatPrice } from '../../utils/formatting';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { blurActiveElement, dismissOverlay } from '../../utils/focus';
 import { useOverlayDismiss } from '../../utils/overlayStack';
 import { usePenCompatibleClick } from '../../utils/penClick';
 import {
-  findMarketData,
   getWatchlistMetrics,
   matchesWatchlistSearch,
   matchesWatchlistTags,
@@ -33,8 +42,19 @@ import { useWatchlists } from './useWatchlists';
 import { parseTags } from './watchlistStorage';
 import type { WatchlistItem } from './types';
 import type { WatchlistQuote } from './useWatchlistQuotes';
+import {
+  MARKET_COLUMN_DEFINITIONS,
+  resolveDefaultSortColumn,
+  resolveMarketColumns,
+  type MarketColumnKey,
+  type SortableMarketColumnKey,
+} from '../../types/tableColumnSettings';
 
-type WatchlistSortKey = 'name' | 'd1' | 'w1' | 'hi52' | 'ytd' | 'tags' | 'comment';
+type WatchlistSortKey =
+  | 'name'
+  | SortableMarketColumnKey
+  | 'tags'
+  | 'comment';
 
 const WATCHLIST_NOTE_MAX_INLINE_HEIGHT = 128;
 const WATCHLIST_ITEM_MENU_VIEWPORT_MARGIN = 8;
@@ -1062,6 +1082,7 @@ function WatchlistRow({
   onUpdateTags,
   onUpdateComment,
   onExpandComment,
+  visibleColumns,
 }: {
   item: WatchlistItem;
   activeTags: string[];
@@ -1072,15 +1093,11 @@ function WatchlistRow({
   onUpdateTags: (sym: string, tags: string[]) => void;
   onUpdateComment: (sym: string, comment: string) => void;
   onExpandComment: (sym: string) => void;
+  visibleColumns: MarketColumnKey[];
 }) {
   const store = useMarketStore();
   const data = watchlistItemToMarketData(item, store, quotes);
-  const existing = findMarketData(store, item.sym);
-  const quote = quotes[item.sym];
-  const d1 = existing?.d1 ?? quote?.d1;
-  const w1 = existing?.w1 ?? quote?.w1;
-  const hi52 = existing?.hi52 ?? quote?.hi52;
-  const ytd = existing?.ytd ?? quote?.ytd;
+  const { sparklineMode } = useSettings();
   const meta = getSymbolMeta(item.sym);
   const displayName = getDisplayName(item.sym, data.name);
   const expandCommentPenClick = usePenCompatibleClick(() => onExpandComment(item.sym));
@@ -1101,18 +1118,60 @@ function WatchlistRow({
           {meta.sym || item.sym}
         </span>
       </td>
-      <td className="watchlist-td" style={{ textAlign: 'right' }}>
-        <PctCell value={d1} />
-      </td>
-      <td className="watchlist-td" style={{ textAlign: 'right' }}>
-        <PctCell value={w1} />
-      </td>
-      <td className="watchlist-td" style={{ textAlign: 'right' }}>
-        <PctCell value={hi52} maxPct={30} />
-      </td>
-      <td className="watchlist-td" style={{ textAlign: 'right' }}>
-        <PctCell value={ytd} maxPct={20} />
-      </td>
+      {visibleColumns.map((column) => {
+        if (column === 'price') {
+          return data.price !== undefined ? (
+            <td
+              key={column}
+              className="watchlist-td price-cell-tooltip-container"
+              style={{ textAlign: 'right', color: colors.text }}
+            >
+              {formatPrice(data.price)}
+              {data.updatedAt && (
+                <span className="price-cell-tooltip">
+                  {formatHoverTimestamp(data.updatedAt)}
+                </span>
+              )}
+            </td>
+          ) : (
+            <td
+              key={column}
+              className="watchlist-td"
+              style={{ textAlign: 'right', color: colors.text3 }}
+            >
+              —
+            </td>
+          );
+        }
+        if (column === 'spark') {
+          return (
+            <td key={column} className="watchlist-td" style={{ textAlign: 'center' }}>
+              {sparklineMode === 'bar' ? (
+                <Sparkbar data={data.spark ?? []} />
+              ) : sparklineMode === 'dot' ? (
+                <Sparkdots data={data.spark ?? []} />
+              ) : (
+                <Sparkline data={data.spark ?? []} />
+              )}
+            </td>
+          );
+        }
+        if (column === 'trend') {
+          return (
+            <td key={column} className="watchlist-td" style={{ textAlign: 'center' }}>
+              <TrendCell value={data.ema_uptrend} />
+            </td>
+          );
+        }
+        return (
+          <td key={column} className="watchlist-td" style={{ textAlign: 'right' }}>
+            <PctCell
+              value={data[column]}
+              maxPct={column === 'hi52' ? 30 : column === 'ytd' ? 20 : undefined}
+            />
+          </td>
+        );
+      })}
       <td className="watchlist-td" style={{ textAlign: 'left' }}>
         <EditableWatchlistTags tags={item.tags} activeTags={activeTags} onChange={handleSetTags} />
       </td>
@@ -1146,6 +1205,14 @@ function WatchlistRow({
 
 export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolean }) {
   const store = useMarketStore();
+  const { marketColumns, defaultMarketSortColumn, sparklineMode } = useSettings();
+  const visibleColumns = useMemo(
+    () =>
+      resolveMarketColumns(marketColumns).filter(
+        (column) => column !== 'spark' || sparklineMode !== 'none',
+      ),
+    [marketColumns, sparklineMode],
+  );
   const {
     watchlists,
     activeWatchlist,
@@ -1176,9 +1243,16 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
   const [watchlistCommentExpanded, setWatchlistCommentExpanded] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [sort, setSort] = useState<{ key: WatchlistSortKey; order: SortOrder }>({
-    key: 'w1',
+    key: resolveDefaultSortColumn(defaultMarketSortColumn, visibleColumns),
     order: 'desc',
   });
+
+  useEffect(() => {
+    setSort({
+      key: resolveDefaultSortColumn(defaultMarketSortColumn, visibleColumns),
+      order: 'desc',
+    });
+  }, [defaultMarketSortColumn, visibleColumns]);
 
   const handleSort = useCallback((key: WatchlistSortKey) => {
     setSort((prev) => ({
@@ -1494,38 +1568,34 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
                         onSort={handleSort}
                         thClassName="watchlist-th"
                       />
-                      <SortableHeader
-                        label="1D%"
-                        sortKey="d1"
-                        activeKey={sort.key}
-                        order={sort.order}
-                        onSort={handleSort}
-                        thClassName="watchlist-th"
-                      />
-                      <SortableHeader
-                        label="1W%"
-                        sortKey="w1"
-                        activeKey={sort.key}
-                        order={sort.order}
-                        onSort={handleSort}
-                        thClassName="watchlist-th"
-                      />
-                      <SortableHeader
-                        label="52W Hi%"
-                        sortKey="hi52"
-                        activeKey={sort.key}
-                        order={sort.order}
-                        onSort={handleSort}
-                        thClassName="watchlist-th"
-                      />
-                      <SortableHeader
-                        label="YTD%"
-                        sortKey="ytd"
-                        activeKey={sort.key}
-                        order={sort.order}
-                        onSort={handleSort}
-                        thClassName="watchlist-th"
-                      />
+                      {visibleColumns.map((column) => {
+                        if (column === 'spark') {
+                          return (
+                            <th
+                              key={column}
+                              className="watchlist-th"
+                              style={{ textAlign: 'center' }}
+                            >
+                              5D
+                            </th>
+                          );
+                        }
+                        const definition = MARKET_COLUMN_DEFINITIONS.find(
+                          (candidate) => candidate.key === column,
+                        );
+                        return (
+                          <SortableHeader
+                            key={column}
+                            label={definition?.label ?? column}
+                            sortKey={column}
+                            activeKey={sort.key}
+                            order={sort.order}
+                            align={column === 'trend' ? 'center' : undefined}
+                            onSort={handleSort}
+                            thClassName="watchlist-th"
+                          />
+                        );
+                      })}
                       <SortableHeader
                         label="Tags"
                         sortKey="tags"
@@ -1562,6 +1632,7 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
                         onUpdateTags={setItemTags}
                         onUpdateComment={setItemComment}
                         onExpandComment={setExpandedCommentSymbol}
+                        visibleColumns={visibleColumns}
                       />
                     ))}
                   </tbody>

@@ -46,9 +46,13 @@ export function watchlistItemToMarketData(
     price: quote?.price,
     d1: quote?.d1 ?? 0,
     w1: quote?.w1 ?? 0,
+    m1: quote?.m1,
+    m3: quote?.m3,
+    m6: quote?.m6,
     hi52: quote?.hi52 ?? 0,
     ytd: quote?.ytd ?? 0,
     spark: quote?.spark ?? [],
+    ema_uptrend: quote?.ema_uptrend,
     updatedAt: quote?.updatedAt,
   };
 }
@@ -63,8 +67,13 @@ export function getWatchlistMetrics(
   return {
     d1: existing?.d1 ?? quote?.d1,
     w1: existing?.w1 ?? quote?.w1,
+    m1: existing?.m1 ?? quote?.m1,
+    m3: existing?.m3 ?? quote?.m3,
+    m6: existing?.m6 ?? quote?.m6,
     hi52: existing?.hi52 ?? quote?.hi52,
     ytd: existing?.ytd ?? quote?.ytd,
+    price: existing?.price ?? quote?.price,
+    trend: existing?.ema_uptrend ?? quote?.ema_uptrend,
   };
 }
 

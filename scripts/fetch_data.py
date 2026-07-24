@@ -262,9 +262,11 @@ def fetch_fred_yield(sym, series_id):
                 'price': round(price, 4),
                 'd1': d1,
                 'w1': w1,
+                **period_changes(rates, is_yield=True),
                 'hi52': hi52,
                 'ytd': ytd,
                 'spark': spark,
+                **trend_metric(rates),
             }
     except Exception as e:
         print(f"  FRED {series_id} failed: {e}")
@@ -339,9 +341,11 @@ def fetch_massive_treasury_yields():
                 'price': round(price, 4),
                 'd1':    d1_bps,
                 'w1':    w1_bps,
+                **period_changes(series, is_yield=True),
                 'hi52':  hi52_bps,
                 'ytd':   ytd_bps,
                 'spark': spark_vals,
+                **trend_metric(series),
             })
             print(f"  \u2713 {sym}: {price:.4f}% (d1={d1_bps:+.1f}bps)")
         return yield_records if yield_records else None
@@ -451,6 +455,20 @@ def pct(new, old):
         return round((new - old) / abs(old) * 100, 2)
     return 0.0
 
+def period_changes(values, is_yield=False):
+    """Return approximately 1M/3M/6M changes from daily trading sessions."""
+    result = {}
+    for key, sessions_ago in (('m1', 21), ('m3', 63), ('m6', 126)):
+        baseline_index = len(values) - 1 - sessions_ago
+        if baseline_index < 0:
+            continue
+        result[key] = (
+            round((values[-1] - values[baseline_index]) * 100, 1)
+            if is_yield
+            else pct(values[-1], values[baseline_index])
+        )
+    return result
+
 def _calc_ema(closes, period):
     """Exponential moving average seeded with SMA of first `period` values."""
     closes = list(closes)
@@ -461,6 +479,11 @@ def _calc_ema(closes, period):
     for c in closes[period:]:
         ema = float(c) * k + ema * (1.0 - k)
     return ema
+
+def trend_metric(values):
+    if len(values) < 20:
+        return {}
+    return {'ema_uptrend': bool(_calc_ema(values, 10) > _calc_ema(values, 20))}
 
 def fetch_individual(tickers, retries=2):
     """Fetch tickers one-by-one via Ticker.history(). More reliable than batch
@@ -609,6 +632,7 @@ def extract_metrics(df, sym, metadata=None, yield_syms=None):
         'price': round(price, 4),
         'd1':    d1,
         'w1':    w1,
+        **period_changes(closes, is_yield=is_yield),
         'hi52':  hi52_pct,
         'ytd':   ytd,
         'spark': spark,

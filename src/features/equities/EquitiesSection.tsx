@@ -1,11 +1,5 @@
 import { Card, CardLabel, ExpandableTableCard, MarketTable, Section } from '../../components/common';
 import { useMarketStore } from '../../store/marketStore';
-import type { MarketTableOptions } from '../../types';
-
-const rankByW1: Pick<MarketTableOptions, 'sortBy' | 'sortOrder'> = {
-  sortBy: 'w1',
-  sortOrder: 'desc',
-};
 
 export function EquitiesSection() {
   const store = useMarketStore();
@@ -19,7 +13,6 @@ export function EquitiesSection() {
           showTrend
           showHoldings
           holdings={store.holdings}
-          {...rankByW1}
         />
       </Card>
 
@@ -30,7 +23,6 @@ export function EquitiesSection() {
           showTrend
           showHoldings
           holdings={store.holdings}
-          {...rankByW1}
         />
       </Card>
 
@@ -44,7 +36,6 @@ export function EquitiesSection() {
             showHoldings
             benchmarkSym="SPY"
             holdings={store.holdings}
-            {...rankByW1}
           />
         </Card>
         <Card label={<CardLabel>S&P 500 Sector ETFs (EW)</CardLabel>} symbols={store.sectorsEW.map((x) => x.sym)}>
@@ -56,7 +47,6 @@ export function EquitiesSection() {
             showHoldings
             benchmarkSym="RSP"
             holdings={store.holdings}
-            {...rankByW1}
           />
         </Card>
       </div>
@@ -72,7 +62,6 @@ export function EquitiesSection() {
           hasPrice: false,
           showTrend: true,
           showHoldings: true,
-          ...rankByW1,
         }}
       />
 
@@ -86,7 +75,6 @@ export function EquitiesSection() {
           hasPrice: false,
           showTrend: true,
           showHoldings: true,
-          ...rankByW1,
         }}
       />
     </Section>
