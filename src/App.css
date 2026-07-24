@@ -1781,6 +1781,7 @@ body::before {
 
 .watchlist-comment-dialog {
   z-index: 10200;
+  touch-action: pan-y;
 }
 
 .watchlist-comment-dialog-box {
@@ -1829,10 +1830,14 @@ body::before {
   width: 100%;
   min-height: min(360px, 55vh);
   padding: 10px 12px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   resize: vertical;
   font-size: 12px;
   line-height: 1.55;
   white-space: pre-wrap;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 .watchlist-comment-dialog-actions {
