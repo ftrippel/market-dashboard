@@ -378,14 +378,77 @@ function TagChip({
   label,
   isActive,
   onClick,
+  onRename,
 }: {
   label: string;
   isActive: boolean;
   onClick: () => void;
+  onRename?: (name: string) => void;
 }) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(label);
+  const inputRef = useRef<HTMLInputElement>(null);
   const penClick = usePenCompatibleClick(onClick);
+
+  useEffect(() => {
+    if (!editing) setDraft(label);
+  }, [editing, label]);
+
+  useEffect(() => {
+    if (editing) {
+      inputRef.current?.focus();
+      inputRef.current?.select();
+    }
+  }, [editing]);
+
+  const commitRename = useCallback(() => {
+    const trimmed = draft.trim();
+    if (trimmed && trimmed !== label) onRename?.(trimmed);
+    setDraft(trimmed || label);
+    setEditing(false);
+  }, [draft, label, onRename]);
+
+  if (editing) {
+    return (
+      <input
+        ref={inputRef}
+        className={`watchlist-chip watchlist-chip-rename${isActive ? ' on' : ''}`}
+        style={{ width: `${Math.max(draft.length, label.length, 3) + 2}ch` }}
+        type="text"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={commitRename}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            commitRename();
+          }
+          if (e.key === 'Escape') {
+            setDraft(label);
+            setEditing(false);
+          }
+        }}
+        aria-label={`Rename tag ${label}`}
+      />
+    );
+  }
+
   return (
-    <button type="button" className={`watchlist-chip${isActive ? ' on' : ''}`} {...penClick}>
+    <button
+      type="button"
+      className={`watchlist-chip${isActive ? ' on' : ''}`}
+      {...penClick}
+      onDoubleClick={
+        onRename
+          ? (e) => {
+              e.preventDefault();
+              setDraft(label);
+              setEditing(true);
+            }
+          : undefined
+      }
+      title={onRename ? 'Double-click to rename' : undefined}
+    >
       {label}
     </button>
   );
@@ -396,11 +459,13 @@ function TagChips({
   activeTags,
   onToggle,
   onClear,
+  onRename,
 }: {
   tags: string[];
   activeTags: string[];
   onToggle: (tag: string) => void;
   onClear: () => void;
+  onRename: (tag: string, name: string) => void;
 }) {
   if (tags.length === 0) return null;
 
@@ -413,6 +478,7 @@ function TagChips({
           label={tag}
           isActive={activeTags.some((t) => t.toLowerCase() === tag.toLowerCase())}
           onClick={() => onToggle(tag)}
+          onRename={(name) => onRename(tag, name)}
         />
       ))}
     </div>
@@ -1094,6 +1160,7 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
     removeItem,
     moveItem,
     setItemTags,
+    renameTag,
     setItemComment,
     allTags,
   } = useWatchlists();
@@ -1196,6 +1263,27 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
   }, []);
 
   const handleClearTags = useCallback(() => setActiveTags([]), []);
+
+  const handleRenameTag = useCallback(
+    (tag: string, name: string) => {
+      const trimmed = name.trim();
+      if (!trimmed) return;
+
+      renameTag(tag, trimmed);
+      setActiveTags((prev) => {
+        const renamed = prev.map((activeTag) =>
+          activeTag.toLowerCase() === tag.toLowerCase() ? trimmed : activeTag,
+        );
+        return renamed.filter(
+          (activeTag, index) =>
+            renamed.findIndex(
+              (candidate) => candidate.toLowerCase() === activeTag.toLowerCase(),
+            ) === index,
+        );
+      });
+    },
+    [renameTag],
+  );
 
   const handleSelectWatchlist = useCallback(
     (id: string) => {
@@ -1333,6 +1421,7 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
               activeTags={activeTags}
               onToggle={handleToggleTag}
               onClear={handleClearTags}
+              onRename={handleRenameTag}
             />
           </div>
 

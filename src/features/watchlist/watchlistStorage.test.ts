@@ -5,6 +5,7 @@ import {
   loadWatchlistStorage,
   moveWatchlistItem,
   persistWatchlistStorage,
+  renameWatchlistTag,
 } from './watchlistStorage';
 
 class MemoryStorage implements Storage {
@@ -105,6 +106,36 @@ describe('moveWatchlistItem', () => {
     expect(moveWatchlistItem(storage, 'missing', 'target', 'AAPL')).toBe(storage);
     expect(moveWatchlistItem(storage, 'source', 'missing', 'AAPL')).toBe(storage);
     expect(moveWatchlistItem(storage, 'source', 'source', 'AAPL')).toBe(storage);
+  });
+});
+
+describe('renameWatchlistTag', () => {
+  it('renames a tag on every item in the selected watchlist', () => {
+    const storage = createStorage();
+    storage.watchlists[0].items[1].tags = ['core'];
+
+    const renamed = renameWatchlistTag(storage, 'source', 'Core', '  Long term  ');
+
+    expect(renamed.watchlists[0].items.map(({ tags }) => tags)).toEqual([
+      ['Long term', 'Tech'],
+      ['Long term'],
+    ]);
+    expect(renamed.watchlists[1].items[0].tags).toEqual(['AI']);
+  });
+
+  it('merges a renamed tag with an existing tag case-insensitively', () => {
+    const storage = createStorage();
+
+    const renamed = renameWatchlistTag(storage, 'source', 'Core', 'tech');
+
+    expect(renamed.watchlists[0].items[0].tags).toEqual(['tech']);
+  });
+
+  it('does nothing for an empty name or a missing tag', () => {
+    const storage = createStorage();
+
+    expect(renameWatchlistTag(storage, 'source', 'Core', '   ')).toBe(storage);
+    expect(renameWatchlistTag(storage, 'source', 'Missing', 'New')).toBe(storage);
   });
 });
 

@@ -107,6 +107,45 @@ export function moveWatchlistItem(
   };
 }
 
+export function renameWatchlistTag(
+  state: WatchlistStorage,
+  watchlistId: string,
+  currentTag: string,
+  newTag: string,
+): WatchlistStorage {
+  const trimmedTag = newTag.trim();
+  if (!trimmedTag) return state;
+
+  const currentKey = currentTag.toLowerCase();
+  let changed = false;
+
+  const watchlists = state.watchlists.map((watchlist) => {
+    if (watchlist.id !== watchlistId) return watchlist;
+
+    const items = watchlist.items.map((item) => {
+      if (!item.tags.some((tag) => tag.toLowerCase() === currentKey)) return item;
+
+      changed = true;
+      const seen = new Set<string>();
+      const tags: string[] = [];
+
+      for (const tag of item.tags) {
+        const renamedTag = tag.toLowerCase() === currentKey ? trimmedTag : tag;
+        const key = renamedTag.toLowerCase();
+        if (seen.has(key)) continue;
+        seen.add(key);
+        tags.push(renamedTag);
+      }
+
+      return { ...item, tags };
+    });
+
+    return changed ? { ...watchlist, items } : watchlist;
+  });
+
+  return changed ? { ...state, watchlists } : state;
+}
+
 /** Replace watchlist storage entirely (used when applying cloud data). */
 export function replaceWatchlistStorage(state: WatchlistStorage): void {
   localStorage.removeItem(STORAGE_KEY);

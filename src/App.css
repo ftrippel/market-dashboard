@@ -1583,6 +1583,16 @@ body::before {
   transition: border .15s, color .15s, background .15s;
 }
 
+.watchlist-chip-rename {
+  min-width: 52px;
+  outline: none;
+}
+
+.watchlist-chip-rename:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
 .watchlist-chip.on {
   border-color: var(--accent);
   color: var(--accent);

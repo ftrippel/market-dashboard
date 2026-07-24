@@ -11,6 +11,7 @@ import {
   normalizeSymbol,
   normalizeWatchlistName,
   persistWatchlistStorage,
+  renameWatchlistTag,
 } from './watchlistStorage';
 import { touchSettingsModified } from '../../services/settingsEvents';
 import type { Watchlist, WatchlistItem, WatchlistStorage } from './types';
@@ -191,6 +192,10 @@ export function useWatchlists() {
     }));
   }, []);
 
+  const renameTag = useCallback((currentTag: string, newTag: string) => {
+    setStorage((prev) => renameWatchlistTag(prev, prev.activeId, currentTag, newTag));
+  }, []);
+
   const setItemComment = useCallback((sym: string, comment: string) => {
     setStorage((prev) => ({
       ...prev,
@@ -232,6 +237,7 @@ export function useWatchlists() {
     removeItem,
     moveItem,
     setItemTags,
+    renameTag,
     setItemComment,
     allTags,
   };
