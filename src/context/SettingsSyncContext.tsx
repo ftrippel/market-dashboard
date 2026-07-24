@@ -44,6 +44,21 @@ const SettingsSyncContext = createContext<SettingsSyncContextValue | null>(null)
 
 const UPLOAD_DEBOUNCE_MS = 1500;
 const INITIAL_SYNC_ATTEMPTS = 3;
+const TEXT_INPUT_TYPES = new Set([
+  'email',
+  'number',
+  'password',
+  'search',
+  'tel',
+  'text',
+  'url',
+]);
+
+function isTextEditingElement(element: Element | null): boolean {
+  if (element instanceof HTMLTextAreaElement) return true;
+  if (element instanceof HTMLInputElement) return TEXT_INPUT_TYPES.has(element.type);
+  return element instanceof HTMLElement && element.isContentEditable;
+}
 
 async function withInitialSyncRetry<T>(fn: () => Promise<T>): Promise<T> {
   let lastError: unknown;
@@ -299,6 +314,23 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
   }, [clearUploadTimers, runReconcile, runUpload, sessionReady, userId]);
 
   useEffect(() => {
+    const scheduleDomainUpload = (domain: SettingsDomain) => {
+      const existing = uploadTimersRef.current[domain];
+      if (existing !== undefined) {
+        window.clearTimeout(existing);
+      }
+
+      uploadTimersRef.current[domain] = window.setTimeout(() => {
+        delete uploadTimersRef.current[domain];
+
+        // A user may pause longer than the debounce while typing. Keep the edit
+        // pending until focus leaves the field instead of uploading partial text.
+        if (isTextEditingElement(document.activeElement)) return;
+
+        void runUpload([domain]);
+      }, UPLOAD_DEBOUNCE_MS);
+    };
+
     const scheduleUpload = (event: Event) => {
       if (!isSettingsChangedEvent(event)) return;
 
@@ -307,20 +339,33 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      const existing = uploadTimersRef.current[domain];
-      if (existing !== undefined) {
-        window.clearTimeout(existing);
+      if (isTextEditingElement(document.activeElement)) {
+        const existing = uploadTimersRef.current[domain];
+        if (existing !== undefined) {
+          window.clearTimeout(existing);
+          delete uploadTimersRef.current[domain];
+        }
+        return;
       }
 
-      uploadTimersRef.current[domain] = window.setTimeout(() => {
-        delete uploadTimersRef.current[domain];
-        void runUpload([domain]);
-      }, UPLOAD_DEBOUNCE_MS);
+      scheduleDomainUpload(domain);
+    };
+
+    const schedulePendingUploadsAfterEdit = (event: FocusEvent) => {
+      if (!isTextEditingElement(event.target as Element | null)) return;
+
+      for (const domain of SETTINGS_DOMAINS) {
+        if (hasPendingUpload(domain)) {
+          scheduleDomainUpload(domain);
+        }
+      }
     };
 
     window.addEventListener(SETTINGS_CHANGED_EVENT, scheduleUpload);
+    window.addEventListener('focusout', schedulePendingUploadsAfterEdit);
     return () => {
       window.removeEventListener(SETTINGS_CHANGED_EVENT, scheduleUpload);
+      window.removeEventListener('focusout', schedulePendingUploadsAfterEdit);
       clearUploadTimers();
     };
   }, [clearUploadTimers, runUpload, sessionReady, userId]);

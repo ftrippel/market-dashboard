@@ -644,7 +644,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                 <>
                   <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
                     Signed in as <span style={{ color: 'var(--text)' }}>{user.email ?? user.displayName ?? 'Google account'}</span>.
-                    Changes sync in real time across devices.
+                    Changes sync across devices after you finish editing a text field.
                   </p>
                   {lastSyncedAt && status !== 'syncing' && !statusMessage && !authError && (
                     <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>

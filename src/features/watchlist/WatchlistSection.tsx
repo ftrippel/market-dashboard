@@ -696,6 +696,7 @@ function CommentEditorDialog({
   }, [close, confirm, draft, onSave, savedComment, unsavedMessage]);
 
   const save = useCallback(() => {
+    textareaRef.current?.blur();
     onSave(draft);
     close();
   }, [close, draft, onSave]);
