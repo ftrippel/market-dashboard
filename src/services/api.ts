@@ -280,7 +280,29 @@ function computeMetricsFromChartResult(
 
   if (closes.length < 2) return null;
 
-  const price = closes[closes.length - 1];
+  const meta = result.meta as
+    | {
+        regularMarketPrice?: number;
+        previousClose?: number;
+        regularMarketTime?: number;
+      }
+    | undefined;
+  let marketPrice = meta?.regularMarketPrice;
+  let previousClose = meta?.previousClose;
+  if (isYield) {
+    if (marketPrice != null) marketPrice = scaleYieldValue(marketPrice);
+    if (previousClose != null) previousClose = scaleYieldValue(previousClose);
+  }
+
+  // Yahoo can expose today's partial candle while omitting the immediately preceding
+  // session from daily history. The quote snapshot is therefore authoritative for 1D.
+  const snapshotPrice =
+    typeof marketPrice === 'number' && Number.isFinite(marketPrice) ? marketPrice : undefined;
+  const snapshotPreviousClose =
+    typeof previousClose === 'number' && Number.isFinite(previousClose) && previousClose !== 0
+      ? previousClose
+      : undefined;
+  const price = snapshotPrice ?? closes[closes.length - 1];
   const hi52Price = Math.max(...highs);
   const thisYear = new Date().getUTCFullYear();
   const ytdStartIdx = years.findIndex((year) => year === thisYear);
@@ -292,12 +314,16 @@ function computeMetricsFromChartResult(
   let ytd: number;
 
   if (isYield) {
-    d1 = closes.length >= 2 ? roundToDecimals((closes[closes.length - 1] - closes[closes.length - 2]) * 100, 1) : 0;
+    d1 = snapshotPreviousClose != null
+      ? roundToDecimals((price - snapshotPreviousClose) * 100, 1)
+      : roundToDecimals((closes[closes.length - 1] - closes[closes.length - 2]) * 100, 1);
     w1 = closes.length >= 6 ? roundToDecimals((closes[closes.length - 1] - closes[closes.length - 6]) * 100, 1) : 0;
     hi52 = roundToDecimals((price - hi52Price) * 100, 1);
     ytd = ytdStart != null ? roundToDecimals((price - ytdStart) * 100, 1) : 0;
   } else {
-    d1 = closes.length >= 2 ? pctChange(closes[closes.length - 1], closes[closes.length - 2]) : 0;
+    d1 = snapshotPreviousClose != null
+      ? pctChange(price, snapshotPreviousClose)
+      : pctChange(closes[closes.length - 1], closes[closes.length - 2]);
     w1 = closes.length >= 6 ? pctChange(closes[closes.length - 1], closes[closes.length - 6]) : 0;
     hi52 = pctChange(price, hi52Price);
     ytd = ytdStart != null ? pctChange(price, ytdStart) : 0;
@@ -315,7 +341,6 @@ function computeMetricsFromChartResult(
     spark.unshift(0);
   }
 
-  const meta = result.meta as { regularMarketTime?: number } | undefined;
   const updatedAt = meta?.regularMarketTime ? meta.regularMarketTime * 1000 : undefined;
 
   return { price, d1, w1, hi52, ytd, spark, updatedAt };
@@ -326,4 +351,3 @@ export async function fetchYahooFinanceMarketMetrics(sym: string): Promise<Yahoo
   if (!result) return null;
   return computeMetricsFromChartResult(sym, result);
 }
-
