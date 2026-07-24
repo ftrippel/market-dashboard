@@ -36,11 +36,14 @@ export const SORTABLE_MARKET_COLUMN_KEYS = MARKET_COLUMN_DEFINITIONS
   .filter(({ sortable }) => sortable)
   .map(({ key }) => key as SortableMarketColumnKey);
 
-/**
- * The shared columns intentionally match the old watchlist layout. Individual
- * market sections merge their existing Price, Sparkline, and Trend columns in.
- */
-export const DEFAULT_MARKET_COLUMNS: MarketColumnKey[] = ['d1', 'w1', 'hi52', 'ytd'];
+export const DEFAULT_MARKET_COLUMNS: MarketColumnKey[] = [
+  'd1',
+  'w1',
+  'hi52',
+  'ytd',
+  'spark',
+  'trend',
+];
 export const DEFAULT_MARKET_SORT_COLUMN: SortableMarketColumnKey = 'w1';
 
 export function isMarketColumnKey(value: unknown): value is MarketColumnKey {

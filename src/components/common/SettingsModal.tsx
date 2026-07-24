@@ -398,7 +398,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
                   </div>
                   <p style={{ margin: '4px 0 0', fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
                     These columns are added to every market table. Sections keep their specialized
-                    Price, Sparkline, Trend, Holdings, Tags, and Comment columns.
+                    Price, Holdings, Tags, and Comment columns.
                   </p>
                 </div>
                 <div

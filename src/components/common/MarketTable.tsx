@@ -109,8 +109,6 @@ export const MarketTable: React.FC<MarketTableProps> = ({
   holdings = {},
   hasPrice = true,
   isYield = false,
-  showSpark = true,
-  showTrend = false,
   showHoldings = false,
   benchmarkSym,
   sortBy,
@@ -123,10 +121,8 @@ export const MarketTable: React.FC<MarketTableProps> = ({
   const sectionColumns = useMemo<MarketColumnKey[]>(() => {
     const columns: MarketColumnKey[] = [];
     if (hasPrice) columns.push('price');
-    if (showSpark) columns.push('spark');
-    if (showTrend) columns.push('trend');
     return columns;
-  }, [hasPrice, showSpark, showTrend]);
+  }, [hasPrice]);
   const visibleColumns = useMemo(
     () =>
       resolveMarketColumns(marketColumns, sectionColumns).filter(

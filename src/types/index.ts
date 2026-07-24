@@ -125,8 +125,6 @@ export interface TableColumn {
 export interface MarketTableOptions {
   hasPrice?: boolean;
   isYield?: boolean;
-  showSpark?: boolean;
-  showTrend?: boolean;
   showHoldings?: boolean;
   benchmarkSym?: string;
   sortBy?: keyof MarketData | 'trend' | string;

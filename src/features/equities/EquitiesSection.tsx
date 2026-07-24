@@ -10,7 +10,6 @@ export function EquitiesSection() {
         <MarketTable
           data={store.etfs}
           nameLabel="ETF"
-          showTrend
           showHoldings
           holdings={store.holdings}
         />
@@ -20,7 +19,6 @@ export function EquitiesSection() {
         <MarketTable
           data={store.submkt}
           nameLabel="ETF"
-          showTrend
           showHoldings
           holdings={store.holdings}
         />
@@ -32,7 +30,6 @@ export function EquitiesSection() {
             data={store.sectors}
             nameLabel="ETF"
             hasPrice={false}
-            showTrend
             showHoldings
             benchmarkSym="SPY"
             holdings={store.holdings}
@@ -43,7 +40,6 @@ export function EquitiesSection() {
             data={store.sectorsEW}
             nameLabel="ETF"
             hasPrice={false}
-            showTrend
             showHoldings
             benchmarkSym="RSP"
             holdings={store.holdings}
@@ -60,7 +56,6 @@ export function EquitiesSection() {
         tableProps={{
           nameLabel: 'ETF',
           hasPrice: false,
-          showTrend: true,
           showHoldings: true,
         }}
       />
@@ -73,7 +68,6 @@ export function EquitiesSection() {
         tableProps={{
           nameLabel: 'ETF',
           hasPrice: false,
-          showTrend: true,
           showHoldings: true,
         }}
       />

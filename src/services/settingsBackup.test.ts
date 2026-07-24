@@ -114,7 +114,14 @@ describe('applyWatchlistsFromSync', () => {
       chartMaSettings: [],
     });
 
-    expect(parsed?.marketColumns).toEqual(['d1', 'w1', 'hi52', 'ytd']);
+    expect(parsed?.marketColumns).toEqual([
+      'd1',
+      'w1',
+      'hi52',
+      'ytd',
+      'spark',
+      'trend',
+    ]);
     expect(parsed?.defaultMarketSortColumn).toBe('w1');
   });
 
