@@ -34,7 +34,6 @@ import {
   hasCloudBaseline,
   hasPendingUpload,
   markPendingUpload,
-  REMOTE_SETTINGS_APPLIED_EVENT,
   setLocalBuildNumber,
   setLocalSchemaVersion,
   setServerRevision,
@@ -148,12 +147,7 @@ function flushPendingRemoteSnapshot(domain: SettingsDomain): void {
   const queued = pendingRemoteSnapshots.get(domain);
   if (!queued) return;
   pendingRemoteSnapshots.delete(domain);
-  const applied = applyRemoteSnapshot(domain, queued.data, queued.updatedAt, queued.metadata);
-  if (applied) {
-    window.dispatchEvent(
-      new CustomEvent(REMOTE_SETTINGS_APPLIED_EVENT, { detail: { domain } }),
-    );
-  }
+  applyRemoteSnapshot(domain, queued.data, queued.updatedAt, queued.metadata);
 }
 
 function resumeRemoteApply(domain: SettingsDomain): void {
@@ -200,7 +194,8 @@ function remoteContentDiffers(domain: SettingsDomain, data: unknown): boolean {
   if (domain === 'preferences') {
     const remote = parsePreferencesSettings(data);
     if (!remote) return true;
-    return JSON.stringify(exportPreferencesSettings()) !== JSON.stringify(remote);
+    const local = parsePreferencesSettings(exportPreferencesSettings());
+    return !local || JSON.stringify(local) !== JSON.stringify(remote);
   }
 
   const remote = parseCalculatorSettings(data);
@@ -433,16 +428,16 @@ function pullRemoteDomain(
   updatedAt: string,
   metadata: DomainSyncMetadata,
 ): DomainSyncResult {
-  if (applyRemoteDomain(domain, data, updatedAt, metadata)) {
-    return 'downloaded';
-  }
-
   if (!remoteContentDiffers(domain, data)) {
     setServerRevision(domain, updatedAt);
     setSyncBase(domain, data);
     stampLocalMetadata(domain, metadata);
     markPendingUpload(domain, false);
     return 'unchanged';
+  }
+
+  if (applyRemoteDomain(domain, data, updatedAt, metadata)) {
+    return 'downloaded';
   }
 
   applyCloudEmptyDomain(domain, updatedAt, metadata);

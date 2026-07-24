@@ -23,7 +23,6 @@ import {
   endCloudSession,
   hasPendingUpload,
   isSettingsChangedEvent,
-  REMOTE_SETTINGS_APPLIED_EVENT,
   SETTINGS_CHANGED_EVENT,
   SETTINGS_DOMAINS,
 } from '../services/settingsEvents';
@@ -102,12 +101,6 @@ function buildStatusMessage(result: SettingsSyncResult, lastSyncedAt: Date | nul
   }
 }
 
-function notifyRemoteApplied(domain: SettingsDomain): void {
-  window.dispatchEvent(
-    new CustomEvent(REMOTE_SETTINGS_APPLIED_EVENT, { detail: { domain } }),
-  );
-}
-
 export function SettingsSyncProvider({ children }: { children: ReactNode }) {
   const { configured, user, loading: authLoading } = useAuth();
   const enabled = configured && user !== null;
@@ -182,10 +175,6 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
     try {
       const result = await withInitialSyncRetry(() => reconcileSettings(userId));
       markSynced(summarizeReconcileResult(result));
-
-      for (const domain of SETTINGS_DOMAINS) {
-        notifyRemoteApplied(domain);
-      }
     } catch (err) {
       setStatus('error');
       setStatusMessage(err instanceof Error ? err.message : 'Cloud sync failed.');
@@ -206,12 +195,6 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
     try {
       const result = await reconcileSettings(userId);
       markSynced(summarizeReconcileResult(result));
-
-      for (const domain of SETTINGS_DOMAINS) {
-        if (result[domain] !== 'unchanged') {
-          notifyRemoteApplied(domain);
-        }
-      }
     } catch (err) {
       setStatus('error');
       setStatusMessage(err instanceof Error ? err.message : 'Cloud sync failed.');
@@ -260,8 +243,6 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
     return subscribeToRemoteSettings(userId, (domain, data, updatedAt, metadata) => {
       const applied = applyRemoteSnapshot(domain, data, updatedAt, metadata);
       if (!applied) return;
-
-      notifyRemoteApplied(domain);
 
       const now = new Date();
       setLastSyncedAt(now);
