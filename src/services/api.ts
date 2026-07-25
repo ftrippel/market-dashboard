@@ -307,15 +307,33 @@ function computeMetricsFromChartResult(
   const quote = result.indicators?.quote?.[0];
   if (!timestamps?.length || !quote) return null;
 
+  const meta = result.meta as
+    | {
+        regularMarketPrice?: number;
+        previousClose?: number;
+        regularMarketTime?: number;
+      }
+    | undefined;
   const closes: number[] = [];
   const highs: number[] = [];
   const years: number[] = [];
+  const closeTimestamps: number[] = [];
   const isYield = isYieldSymbol(sym);
+  let marketPrice = meta?.regularMarketPrice;
+  let previousClose = meta?.previousClose;
+  if (isYield) {
+    if (marketPrice != null) marketPrice = scaleYieldValue(marketPrice);
+    if (previousClose != null) previousClose = scaleYieldValue(previousClose);
+  }
 
   for (let i = 0; i < timestamps.length; i++) {
     let close = quote.close?.[i];
     let high = quote.high?.[i];
-    if (close == null || high == null) continue;
+    if (close == null && i === timestamps.length - 1) {
+      close = getSameSessionMarketPrice(result, timestamps[i]);
+    }
+    if (close == null) continue;
+    if (high == null) high = close;
 
     if (isYield) {
       close = scaleYieldValue(close);
@@ -325,23 +343,25 @@ function computeMetricsFromChartResult(
     closes.push(close);
     highs.push(high);
     years.push(new Date(timestamps[i] * 1000).getUTCFullYear());
+    closeTimestamps.push(timestamps[i]);
+  }
+
+  const latestCloseTimestamp = closeTimestamps[closeTimestamps.length - 1];
+  if (
+    typeof marketPrice === 'number' &&
+    Number.isFinite(marketPrice) &&
+    typeof meta?.regularMarketTime === 'number' &&
+    (latestCloseTimestamp == null ||
+      formatYahooTimestamp(latestCloseTimestamp) !==
+        formatYahooTimestamp(meta.regularMarketTime))
+  ) {
+    closes.push(marketPrice);
+    highs.push(marketPrice);
+    years.push(new Date(meta.regularMarketTime * 1000).getUTCFullYear());
+    closeTimestamps.push(meta.regularMarketTime);
   }
 
   if (closes.length < 2) return null;
-
-  const meta = result.meta as
-    | {
-        regularMarketPrice?: number;
-        previousClose?: number;
-        regularMarketTime?: number;
-      }
-    | undefined;
-  let marketPrice = meta?.regularMarketPrice;
-  let previousClose = meta?.previousClose;
-  if (isYield) {
-    if (marketPrice != null) marketPrice = scaleYieldValue(marketPrice);
-    if (previousClose != null) previousClose = scaleYieldValue(previousClose);
-  }
 
   // Yahoo can expose today's partial candle while omitting the immediately preceding
   // session from daily history. The quote snapshot is therefore authoritative for 1D.

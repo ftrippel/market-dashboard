@@ -12,8 +12,8 @@ function mockYahooChart({
   previousClose,
   regularMarketTime = 1_784_879_618,
 }: {
-  closes: number[];
-  highs?: number[];
+  closes: Array<number | null>;
+  highs?: Array<number | null>;
   regularMarketPrice?: number;
   previousClose?: number;
   regularMarketTime?: number;
@@ -68,6 +68,33 @@ describe('fetchYahooFinanceMarketMetrics', () => {
 
     expect(metrics?.price).toBe(136.6);
     expect(metrics?.d1).toBe(6.45);
+  });
+
+  it('repairs a missing current daily close without making a second request', async () => {
+    mockYahooChart({
+      closes: [100, 102, null],
+      highs: [101, 103, 106],
+      regularMarketPrice: 105,
+    });
+
+    const metrics = await fetchYahooFinanceMarketMetrics('TEST');
+
+    expect(metrics?.price).toBe(105);
+    expect(metrics?.d1).toBe(2.94);
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('adds the current session when daily history ends on the previous session', async () => {
+    mockYahooChart({
+      closes: [100, 102],
+      regularMarketPrice: 105,
+    });
+
+    const metrics = await fetchYahooFinanceMarketMetrics('TEST');
+
+    expect(metrics?.price).toBe(105);
+    expect(metrics?.d1).toBe(2.94);
+    expect(fetch).toHaveBeenCalledTimes(1);
   });
 
   it('fetches all market metrics with a single cache-busted history request', async () => {
