@@ -20,6 +20,7 @@ declare module '../../config/symbolMaps.json' {
 }
 
 interface ImportMetaEnv {
+  readonly VITE_BACKEND_API_URL?: string;
   readonly VITE_LIVE_DATA_REFRESH_MS?: string;
   readonly VITE_LIVE_DATA_IDLE_RETRY_MS?: string;
   readonly VITE_FIREBASE_API_KEY?: string;

@@ -42,6 +42,8 @@ import { useWatchlists } from './useWatchlists';
 import { parseTags } from './watchlistStorage';
 import type { WatchlistItem } from './types';
 import type { WatchlistQuote } from './useWatchlistQuotes';
+import { useWatchlistInstrumentInfo } from './useWatchlistInstrumentInfo';
+import type { InstrumentMetadataBySymbol } from '../../services/instrumentApi';
 import {
   MARKET_COLUMN_DEFINITIONS,
   resolveDefaultSortColumn,
@@ -70,12 +72,19 @@ function compareWatchlistItems(
   order: SortOrder,
   store: MarketState,
   quotes: Record<string, WatchlistQuote>,
+  instrumentInfo: InstrumentMetadataBySymbol,
 ): number {
   let cmp = 0;
 
   if (key === 'name') {
-    const aName = getDisplayName(a.sym, watchlistItemToMarketData(a, store, quotes).name);
-    const bName = getDisplayName(b.sym, watchlistItemToMarketData(b, store, quotes).name);
+    const aName = getDisplayName(
+      a.sym,
+      watchlistItemToMarketData(a, store, quotes, instrumentInfo).name,
+    );
+    const bName = getDisplayName(
+      b.sym,
+      watchlistItemToMarketData(b, store, quotes, instrumentInfo).name,
+    );
     cmp = aName.localeCompare(bName);
   } else if (key === 'tags') {
     cmp = a.tags.join(', ').localeCompare(b.tags.join(', '));
@@ -1078,6 +1087,7 @@ function WatchlistRow({
   activeTags,
   siblings,
   quotes,
+  instrumentInfo,
   onRemove,
   onRequestMove,
   onUpdateTags,
@@ -1089,6 +1099,7 @@ function WatchlistRow({
   activeTags: string[];
   siblings: { sym: string; name: string }[];
   quotes: Record<string, WatchlistQuote>;
+  instrumentInfo: InstrumentMetadataBySymbol;
   onRemove: (sym: string) => void;
   onRequestMove: (sym: string) => void;
   onUpdateTags: (sym: string, tags: string[]) => void;
@@ -1097,7 +1108,7 @@ function WatchlistRow({
   visibleColumns: MarketColumnKey[];
 }) {
   const store = useMarketStore();
-  const data = watchlistItemToMarketData(item, store, quotes);
+  const data = watchlistItemToMarketData(item, store, quotes, instrumentInfo);
   const { sparklineMode } = useSettings();
   const meta = getSymbolMeta(item.sym);
   const displayName = getDisplayName(item.sym, data.name);
@@ -1284,31 +1295,43 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
     liveEnabled,
     allWatchlistSymbols,
   );
+  const instrumentInfo = useWatchlistInstrumentInfo(allWatchlistSymbols, store);
 
   const filteredItems = useMemo(() => {
     if (!activeWatchlist) return [];
     return activeWatchlist.items.filter(
       (item) =>
-        matchesWatchlistSearch(item, store, searchQuery) &&
+        matchesWatchlistSearch(item, store, searchQuery, quotes, instrumentInfo) &&
         matchesWatchlistTags(item, activeTags),
     );
-  }, [activeWatchlist, store, searchQuery, activeTags]);
+  }, [activeWatchlist, store, searchQuery, activeTags, quotes, instrumentInfo]);
 
   const sortedItems = useMemo(
     () =>
       [...filteredItems].sort((a, b) =>
-        compareWatchlistItems(a, b, sort.key, sort.order, store, quotes),
+        compareWatchlistItems(
+          a,
+          b,
+          sort.key,
+          sort.order,
+          store,
+          quotes,
+          instrumentInfo,
+        ),
       ),
-    [filteredItems, sort, store, quotes],
+    [filteredItems, sort, store, quotes, instrumentInfo],
   );
 
   const siblings = useMemo(
     () =>
       sortedItems.map((item) => ({
         sym: item.sym,
-        name: getDisplayName(item.sym, watchlistItemToMarketData(item, store, quotes).name),
+        name: getDisplayName(
+          item.sym,
+          watchlistItemToMarketData(item, store, quotes, instrumentInfo).name,
+        ),
       })),
-    [sortedItems, store, quotes],
+    [sortedItems, store, quotes, instrumentInfo],
   );
 
   const handleAdd = useCallback(() => {
@@ -1628,6 +1651,7 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
                         activeTags={activeTags}
                         siblings={siblings}
                         quotes={quotes}
+                        instrumentInfo={instrumentInfo}
                         onRemove={handleRemoveItem}
                         onRequestMove={setMovingSymbol}
                         onUpdateTags={setItemTags}

@@ -5,6 +5,10 @@ function readPositiveIntEnv(value: string | undefined, fallback: number): number
 }
 
 export const config = {
+  backend: {
+    /** Base URL of the versioned market-dashboard backend (without /api/v1). */
+    apiUrl: (import.meta.env.VITE_BACKEND_API_URL ?? '').replace(/\/+$/, ''),
+  },
   liveData: {
     /** Delay between Yahoo price fetches when symbols are visible (ms). */
     refreshIntervalMs: readPositiveIntEnv(import.meta.env.VITE_LIVE_DATA_REFRESH_MS, 1000),
@@ -18,4 +22,3 @@ export const config = {
     enableUnderline: false,
   },
 } as const;
-

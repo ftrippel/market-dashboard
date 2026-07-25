@@ -1,4 +1,5 @@
 import { getDisplayName, getSymbolMeta } from '../../data/symbolMaps';
+import type { InstrumentMetadataBySymbol } from '../../services/instrumentApi';
 import type { MarketData, MarketState } from '../../types';
 import type { WatchlistQuote } from './useWatchlistQuotes';
 import type { WatchlistItem } from './types';
@@ -33,16 +34,22 @@ export function watchlistItemToMarketData(
   item: WatchlistItem,
   store: MarketState,
   quotes: Record<string, WatchlistQuote> = {},
+  instrumentInfo: InstrumentMetadataBySymbol = {},
 ): MarketData {
   const existing = findMarketData(store, item.sym);
-  if (existing) return existing;
+  const fetchedName = instrumentInfo[item.sym]?.displayName;
+  if (existing) {
+    return fetchedName && getDisplayName(item.sym, existing.name) === item.sym
+      ? { ...existing, name: fetchedName }
+      : existing;
+  }
 
   const quote = quotes[item.sym];
   const meta = getSymbolMeta(item.sym);
 
   return {
     sym: item.sym,
-    name: meta.name,
+    name: fetchedName ?? meta.name,
     price: quote?.price,
     d1: quote?.d1 ?? 0,
     w1: quote?.w1 ?? 0,
@@ -81,12 +88,14 @@ export function matchesWatchlistSearch(
   item: WatchlistItem,
   store: MarketState,
   query: string,
+  quotes: Record<string, WatchlistQuote> = {},
+  instrumentInfo: InstrumentMetadataBySymbol = {},
 ): boolean {
   const q = query.toLowerCase().trim();
   if (!q) return true;
 
-  const market = findMarketData(store, item.sym);
-  const displayName = getDisplayName(item.sym, market?.name);
+  const market = watchlistItemToMarketData(item, store, quotes, instrumentInfo);
+  const displayName = getDisplayName(item.sym, market.name);
   const tagMatch = item.tags.some((tag) => tag.toLowerCase().includes(q));
   const commentMatch = (item.comment ?? '').toLowerCase().includes(q);
 

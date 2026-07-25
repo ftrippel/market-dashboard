@@ -8,6 +8,11 @@ React rewrite of the original [market-dashboard](https://github.com/clementang17
 
 **Stack:** React 19, TypeScript, Zustand, Vite
 
+The optional backend is a versioned Hono API on Cloudflare Workers. It handles
+server-side integrations such as Yahoo Finance instrument metadata while the
+React application remains hosted on GitHub Pages. See
+[`docs/BACKEND_API.md`](docs/BACKEND_API.md).
+
 ## Data flow
 
 Market data is fetched by a Python script from yfinance, FRED, and optionally the Massive API, then written to `public/data.json`. In production, GitHub Actions runs this fetch **every 6 hours** (00:00, 06:00, 12:00, and 18:00 UTC), commits the updated file, and triggers a redeploy. The React app loads that JSON, transforms it, and stores it in Zustand for the UI.
@@ -116,7 +121,10 @@ Without these variables, the dashboard works as before with local storage and JS
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Start Vite dev server |
+| `npm run dev:backend` | Start the Cloudflare Worker backend locally |
 | `npm run build` | Type-check and build for production |
+| `npm run build:backend` | Type-check the Worker backend |
+| `npm run deploy:backend` | Deploy the Worker with Wrangler |
 | `npm run preview` | Preview production build locally |
 | `npm run preview:pages` | Preview with GitHub Pages base path |
 | `npm run verify:dist` | Build and verify `dist/` output |
