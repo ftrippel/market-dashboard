@@ -95,5 +95,15 @@ The `Deploy Backend` GitHub Actions workflow requires:
 - `CLOUDFLARE_API_TOKEN`, scoped to edit Workers
 - `CLOUDFLARE_ACCOUNT_ID`
 
+For a local deployment, copy `.env.example` to `.env`, set the same two
+variables, and run:
+
+```bash
+npm run deploy:backend
+```
+
+This command type-checks the backend and then uses the repository's installed
+Wrangler version to load `.env`, build, bundle, and deploy the Worker.
+
 The Worker origin is set directly as `VITE_BACKEND_API_URL` in the existing
 GitHub Pages workflow and is baked into the Vite build.

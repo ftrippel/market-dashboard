@@ -134,6 +134,17 @@ Without these variables, the dashboard works as before with local storage and JS
 
 Production builds use the GitHub Pages base path `/market-dashboard/`. After each 6-hour data fetch (or any push to `main`), GitHub Actions builds and deploys to the `gh-pages` branch. Data-only refreshes retain the latest code build number; the number advances only for a push or manual code deployment.
 
+To deploy the Cloudflare Worker locally, copy the example environment file and
+set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`:
+
+```bash
+cp .env.example .env
+npm run deploy:backend
+```
+
+This single command type-checks the backend, then lets the project-local
+Wrangler installation build, bundle, and deploy the Worker.
+
 ## License
 
 MIT — see [LICENSE](LICENSE).
