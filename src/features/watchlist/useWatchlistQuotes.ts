@@ -41,12 +41,8 @@ export function useWatchlistQuotes(
     let active = true;
 
     const fetchAll = async () => {
-      for (let i = 0; i < missingSymbols.length; i++) {
+      for (const sym of missingSymbols) {
         if (!active) return;
-        if (i > 0) await delay(REFETCH_MIN_INTERVAL_MS);
-        if (!active) return;
-
-        const sym = missingSymbols[i];
         try {
           const res = await fetchYahooFinanceMarketMetrics(sym);
           if (!active || !res) continue;
