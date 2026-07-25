@@ -577,7 +577,7 @@ def _fetch_yfinance_history(sym):
         period='1y',
         interval='1d',
         auto_adjust=True,
-        repair=True,
+        repair=False,
     )
     return df, getattr(ticker, 'history_metadata', None)
 
@@ -631,7 +631,7 @@ def _fetch_batch_chunk(tickers, retries=3):
         try:
             data = yf.download(tickers, period='1y', interval='1d',
                                group_by='ticker', auto_adjust=True,
-                               repair=True, progress=False, threads=False)
+                               repair=False, progress=False, threads=False)
             break
         except Exception as e:
             print(f"attempt {attempt+1} failed: {e}", end=' ')
@@ -867,7 +867,7 @@ def compute_sp500_breadth():
             for attempt in range(max_retries):
                 try:
                     raw = yf.download(batch, period='1y', interval='1d',
-                                     auto_adjust=True, repair=True, progress=False,
+                                     auto_adjust=True, repair=False, progress=False,
                                      threads=False)  # Single-threaded, much more reliable
                     
                     if isinstance(raw.columns, pd.MultiIndex):
