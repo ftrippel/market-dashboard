@@ -95,8 +95,9 @@ function unregisterEntry(id: symbol) {
   stack.splice(index, 1);
   stopKeydownListeningIfEmpty();
 
-  // Back button consumed the root guard; re-arm it while nested overlays remain open.
-  if (removed.closedByBack && stack.length > 0 && isCoarsePointerDevice()) {
+  // Back consumed the root guard. Re-arm it for the next overlay/back interaction,
+  // including when this was the only open overlay.
+  if (removed.closedByBack && isCoarsePointerDevice()) {
     history.pushState(ROOT_GUARD_STATE, '');
   }
 }
