@@ -70,6 +70,55 @@ describe('fetchYahooFinanceMarketMetrics', () => {
     expect(metrics?.d1).toBe(6.45);
   });
 
+  it('uses the current quote when the latest daily close and annual previous close are unavailable', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (input: string | URL | Request) => {
+        const proxyUrl = new URL(String(input));
+        const targetUrl = new URL(proxyUrl.searchParams.get('url') ?? '');
+        const isCurrentQuote = targetUrl.searchParams.get('interval') === '1m';
+
+        return {
+          ok: true,
+          json: async () => ({
+            chart: {
+              result: [
+                isCurrentQuote
+                  ? {
+                      meta: {
+                        regularMarketPrice: 105,
+                        previousClose: 102,
+                        regularMarketTime: 1_784_879_618,
+                      },
+                    }
+                  : {
+                      timestamp: [1_784_700_000, 1_784_786_400, 1_784_872_800],
+                      indicators: {
+                        quote: [
+                          {
+                            close: [100, 102, null],
+                            high: [101, 103, 106],
+                          },
+                        ],
+                      },
+                      meta: {
+                        regularMarketPrice: 105,
+                        regularMarketTime: 1_784_879_618,
+                      },
+                    },
+              ],
+            },
+          }),
+        };
+      }),
+    );
+
+    const metrics = await fetchYahooFinanceMarketMetrics('TEST');
+
+    expect(metrics?.price).toBe(105);
+    expect(metrics?.d1).toBe(2.94);
+  });
+
   it('falls back to consecutive daily candles when Yahoo metadata is unavailable', async () => {
     mockYahooChart({ closes: [100, 102] });
 

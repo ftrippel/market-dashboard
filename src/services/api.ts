@@ -79,14 +79,20 @@ export function buildYahooFinanceQuoteUrl(sym: string): string {
   return `https://finance.yahoo.com/quote/${encodeURIComponent(yfSym)}/`;
 }
 
+function buildYahooFinanceChartProxyUrl(sym: string, interval: string, range: string): string {
+  const yfSym = toYahooFinanceSymbol(sym);
+  const targetUrl =
+    `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yfSym)}` +
+    `?interval=${encodeURIComponent(interval)}&range=${encodeURIComponent(range)}&_=${Date.now()}`;
+  return `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`;
+}
+
 export async function fetchYahooFinancePrice(sym: string): Promise<{ price: number; d1: number; updatedAt?: number } | null> {
   if (!isYahooFetchable(sym)) return null;
 
-  const yfSym = toYahooFinanceSymbol(sym);
-  const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yfSym)}?interval=1m&range=1d`;
-  const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`;
-
-  const res = await fetch(proxyUrl);
+  const res = await fetch(buildYahooFinanceChartProxyUrl(sym, '1m', '1d'), {
+    cache: 'no-store',
+  });
   if (!res.ok) {
     throw new Error(`Failed to fetch live price for ${sym}: HTTP ${res.status}`);
   }
@@ -163,11 +169,9 @@ function scaleYieldValue(value: number): number {
 async function fetchYahooFinanceChartResult(sym: string, range: string) {
   if (!isYahooFetchable(sym)) return null;
 
-  const yfSym = toYahooFinanceSymbol(sym);
-  const targetUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yfSym)}?interval=1d&range=${range}`;
-  const proxyUrl = `https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`;
-
-  const res = await fetch(proxyUrl);
+  const res = await fetch(buildYahooFinanceChartProxyUrl(sym, '1d', range), {
+    cache: 'no-store',
+  });
   if (!res.ok) {
     throw new Error(`Failed to fetch daily history for ${sym}: HTTP ${res.status}`);
   }
@@ -298,6 +302,7 @@ function ema(values: number[], period: number): number | null {
 function computeMetricsFromChartResult(
   sym: string,
   result: NonNullable<Awaited<ReturnType<typeof fetchYahooFinanceChartResult>>>,
+  currentSnapshot?: Awaited<ReturnType<typeof fetchYahooFinancePrice>>,
 ): YahooMarketMetrics | null {
   const timestamps = result.timestamp;
   const quote = result.indicators?.quote?.[0];
@@ -332,10 +337,10 @@ function computeMetricsFromChartResult(
         regularMarketTime?: number;
       }
     | undefined;
-  let marketPrice = meta?.regularMarketPrice;
+  let marketPrice = currentSnapshot?.price ?? meta?.regularMarketPrice;
   let previousClose = meta?.previousClose;
   if (isYield) {
-    if (marketPrice != null) marketPrice = scaleYieldValue(marketPrice);
+    if (currentSnapshot == null && marketPrice != null) marketPrice = scaleYieldValue(marketPrice);
     if (previousClose != null) previousClose = scaleYieldValue(previousClose);
   }
 
@@ -370,16 +375,16 @@ function computeMetricsFromChartResult(
   };
 
   if (isYield) {
-    d1 = snapshotPreviousClose != null
+    d1 = currentSnapshot?.d1 ?? (snapshotPreviousClose != null
       ? roundToDecimals((price - snapshotPreviousClose) * 100, 1)
-      : roundToDecimals((closes[closes.length - 1] - closes[closes.length - 2]) * 100, 1);
+      : roundToDecimals((closes[closes.length - 1] - closes[closes.length - 2]) * 100, 1));
     w1 = closes.length >= 6 ? roundToDecimals((closes[closes.length - 1] - closes[closes.length - 6]) * 100, 1) : 0;
     hi52 = roundToDecimals((price - hi52Price) * 100, 1);
     ytd = ytdStart != null ? roundToDecimals((price - ytdStart) * 100, 1) : 0;
   } else {
-    d1 = snapshotPreviousClose != null
+    d1 = currentSnapshot?.d1 ?? (snapshotPreviousClose != null
       ? pctChange(price, snapshotPreviousClose)
-      : pctChange(closes[closes.length - 1], closes[closes.length - 2]);
+      : pctChange(closes[closes.length - 1], closes[closes.length - 2]));
     w1 = closes.length >= 6 ? pctChange(closes[closes.length - 1], closes[closes.length - 6]) : 0;
     hi52 = pctChange(price, hi52Price);
     ytd = ytdStart != null ? pctChange(price, ytdStart) : 0;
@@ -400,7 +405,9 @@ function computeMetricsFromChartResult(
     spark.unshift(0);
   }
 
-  const updatedAt = meta?.regularMarketTime ? meta.regularMarketTime * 1000 : undefined;
+  const updatedAt =
+    currentSnapshot?.updatedAt ??
+    (meta?.regularMarketTime ? meta.regularMarketTime * 1000 : undefined);
   const ema10 = ema(closes, 10);
   const ema20 = ema(closes, 20);
   const ema_uptrend =
@@ -422,7 +429,10 @@ function computeMetricsFromChartResult(
 }
 
 export async function fetchYahooFinanceMarketMetrics(sym: string): Promise<YahooMarketMetrics | null> {
-  const result = await fetchYahooFinanceChartResult(sym, '1y');
+  const [result, currentSnapshot] = await Promise.all([
+    fetchYahooFinanceChartResult(sym, '1y'),
+    fetchYahooFinancePrice(sym).catch(() => null),
+  ]);
   if (!result) return null;
-  return computeMetricsFromChartResult(sym, result);
+  return computeMetricsFromChartResult(sym, result, currentSnapshot);
 }

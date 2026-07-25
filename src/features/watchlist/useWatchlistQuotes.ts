@@ -11,8 +11,11 @@ import { findMarketData } from './resolveMarketData';
 
 export type WatchlistQuote = YahooMarketMetrics;
 
-/** Max 2 Yahoo requests per second when bulk-refreshing watchlist quotes. */
-const REFETCH_MIN_INTERVAL_MS = 500;
+/**
+ * A metric refresh fetches both daily history and a current quote snapshot.
+ * Starting at most one symbol per second keeps bulk refreshes at 2 Yahoo requests/second.
+ */
+const REFETCH_MIN_INTERVAL_MS = 1000;
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
@@ -41,8 +44,12 @@ export function useWatchlistQuotes(
     let active = true;
 
     const fetchAll = async () => {
-      for (const sym of missingSymbols) {
+      for (let i = 0; i < missingSymbols.length; i++) {
         if (!active) return;
+        if (i > 0) await delay(REFETCH_MIN_INTERVAL_MS);
+        if (!active) return;
+
+        const sym = missingSymbols[i];
         try {
           const res = await fetchYahooFinanceMarketMetrics(sym);
           if (!active || !res) continue;
