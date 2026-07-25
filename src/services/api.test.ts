@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fetchYahooFinanceMarketMetrics } from './api';
+import {
+  fetchYahooFinanceDailyHistory,
+  fetchYahooFinanceMarketMetrics,
+  fetchYahooFinanceOhlcHistory,
+} from './api';
 
 function mockYahooChart({
   closes,
@@ -120,5 +124,95 @@ describe('fetchYahooFinanceMarketMetrics', () => {
     expect(metrics?.m1).toBe(21);
     expect(metrics?.m3).toBe(63);
     expect(metrics?.m6).toBe(126);
+  });
+});
+
+describe('Yahoo Finance daily chart history', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('repairs a latest same-session null close from the market snapshot', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          chart: {
+            result: [
+              {
+                timestamp: [1_784_813_400, 1_784_899_800],
+                indicators: {
+                  quote: [
+                    {
+                      open: [138.52, 137.72],
+                      high: [142.33, 137.81],
+                      low: [138.15, 133.53],
+                      close: [139.49, null],
+                    },
+                  ],
+                },
+                meta: {
+                  regularMarketPrice: 136.69,
+                  regularMarketTime: 1_784_923_200,
+                },
+              },
+            ],
+          },
+        }),
+      }),
+    );
+
+    const lineHistory = await fetchYahooFinanceDailyHistory('USO');
+    const ohlcHistory = await fetchYahooFinanceOhlcHistory('USO');
+
+    expect(lineHistory?.at(-1)).toEqual({
+      time: '2026-07-24',
+      value: 136.69,
+    });
+    expect(ohlcHistory?.at(-1)).toEqual({
+      time: '2026-07-24',
+      open: 137.72,
+      high: 137.81,
+      low: 133.53,
+      close: 136.69,
+    });
+  });
+
+  it('does not apply a market snapshot from a different session', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          chart: {
+            result: [
+              {
+                timestamp: [1_784_813_400, 1_784_899_800],
+                indicators: {
+                  quote: [
+                    {
+                      open: [138.52, 137.72],
+                      high: [142.33, 137.81],
+                      low: [138.15, 133.53],
+                      close: [139.49, null],
+                    },
+                  ],
+                },
+                meta: {
+                  regularMarketPrice: 136.69,
+                  regularMarketTime: 1_784_836_800,
+                },
+              },
+            ],
+          },
+        }),
+      }),
+    );
+
+    const history = await fetchYahooFinanceOhlcHistory('USO');
+
+    expect(history).toHaveLength(1);
+    expect(history?.at(-1)?.time).toBe('2026-07-23');
   });
 });

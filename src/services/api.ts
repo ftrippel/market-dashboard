@@ -138,6 +138,24 @@ function formatYahooTimestamp(timestamp: number): string {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+function getSameSessionMarketPrice(
+  result: NonNullable<Awaited<ReturnType<typeof fetchYahooFinanceChartResult>>>,
+  timestamp: number,
+): number | null {
+  const marketPrice = result.meta?.regularMarketPrice;
+  const marketTime = result.meta?.regularMarketTime;
+  if (
+    typeof marketPrice !== 'number' ||
+    !Number.isFinite(marketPrice) ||
+    typeof marketTime !== 'number' ||
+    formatYahooTimestamp(marketTime) !== formatYahooTimestamp(timestamp)
+  ) {
+    return null;
+  }
+
+  return marketPrice;
+}
+
 function scaleYieldValue(value: number): number {
   return value > 10 ? value / 10 : value;
 }
@@ -171,6 +189,9 @@ export async function fetchYahooFinanceDailyHistory(sym: string): Promise<DailyH
 
   for (let i = 0; i < timestamps.length; i++) {
     let close = closes[i];
+    if (close == null && i === timestamps.length - 1) {
+      close = getSameSessionMarketPrice(result, timestamps[i]);
+    }
     if (close == null) continue;
 
     if (isYield) {
@@ -209,7 +230,16 @@ export async function fetchYahooFinanceOhlcHistory(sym: string): Promise<DailyOh
     let high = highs[i];
     let low = lows[i];
     let close = closes[i];
-    if (open == null || high == null || low == null || close == null) continue;
+    if (open == null || high == null || low == null) continue;
+
+    if (close == null && i === timestamps.length - 1) {
+      close = getSameSessionMarketPrice(result, timestamps[i]);
+      if (close != null) {
+        high = Math.max(high, close);
+        low = Math.min(low, close);
+      }
+    }
+    if (close == null) continue;
 
     if (isYield) {
       open = scaleYieldValue(open);
