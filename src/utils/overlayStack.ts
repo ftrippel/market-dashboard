@@ -1,6 +1,5 @@
 import { useEffect, useRef } from 'react';
 import { showConfirm } from './confirmDialog';
-import { isCoarsePointerDevice } from './device';
 import { isTypingTarget } from './focus';
 
 type DismissHandler = () => void;
@@ -18,12 +17,12 @@ interface StackEntry {
 const stack: StackEntry[] = [];
 let keydownListening = false;
 let ignoringPopstateCount = 0;
-let mobileBackInitialized = false;
+let backNavigationInitialized = false;
 
-/** Install the root history guard so the first back press can be intercepted on touch devices. */
-export function initMobileBackNavigation() {
-  if (!isCoarsePointerDevice() || mobileBackInitialized) return;
-  mobileBackInitialized = true;
+/** Install the root history guard so the first browser/system Back action can be intercepted. */
+export function initBackNavigation() {
+  if (backNavigationInitialized) return;
+  backNavigationInitialized = true;
 
   if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
@@ -97,7 +96,7 @@ function unregisterEntry(id: symbol) {
 
   // Back consumed the root guard. Re-arm it for the next overlay/back interaction,
   // including when this was the only open overlay.
-  if (removed.closedByBack && isCoarsePointerDevice()) {
+  if (removed.closedByBack) {
     history.pushState(ROOT_GUARD_STATE, '');
   }
 }

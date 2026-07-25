@@ -1,20 +1,16 @@
 // @vitest-environment jsdom
 
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { initMobileBackNavigation, pushOverlayDismiss } from './overlayStack';
+import { initBackNavigation, pushOverlayDismiss } from './overlayStack';
 
-vi.mock('./device', () => ({
-  isCoarsePointerDevice: () => true,
-}));
-
-describe('mobile overlay back navigation', () => {
+describe('overlay back navigation', () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
 
-  it('re-arms the history guard after repeatedly closing a lone overlay with Back', () => {
+  it('initializes on desktop and re-arms the history guard after repeatedly closing an overlay', () => {
     const pushState = vi.spyOn(history, 'pushState');
-    initMobileBackNavigation();
+    initBackNavigation();
 
     expect(pushState).toHaveBeenCalledOnce();
 

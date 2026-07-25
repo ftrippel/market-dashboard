@@ -2,7 +2,6 @@
  * Device and pointer detection for touch-first Safari (especially iPad).
  *
  * Consumers:
- * - overlayStack: history guard + back-button overlay dismiss (isCoarsePointerDevice)
  * - penClick: Apple Pencil tap fallbacks when click/change is skipped (isPenPrimaryTap)
  * - chartInteractionController: crosshair vs pan by pointer type
  * - useScrollLock: scroll lock targets iOS fixed-position quirks (runs on all devices)
