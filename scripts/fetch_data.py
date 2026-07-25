@@ -358,9 +358,94 @@ def _safe_float(val):
     """Convert val to float, return None if NaN/invalid."""
     try:
         f = float(val)
-        return None if math.isnan(f) else f
+        return f if math.isfinite(f) else None
     except Exception:
         return None
+
+def _metadata_float(metadata, *keys):
+    """Return the first finite numeric metadata value for the requested keys."""
+    if not isinstance(metadata, dict):
+        return None
+    for key in keys:
+        value = _safe_float(metadata.get(key))
+        if value is not None:
+            return value
+    return None
+
+def _metadata_market_timestamp(metadata):
+    """Return regularMarketTime as a timezone-aware pandas Timestamp."""
+    if not isinstance(metadata, dict):
+        return None
+    value = metadata.get('regularMarketTime')
+    if value is None:
+        return None
+    try:
+        if isinstance(value, (str, datetime.datetime, pd.Timestamp)):
+            timestamp = pd.to_datetime(value, utc=True)
+        else:
+            numeric_value = _safe_float(value)
+            if numeric_value is None:
+                return None
+            timestamp = pd.to_datetime(numeric_value, unit='s', utc=True)
+        timezone = metadata.get('exchangeTimezoneName')
+        return timestamp.tz_convert(timezone) if timezone else timestamp
+    except Exception:
+        return None
+
+def _repair_latest_close_from_metadata(df, metadata):
+    """Repair or append the latest daily close from yfinance quote metadata.
+
+    Yahoo occasionally returns a current daily candle whose Close is NaN, or
+    omits that candle while exposing a valid same-session regularMarketPrice.
+    """
+    if df is None or df.empty or 'Close' not in df or not isinstance(metadata, dict):
+        return df
+
+    market_price = _metadata_float(metadata, 'regularMarketPrice')
+    market_timestamp = _metadata_market_timestamp(metadata)
+    if market_price is None or market_timestamp is None:
+        return df
+
+    repaired = df.copy()
+    last_timestamp = pd.Timestamp(repaired.index[-1])
+    timezone = metadata.get('exchangeTimezoneName')
+    try:
+        if timezone:
+            if last_timestamp.tzinfo is None:
+                last_timestamp = last_timestamp.tz_localize(timezone)
+            else:
+                last_timestamp = last_timestamp.tz_convert(timezone)
+            market_timestamp = market_timestamp.tz_convert(timezone)
+    except Exception:
+        pass
+
+    market_date = market_timestamp.date()
+    last_date = last_timestamp.date()
+    if market_date < last_date:
+        return repaired
+
+    if market_date == last_date:
+        row_index = repaired.index[-1]
+    else:
+        if last_timestamp.tzinfo is None:
+            row_index = pd.Timestamp(market_date)
+        else:
+            row_index = market_timestamp.tz_convert(last_timestamp.tzinfo).normalize()
+        repaired.loc[row_index] = pd.NA
+
+    repaired.at[row_index, 'Close'] = market_price
+    for column in ('Open', 'High', 'Low'):
+        if column not in repaired:
+            continue
+        current = _safe_float(repaired.at[row_index, column])
+        if current is None:
+            repaired.at[row_index, column] = market_price
+        elif column == 'High':
+            repaired.at[row_index, column] = max(current, market_price)
+        elif column == 'Low':
+            repaired.at[row_index, column] = min(current, market_price)
+
+    return repaired.sort_index()
 
 def _pct_from_val(val):
     """Convert a weight value to percentage. Handles both decimal (0.07) and % (7.0) formats."""
@@ -485,6 +570,39 @@ def trend_metric(values):
         return {}
     return {'ema_uptrend': bool(_calc_ema(values, 10) > _calc_ema(values, 20))}
 
+def _fetch_yfinance_history(sym):
+    """Fetch repaired daily history plus the quote metadata used for close repair."""
+    ticker = yf.Ticker(sym)
+    df = ticker.history(
+        period='1y',
+        interval='1d',
+        auto_adjust=True,
+        repair=True,
+    )
+    return df, getattr(ticker, 'history_metadata', None)
+
+def _latest_price_row_has_missing_close(df):
+    """Return True when the newest OHLC row has data but no finite close."""
+    if df is None or df.empty or 'Close' not in df:
+        return False
+    price_columns = [column for column in ('Open', 'High', 'Low', 'Close') if column in df]
+    for _, row in df.iloc[::-1].iterrows():
+        if any(_safe_float(row[column]) is not None for column in price_columns):
+            return _safe_float(row['Close']) is None
+    return False
+
+def _extract_batch_metrics(df, sym):
+    """Extract batch metrics, retrying a partial latest candle individually."""
+    metadata = None
+    if _latest_price_row_has_missing_close(df):
+        try:
+            repaired_df, metadata = _fetch_yfinance_history(sym)
+            if repaired_df is not None and not repaired_df.empty:
+                df = repaired_df
+        except Exception as error:
+            print(f"latest-close repair {sym}: {error}", end=' ')
+    return extract_metrics(df, sym, metadata=metadata)
+
 def fetch_individual(tickers, retries=2):
     """Fetch tickers one-by-one via Ticker.history(). More reliable than batch
     download for international indices where yf.download() can return stale data."""
@@ -492,11 +610,9 @@ def fetch_individual(tickers, retries=2):
     for sym in tickers:
         for attempt in range(retries):
             try:
-                ticker = yf.Ticker(sym)
-                df = ticker.history(period='1y', interval='1d', auto_adjust=True)
+                df, metadata = _fetch_yfinance_history(sym)
                 if df is not None and not df.empty:
-                    meta = getattr(ticker, 'history_metadata', None)
-                    results[sym] = extract_metrics(df, sym, metadata=meta)
+                    results[sym] = extract_metrics(df, sym, metadata=metadata)
                 break
             except Exception as e:
                 print(f"  Attempt {attempt+1} failed for {sym}: {e}")
@@ -515,7 +631,7 @@ def _fetch_batch_chunk(tickers, retries=3):
         try:
             data = yf.download(tickers, period='1y', interval='1d',
                                group_by='ticker', auto_adjust=True,
-                               progress=False, threads=False)
+                               repair=True, progress=False, threads=False)
             break
         except Exception as e:
             print(f"attempt {attempt+1} failed: {e}", end=' ')
@@ -528,7 +644,7 @@ def _fetch_batch_chunk(tickers, retries=3):
     if len(tickers) == 1:
         sym = tickers[0]
         try:
-            results[sym] = extract_metrics(data, sym)
+            results[sym] = _extract_batch_metrics(data, sym)
         except Exception as e:
             print(f"extract {sym}: {e}", end=' ')
         return results
@@ -536,12 +652,12 @@ def _fetch_batch_chunk(tickers, retries=3):
     for sym in tickers:
         try:
             if sym in data.columns.get_level_values(0):
-                df = data[sym].dropna()
+                df = data[sym]
             elif hasattr(data, 'columns') and sym in data:
-                df = data[sym].dropna()
+                df = data[sym]
             else:
                 continue
-            results[sym] = extract_metrics(df, sym)
+            results[sym] = _extract_batch_metrics(df, sym)
         except Exception as e:
             print(f"extract {sym}: {e}", end=' ')
     return results
@@ -563,19 +679,26 @@ def fetch_batch(tickers, retries=3):
     return results
 
 def extract_metrics(df, sym, metadata=None, yield_syms=None):
-    df = df.dropna(subset=['Close'])
+    df = _repair_latest_close_from_metadata(df, metadata)
+    df = df[df['Close'].map(lambda value: _safe_float(value) is not None)]
     if len(df) < 2:
         return None
-    closes = df['Close'].values
+    closes = df['Close'].astype(float).values
     price  = float(closes[-1])
+    previous_close = _metadata_float(
+        metadata,
+        'previousClose',
+        'regularMarketPreviousClose',
+    )
 
     yield_set = set(yield_syms if yield_syms is not None else YIELD_SYMS)
     is_yield = sym in yield_set
 
     if is_yield:
-        d1     = round((closes[-1] - closes[-2]) * 100, 1) if len(closes) >= 2 else 0.0
+        d1     = round((price - (previous_close if previous_close is not None else closes[-2])) * 100, 1)
         w1     = round((closes[-1] - closes[-6]) * 100, 1) if len(closes) >= 6 else 0.0
-        hi52_price = float(df['High'].max()) if 'High' in df else price
+        high_values = [_safe_float(value) for value in df['High']] if 'High' in df else []
+        hi52_price = max((value for value in high_values if value is not None), default=price)
         hi52_pct   = round((price - hi52_price) * 100, 1)
         this_year  = datetime.datetime.now().year
         ytd_df     = df[df.index.year == this_year]
@@ -584,9 +707,10 @@ def extract_metrics(df, sym, metadata=None, yield_syms=None):
         for i in range(max(1, len(closes)-5), len(closes)):
             spark.append(round((closes[i] - closes[i-1]) * 100, 2))
     else:
-        d1     = pct(closes[-1], closes[-2]) if len(closes) >= 2 else 0.0
+        d1     = pct(price, previous_close if previous_close is not None else closes[-2])
         w1     = pct(closes[-1], closes[-6]) if len(closes) >= 6 else 0.0
-        hi52_price = float(df['High'].max()) if 'High' in df else price
+        high_values = [_safe_float(value) for value in df['High']] if 'High' in df else []
+        hi52_price = max((value for value in high_values if value is not None), default=price)
         hi52_pct   = pct(price, hi52_price)
         this_year  = datetime.datetime.now().year
         ytd_df     = df[df.index.year == this_year]
@@ -605,8 +729,9 @@ def extract_metrics(df, sym, metadata=None, yield_syms=None):
         ema_uptrend = bool(ema10 > ema20)
 
     updated_at = None
-    if metadata and isinstance(metadata, dict) and 'regularMarketTime' in metadata:
-        updated_at = int(metadata['regularMarketTime'] * 1000)
+    regular_market_time = _metadata_float(metadata, 'regularMarketTime')
+    if regular_market_time is not None:
+        updated_at = int(regular_market_time * 1000)
 
     if updated_at is None:
         try:
@@ -742,7 +867,7 @@ def compute_sp500_breadth():
             for attempt in range(max_retries):
                 try:
                     raw = yf.download(batch, period='1y', interval='1d',
-                                     auto_adjust=True, progress=False, 
+                                     auto_adjust=True, repair=True, progress=False,
                                      threads=False)  # Single-threaded, much more reliable
                     
                     if isinstance(raw.columns, pd.MultiIndex):
@@ -997,7 +1122,7 @@ if __name__ == '__main__':
     out_path = DATA_PATH
     out_path.parent.mkdir(exist_ok=True)
     with open(out_path, 'w') as f:
-        json.dump(data, f, indent=2)
+        json.dump(data, f, indent=2, allow_nan=False)
     total = sum(len(v) for v in data.values() if isinstance(v, list))
     print(f"\n\u2713 Wrote {total} records to {out_path}")
     print(f"  Yields: {[x['sym'] for x in data['yields']]}")
