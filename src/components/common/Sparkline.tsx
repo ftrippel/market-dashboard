@@ -146,10 +146,14 @@ export const Sparkline: React.FC<SparklineProps> = ({ data, positive, showGradie
     <div style={{ position: 'relative', display: 'inline-block', verticalAlign: 'middle' }}>
       <canvas
         ref={canvasRef}
+        width={64}
+        height={26}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
         style={{
           display: 'block',
+          width: '64px',
+          height: '26px',
           cursor: 'pointer',
         }}
       />
