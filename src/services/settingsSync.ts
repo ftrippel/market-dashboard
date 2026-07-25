@@ -44,7 +44,7 @@ import {
   type SettingsDomain,
 } from './settingsEvents';
 import { getFirebaseDb } from './firebase';
-import { mergeWatchlistsForUpload } from './settingsMerge';
+import { mergePreferencesForUpload, mergeWatchlistsForUpload } from './settingsMerge';
 
 export { SETTINGS_CHANGED_EVENT } from './settingsEvents';
 export type { SettingsDomain } from './settingsEvents';
@@ -343,17 +343,25 @@ async function uploadDomainWhileRemoteApplyPaused(
     }
 
     let data = localData;
-    if (
-      domain === 'watchlists' &&
-      currentPayload?.data !== undefined &&
-      ((remoteUpdatedAt && Date.parse(remoteUpdatedAt) > baseRevisionMs) ||
-        JSON.stringify(currentPayload.data) !== JSON.stringify(baseData))
-    ) {
-      const localWatchlists = parseWatchlistsSyncPayload(localData);
-      const remoteWatchlists = parseWatchlistsSyncPayload(currentPayload.data);
-      const baseWatchlists = baseData ? parseWatchlistsSyncPayload(baseData) : null;
-      if (localWatchlists && remoteWatchlists) {
-        data = mergeWatchlistsForUpload(baseWatchlists, localWatchlists, remoteWatchlists);
+    if (currentPayload?.data !== undefined) {
+      if (domain === 'preferences') {
+        const localPreferences = parsePreferencesSettings(localData);
+        const remotePreferences = parsePreferencesSettings(currentPayload.data);
+        const basePreferences = baseData ? parsePreferencesSettings(baseData) : null;
+        if (localPreferences && remotePreferences) {
+          data = mergePreferencesForUpload(basePreferences, localPreferences, remotePreferences);
+        }
+      } else if (
+        domain === 'watchlists' &&
+        ((remoteUpdatedAt && Date.parse(remoteUpdatedAt) > baseRevisionMs) ||
+          JSON.stringify(currentPayload.data) !== JSON.stringify(baseData))
+      ) {
+        const localWatchlists = parseWatchlistsSyncPayload(localData);
+        const remoteWatchlists = parseWatchlistsSyncPayload(currentPayload.data);
+        const baseWatchlists = baseData ? parseWatchlistsSyncPayload(baseData) : null;
+        if (localWatchlists && remoteWatchlists) {
+          data = mergeWatchlistsForUpload(baseWatchlists, localWatchlists, remoteWatchlists);
+        }
       }
     }
 
@@ -505,9 +513,15 @@ async function reconcileDomain(userId: string, domain: SettingsDomain): Promise<
     return pullRemoteDomain(domain, remote.data, remote.updatedAt, remote.metadata);
   }
 
-  if (hasPendingUpload(domain) || remoteContentDiffers(domain, remote.data)) {
+  if (hasPendingUpload(domain)) {
     await uploadDomain(userId, domain);
     return 'uploaded';
+  }
+
+  // Local values without a pending edit are cache/default state, not a change
+  // that may overwrite the established cloud document.
+  if (remoteContentDiffers(domain, remote.data)) {
+    return pullRemoteDomain(domain, remote.data, remote.updatedAt, remote.metadata);
   }
 
   return 'unchanged';

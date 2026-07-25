@@ -1,5 +1,5 @@
 import type { Watchlist, WatchlistItem } from '../features/watchlist/types';
-import type { WatchlistsSyncPayload } from './settingsBackup';
+import type { PreferencesSettings, WatchlistsSyncPayload } from './settingsBackup';
 
 function contentEqual(a: unknown, b: unknown): boolean {
   return JSON.stringify(a) === JSON.stringify(b);
@@ -9,6 +9,38 @@ function mergeValue<T>(base: T, local: T, remote: T): T {
   if (contentEqual(local, base)) return remote;
   if (contentEqual(remote, base)) return local;
   return local;
+}
+
+export function mergePreferencesForUpload(
+  base: PreferencesSettings | null,
+  local: PreferencesSettings,
+  remote: PreferencesSettings,
+): PreferencesSettings {
+  // Without a shared baseline, the pending local settings are the only evidence
+  // of an intentional offline edit. Once a baseline exists, merge every field
+  // independently so an unrelated edit cannot restore stale preference values.
+  if (!base) return local;
+
+  return {
+    theme: mergeValue(base.theme, local.theme, remote.theme),
+    enableHoverPreview: mergeValue(
+      base.enableHoverPreview,
+      local.enableHoverPreview,
+      remote.enableHoverPreview,
+    ),
+    sparklineMode: mergeValue(base.sparklineMode, local.sparklineMode, remote.sparklineMode),
+    marketColumns: mergeValue(base.marketColumns, local.marketColumns, remote.marketColumns),
+    defaultMarketSortColumn: mergeValue(
+      base.defaultMarketSortColumn,
+      local.defaultMarketSortColumn,
+      remote.defaultMarketSortColumn,
+    ),
+    chartMaSettings: mergeValue(
+      base.chartMaSettings,
+      local.chartMaSettings,
+      remote.chartMaSettings,
+    ),
+  };
 }
 
 function mergeOrder(

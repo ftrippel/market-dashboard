@@ -1,6 +1,48 @@
 import { describe, expect, it } from 'vitest';
 import type { Watchlist, WatchlistItem } from '../features/watchlist/types';
-import { mergeWatchlistsForUpload } from './settingsMerge';
+import type { PreferencesSettings } from './settingsBackup';
+import { mergePreferencesForUpload, mergeWatchlistsForUpload } from './settingsMerge';
+
+const BASE_PREFERENCES: PreferencesSettings = {
+  theme: 'dark',
+  enableHoverPreview: true,
+  sparklineMode: 'line',
+  marketColumns: ['d1', 'w1', 'hi52', 'ytd', 'spark', 'trend'],
+  defaultMarketSortColumn: 'w1',
+  chartMaSettings: [],
+};
+
+describe('mergePreferencesForUpload', () => {
+  it('preserves remote columns when the pending local edit changed only the theme', () => {
+    const local = { ...BASE_PREFERENCES, theme: 'light' as const };
+    const remote = {
+      ...BASE_PREFERENCES,
+      marketColumns: ['d1', 'w1', 'm3', 'm6'] as PreferencesSettings['marketColumns'],
+      defaultMarketSortColumn: 'm3' as const,
+    };
+
+    expect(mergePreferencesForUpload(BASE_PREFERENCES, local, remote)).toEqual({
+      ...remote,
+      theme: 'light',
+    });
+  });
+
+  it('keeps the pending local value when both devices changed the same field', () => {
+    const local = {
+      ...BASE_PREFERENCES,
+      marketColumns: ['d1', 'm3'] as PreferencesSettings['marketColumns'],
+    };
+    const remote = {
+      ...BASE_PREFERENCES,
+      marketColumns: ['w1', 'm6'] as PreferencesSettings['marketColumns'],
+    };
+
+    expect(mergePreferencesForUpload(BASE_PREFERENCES, local, remote).marketColumns).toEqual([
+      'd1',
+      'm3',
+    ]);
+  });
+});
 
 function item(sym: string, comment = ''): WatchlistItem {
   return { sym, tags: [], comment };
