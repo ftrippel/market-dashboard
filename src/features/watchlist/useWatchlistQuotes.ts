@@ -11,11 +11,8 @@ import { findMarketData } from './resolveMarketData';
 
 export type WatchlistQuote = YahooMarketMetrics;
 
-/**
- * A metric refresh fetches both daily history and a current quote snapshot.
- * Starting at most one symbol per second keeps bulk refreshes at 2 Yahoo requests/second.
- */
-const REFETCH_MIN_INTERVAL_MS = 1000;
+/** Max 2 Yahoo requests per second when bulk-refreshing watchlist quotes. */
+const REFETCH_MIN_INTERVAL_MS = 500;
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms));
