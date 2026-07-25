@@ -8,26 +8,32 @@ describe('overlay back navigation', () => {
     vi.restoreAllMocks();
   });
 
-  it('initializes on desktop and re-arms the history guard after repeatedly closing an overlay', () => {
+  it('arms history from user input and closes nested overlays one at a time with Back', () => {
     const pushState = vi.spyOn(history, 'pushState');
     initBackNavigation();
 
+    // Safari skips entries pushed during startup without user activation.
+    expect(pushState).not.toHaveBeenCalled();
+    window.dispatchEvent(new Event('pointerdown'));
     expect(pushState).toHaveBeenCalledOnce();
 
-    const closeWithBack = () => {
-      let unregister: () => void = () => undefined;
-      const dismiss = vi.fn(() => unregister());
-      unregister = pushOverlayDismiss(dismiss);
+    let unregisterFirst: () => void = () => undefined;
+    const dismissFirst = vi.fn(() => unregisterFirst());
+    unregisterFirst = pushOverlayDismiss(dismissFirst);
 
-      window.dispatchEvent(new PopStateEvent('popstate'));
+    let unregisterSecond: () => void = () => undefined;
+    const dismissSecond = vi.fn(() => unregisterSecond());
+    unregisterSecond = pushOverlayDismiss(dismissSecond);
 
-      expect(dismiss).toHaveBeenCalledOnce();
-    };
-
-    closeWithBack();
     expect(pushState).toHaveBeenCalledTimes(2);
 
-    closeWithBack();
-    expect(pushState).toHaveBeenCalledTimes(3);
+    window.dispatchEvent(
+      new PopStateEvent('popstate', { state: { __rootGuard: true, depth: 1 } }),
+    );
+    expect(dismissSecond).toHaveBeenCalledOnce();
+    expect(dismissFirst).not.toHaveBeenCalled();
+
+    window.dispatchEvent(new PopStateEvent('popstate', { state: null }));
+    expect(dismissFirst).toHaveBeenCalledOnce();
   });
 });

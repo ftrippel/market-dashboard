@@ -4,32 +4,81 @@ import { isTypingTarget } from './focus';
 
 type DismissHandler = () => void;
 
-const ROOT_GUARD_STATE = { __rootGuard: true } as const;
 const LEAVE_CONFIRM_MESSAGE = 'Go back to the previous page?';
+const ROOT_GUARD_KEY = '__rootGuard';
 
 interface StackEntry {
   id: symbol;
   dismiss: DismissHandler;
   ignoreWhenTyping?: boolean;
-  closedByBack?: boolean;
 }
 
 const stack: StackEntry[] = [];
 let keydownListening = false;
 let ignoringPopstateCount = 0;
 let backNavigationInitialized = false;
+let historyGuardDepth = 0;
+let trimmingHistory = false;
+let leaveConfirmationOpen = false;
 
-/** Install the root history guard so the first browser/system Back action can be intercepted. */
+function getHistoryGuardDepth(state: unknown): number {
+  if (!state || typeof state !== 'object' || !(ROOT_GUARD_KEY in state)) return 0;
+
+  const depth = (state as Record<string, unknown>).depth;
+  // Legacy guards had no depth and were created during startup, so Safari may
+  // have marked them as skippable. Treat them as unarmed and replace them from
+  // the next real user interaction.
+  return typeof depth === 'number' && depth > 0 ? depth : 0;
+}
+
+function pushHistoryGuard() {
+  historyGuardDepth++;
+  history.pushState({ [ROOT_GUARD_KEY]: true, depth: historyGuardDepth }, '');
+}
+
+/**
+ * Safari skips script-created history entries that were added without recent user
+ * interaction. Calling this directly from pointer/keyboard input makes the root
+ * guard eligible for Safari's browser Back button and swipe-back gesture.
+ */
+function armHistoryFromUserInteraction() {
+  if (leaveConfirmationOpen) return;
+  if (historyGuardDepth === 0) pushHistoryGuard();
+}
+
+function ensureHistoryForStack() {
+  if (!backNavigationInitialized || leaveConfirmationOpen) return;
+
+  const desiredDepth = Math.max(1, stack.length);
+  while (historyGuardDepth < desiredDepth) {
+    pushHistoryGuard();
+  }
+}
+
+function trimHistoryForStack() {
+  if (trimmingHistory) return;
+
+  const desiredDepth = Math.max(1, stack.length);
+  if (historyGuardDepth <= desiredDepth) return;
+
+  trimmingHistory = true;
+  ignoringPopstateCount++;
+  history.go(desiredDepth - historyGuardDepth);
+}
+
+/** Install browser/system Back handling for overlays on every input type. */
 export function initBackNavigation() {
   if (backNavigationInitialized) return;
   backNavigationInitialized = true;
+  historyGuardDepth = getHistoryGuardDepth(history.state);
 
   if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
   }
 
-  history.pushState(ROOT_GUARD_STATE, '');
   window.addEventListener('popstate', onPopState);
+  window.addEventListener('pointerdown', armHistoryFromUserInteraction, true);
+  window.addEventListener('keydown', armHistoryFromUserInteraction, true);
 }
 
 function onKeyDown(event: KeyboardEvent) {
@@ -44,32 +93,44 @@ function onKeyDown(event: KeyboardEvent) {
   top.dismiss();
 }
 
-function onPopState() {
+function onPopState(event: PopStateEvent) {
+  const previousDepth = historyGuardDepth;
+  historyGuardDepth = getHistoryGuardDepth(event.state);
+
   if (ignoringPopstateCount > 0) {
     ignoringPopstateCount--;
+    trimmingHistory = false;
+    trimHistoryForStack();
     return;
   }
 
+  // Forward navigation does not represent a request to dismiss the current overlay.
+  if (historyGuardDepth >= previousDepth) return;
+
   const top = stack[stack.length - 1];
   if (top) {
-    top.closedByBack = true;
     top.dismiss();
     return;
   }
 
+  // Keep the confirmation on the unguarded root entry. If confirmed, the next
+  // history.back() must leave the page rather than merely close another guard.
+  leaveConfirmationOpen = true;
   void showConfirm({
     title: 'Leave page',
     message: LEAVE_CONFIRM_MESSAGE,
     confirmLabel: 'Go back',
     cancelLabel: 'Stay',
   }).then((confirmed) => {
+    leaveConfirmationOpen = false;
+
     if (confirmed) {
       ignoringPopstateCount++;
       history.back();
       return;
     }
 
-    history.pushState(ROOT_GUARD_STATE, '');
+    ensureHistoryForStack();
   });
 }
 
@@ -90,15 +151,12 @@ function unregisterEntry(id: symbol) {
   const index = stack.findIndex((entry) => entry.id === id);
   if (index === -1) return;
 
-  const removed = stack[index];
   stack.splice(index, 1);
   stopKeydownListeningIfEmpty();
 
-  // Back consumed the root guard. Re-arm it for the next overlay/back interaction,
-  // including when this was the only open overlay.
-  if (removed.closedByBack) {
-    history.pushState(ROOT_GUARD_STATE, '');
-  }
+  // Remove history entries for overlays closed through their UI or Escape.
+  // A browser Back action has already moved to the correct guard depth.
+  if (historyGuardDepth > Math.max(1, stack.length)) trimHistoryForStack();
 }
 
 /** Whether any modal overlay is currently registered (excludes ephemeral UI like hover previews). */
@@ -120,6 +178,7 @@ export function pushOverlayDismiss(
 
   stack.push(entry);
   ensureKeydownListening();
+  ensureHistoryForStack();
 
   return () => {
     unregisterEntry(id);
