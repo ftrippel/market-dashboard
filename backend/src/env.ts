@@ -1,4 +1,9 @@
-import type { InstrumentMetadata } from '../../shared/api/contracts';
+import type {
+  InstrumentMetadata,
+  YahooChartData,
+  YahooChartInterval,
+  YahooChartRange,
+} from '../../shared/api/contracts';
 
 export interface BackendBindings {
   ALLOWED_ORIGINS?: string;
@@ -20,6 +25,11 @@ export interface InstrumentLookupResult {
 
 export interface BackendDependencies {
   lookupInstruments: (symbols: string[]) => Promise<InstrumentLookupResult>;
+  lookupChart?: (
+    symbol: string,
+    interval: YahooChartInterval,
+    range: YahooChartRange,
+  ) => Promise<YahooChartData>;
   cache?: Cache | null;
   now?: () => number;
 }

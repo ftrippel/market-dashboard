@@ -1,5 +1,14 @@
 import type { MarketData, MarketState, Holding } from '../types';
 import { isYieldSymbol, isYahooFetchable, toYahooFinanceSymbol } from '../data/symbolMaps';
+import type {
+  YahooChartData,
+  YahooChartInterval,
+  YahooChartRange,
+} from '../../shared/api/contracts';
+import {
+  fetchBackendData,
+  isBackendApiConfigured,
+} from './backendApi';
 
 export { toYahooFinanceSymbol };
 
@@ -90,14 +99,8 @@ function buildYahooFinanceChartProxyUrl(sym: string, interval: string, range: st
 export async function fetchYahooFinancePrice(sym: string): Promise<{ price: number; d1: number; updatedAt?: number } | null> {
   if (!isYahooFetchable(sym)) return null;
 
-  const res = await fetch(buildYahooFinanceChartProxyUrl(sym, '1m', '1d'), {
-    cache: 'no-store',
-  });
-  if (!res.ok) {
-    throw new Error(`Failed to fetch live price for ${sym}: HTTP ${res.status}`);
-  }
-  const data = await res.json();
-  const meta = data?.chart?.result?.[0]?.meta;
+  const result = await fetchYahooFinanceChartResult(sym, '1d', '1m');
+  const meta = result?.meta;
   if (!meta) return null;
 
   let currentPrice = meta.regularMarketPrice;
@@ -166,14 +169,30 @@ function scaleYieldValue(value: number): number {
   return value > 10 ? value / 10 : value;
 }
 
-async function fetchYahooFinanceChartResult(sym: string, range: string) {
+async function fetchYahooFinanceChartResult(
+  sym: string,
+  range: YahooChartRange,
+  interval: YahooChartInterval = '1d',
+): Promise<YahooChartData | null> {
   if (!isYahooFetchable(sym)) return null;
 
-  const res = await fetch(buildYahooFinanceChartProxyUrl(sym, '1d', range), {
+  if (isBackendApiConfigured()) {
+    try {
+      const yfSym = toYahooFinanceSymbol(sym);
+      return await fetchBackendData<YahooChartData>(
+        `/charts/${encodeURIComponent(yfSym)}`,
+        { query: { interval, range } },
+      );
+    } catch (error) {
+      console.warn(`Backend chart request failed for ${sym}; using CORS proxy fallback.`, error);
+    }
+  }
+
+  const res = await fetch(buildYahooFinanceChartProxyUrl(sym, interval, range), {
     cache: 'no-store',
   });
   if (!res.ok) {
-    throw new Error(`Failed to fetch daily history for ${sym}: HTTP ${res.status}`);
+    throw new Error(`Failed to fetch Yahoo chart for ${sym}: HTTP ${res.status}`);
   }
 
   const data = await res.json();

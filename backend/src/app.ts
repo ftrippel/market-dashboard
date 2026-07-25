@@ -3,6 +3,7 @@ import type { BackendDependencies, BackendEnv } from './env';
 import { failure } from './http';
 import { apiCors } from './middleware/cors';
 import { requestId } from './middleware/requestId';
+import { registerChartRoutes } from './routes/charts';
 import { registerHealthRoutes } from './routes/health';
 import { registerInstrumentRoutes } from './routes/instruments';
 import { lookupYahooInstruments } from './services/yahooFinance';
@@ -18,6 +19,7 @@ export function createApp(
   app.use('/api/*', apiCors);
 
   registerHealthRoutes(app);
+  registerChartRoutes(app, dependencies);
   registerInstrumentRoutes(app, dependencies);
 
   app.notFound((c) => failure(c, 404, 'NOT_FOUND', 'The requested API route was not found.'));

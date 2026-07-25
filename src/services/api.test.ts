@@ -1,8 +1,21 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
+import type { YahooChartData } from '../../shared/api/contracts';
+
+const backendMocks = vi.hoisted(() => ({
+  configured: vi.fn(() => false),
+  fetchData: vi.fn(),
+}));
+
+vi.mock('./backendApi', () => ({
+  isBackendApiConfigured: backendMocks.configured,
+  fetchBackendData: backendMocks.fetchData,
+}));
+
 import {
   fetchYahooFinanceDailyHistory,
   fetchYahooFinanceMarketMetrics,
   fetchYahooFinanceOhlcHistory,
+  fetchYahooFinancePrice,
 } from './api';
 
 function mockYahooChart({
@@ -41,6 +54,72 @@ function mockYahooChart({
 describe('fetchYahooFinanceMarketMetrics', () => {
   afterEach(() => {
     vi.unstubAllGlobals();
+    backendMocks.configured.mockReturnValue(false);
+    backendMocks.fetchData.mockReset();
+  });
+
+  it('uses the configured backend instead of the public CORS proxy', async () => {
+    const chart: YahooChartData = {
+      timestamp: [1_784_700_000, 1_784_786_400],
+      indicators: {
+        quote: [{
+          open: [100, 102],
+          high: [101, 104],
+          low: [99, 101],
+          close: [100, 103],
+          volume: [1_000, 2_000],
+        }],
+      },
+      meta: {
+        regularMarketPrice: 103,
+        previousClose: 100,
+        regularMarketTime: 1_784_879_618,
+      },
+    };
+    backendMocks.configured.mockReturnValue(true);
+    backendMocks.fetchData.mockResolvedValue(chart);
+    const directFetch = vi.fn();
+    vi.stubGlobal('fetch', directFetch);
+
+    const metrics = await fetchYahooFinanceMarketMetrics('SAP.DE');
+
+    expect(metrics?.d1).toBe(3);
+    expect(backendMocks.fetchData).toHaveBeenCalledWith('/charts/SAP.DE', {
+      query: { interval: '1d', range: '1y' },
+    });
+    expect(directFetch).not.toHaveBeenCalled();
+  });
+
+  it('uses the backend for live price snapshots', async () => {
+    backendMocks.configured.mockReturnValue(true);
+    backendMocks.fetchData.mockResolvedValue({
+      timestamp: [1_784_879_618],
+      indicators: {
+        quote: [{
+          open: [102],
+          high: [105],
+          low: [101],
+          close: [104],
+          volume: [2_000],
+        }],
+      },
+      meta: {
+        regularMarketPrice: 104,
+        chartPreviousClose: 102,
+        regularMarketTime: 1_784_879_618,
+      },
+    } satisfies YahooChartData);
+
+    const quote = await fetchYahooFinancePrice('SAP.DE');
+
+    expect(quote).toEqual({
+      price: 104,
+      d1: 1.96,
+      updatedAt: 1_784_879_618_000,
+    });
+    expect(backendMocks.fetchData).toHaveBeenCalledWith('/charts/SAP.DE', {
+      query: { interval: '1m', range: '1d' },
+    });
   });
 
   it('uses Yahoo market metadata when daily history skips the previous trading day intraday', async () => {

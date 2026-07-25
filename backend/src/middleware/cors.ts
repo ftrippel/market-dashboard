@@ -29,7 +29,7 @@ export const apiCors = createMiddleware<BackendEnv>(async (c, next) => {
     origin: origin ?? origins[0],
     allowMethods: ['GET', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'X-Request-Id'],
-    exposeHeaders: ['X-Request-Id'],
+    exposeHeaders: ['X-Request-Id', 'X-Cache'],
     maxAge: 86400,
   });
   return middleware(c, next);

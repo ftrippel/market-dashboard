@@ -2,8 +2,8 @@
 
 The market dashboard keeps its React application on GitHub Pages and uses a
 separate Hono application on Cloudflare Workers for operations that cannot run
-in a browser. Yahoo Finance lookups are the first such operation because
-`yahoo-finance2` requires a server or edge runtime.
+reliably in a browser. The Worker handles Yahoo Finance metadata and chart
+requests so the production frontend does not depend on a public CORS proxy.
 
 ## Configuration
 
@@ -14,8 +14,8 @@ VITE_BACKEND_API_URL=https://market-dashboard-api.florian-trippel.workers.dev
 ```
 
 The value is an origin without `/api/v1`. The frontend API client appends the
-versioned route prefix. If the value is absent, backend-powered enhancements
-are skipped and the watchlist continues to fall back to its existing symbols.
+versioned route prefix. If the value is absent, backend-powered metadata is
+skipped and Yahoo chart requests use the public CORS-proxy fallback.
 
 For local backend development:
 
@@ -65,12 +65,23 @@ Successful responses use a shared envelope:
 
 Errors use `{ "error": { "code", "message", "details?" }, "meta": { ... } }`.
 
+### `GET /api/v1/charts/:symbol?interval=1d&range=1y`
+
+Returns the Yahoo chart timestamps, OHLCV arrays, and quote metadata required by
+the frontend. Supported intervals are `1m` and `1d`; supported ranges are `1d`,
+`1y`, and `2y`.
+
+The Worker caches live one-minute data for 15 seconds and daily history for 60
+seconds. Browser responses use `Cache-Control: no-store`, so freshness is
+controlled in one place by the Worker. If Yahoo temporarily fails, cached chart
+data can be served stale for up to 15 minutes. The `X-Cache` response header
+reports `HIT`, `MISS`, `REFRESH`, or `STALE`.
+
 ## Future route conventions
 
 New capabilities belong under `/api/v1` and should use plural resource names:
 
 - `/api/v1/quotes?symbols=...` for quote snapshots
-- `/api/v1/charts/:symbol?range=...&interval=...` for historical chart data
 - `/api/v1/search?q=...` for instrument discovery
 
 These routes are intentionally not registered until implemented. Route modules

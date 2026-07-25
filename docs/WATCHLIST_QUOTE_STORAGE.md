@@ -6,8 +6,8 @@ The browser persists the watchlist configuration, but the application does not
 persist watchlist quotes.
 
 Quotes can nevertheless appear very quickly after a page reload because some
-watchlist symbols already exist in the dashboard data and because the browser or
-the CORS proxy may cache Yahoo Finance responses at the HTTP level.
+watchlist symbols already exist in the dashboard data and because the backend
+keeps a short-lived Yahoo chart cache.
 
 ## Persisted watchlist data
 
@@ -48,9 +48,12 @@ After loading `data.json`, the watchlist resolves every symbol in this order:
 1. If the symbol already exists in the dashboard market store, the watchlist
    immediately reuses that market data.
 2. If the symbol is missing from the market store, `useWatchlistQuotes` requests
-   one year of daily chart data from Yahoo Finance through `corsproxy.io`.
+   one year of daily chart data through the configured Cloudflare Worker.
 3. The returned chart data is converted into the watchlist metrics and stored in
    component state for the current page session.
+
+When no backend URL is configured, or if the backend request fails, local
+development falls back to a cache-busted `corsproxy.io` request.
 
 The initial fetch for missing symbols is sequential. Manual bulk refreshes are
 also sequential and enforce a minimum interval of 500 ms, limiting them to two
@@ -62,21 +65,18 @@ Fast quote display does not demonstrate that quotes are in `localStorage`.
 Likely causes are:
 
 - The symbol is part of `data.json`, which is loaded on application startup.
-- The Yahoo/CORS-proxy GET response is available from the browser's HTTP cache.
-- The CORS proxy has an upstream or edge cache.
+- The Worker has a fresh chart response in its short-lived edge cache.
 - The network request and local metric calculation complete quickly.
 
 `data.json` itself is requested with a timestamp query parameter, so the
 application intentionally gives each dashboard-data request a unique URL.
 
-To inspect the behavior, open browser developer tools, select the Network panel,
-enable **Disable cache**, and reload the page. Requests to `corsproxy.io` identify
-quotes that are fetched separately because their symbols were absent from the
-dashboard market store.
+To inspect the behavior, open browser developer tools and check requests to the
+backend `/api/v1/charts/:symbol` endpoint. Its `X-Cache` header identifies
+whether the Worker returned a hit, miss, refresh, or stale fallback.
 
 ## Current conclusion
 
-There is no application-level persistent quote cache. Only the watchlist
-configuration is deliberately stored in browser storage. Any persistent quote
-caching observed across reloads is provided by the normal HTTP path rather than
-by the watchlist implementation.
+There is no browser-persistent quote cache. Only the watchlist configuration is
+deliberately stored in browser storage. The backend cache is intentionally
+short-lived and does not persist quotes in the watchlist.

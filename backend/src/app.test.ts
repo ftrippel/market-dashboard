@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import type { YahooChartData } from '../../shared/api/contracts';
 import type { InstrumentLookupResult } from './env';
 import { createApp } from './app';
 
@@ -99,6 +100,111 @@ describe('market dashboard backend', () => {
       },
       meta: { requestId: 'invalid-test' },
     });
+  });
+
+  it('proxies validated chart requests through the backend', async () => {
+    const chart: YahooChartData = {
+      timestamp: [1_700_000_000, 1_700_086_400],
+      indicators: {
+        quote: [{
+          open: [100, 102],
+          high: [103, 105],
+          low: [99, 101],
+          close: [102, 104],
+          volume: [1_000, 2_000],
+        }],
+      },
+      meta: {
+        symbol: '^GDAXI',
+        regularMarketPrice: 104,
+        previousClose: 102,
+        regularMarketTime: 1_700_090_000,
+      },
+    };
+    const lookupChart = vi.fn().mockResolvedValue(chart);
+    const app = createApp({
+      lookupInstruments: vi.fn(),
+      lookupChart,
+      cache: null,
+    });
+
+    const response = await app.request(
+      'https://api.example/api/v1/charts/%5EGDAXI?interval=1d&range=1y',
+      { headers: { Origin: allowedOrigin, 'X-Request-Id': 'chart-test' } },
+      bindings,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    expect(response.headers.get('X-Cache')).toBe('MISS');
+    expect(lookupChart).toHaveBeenCalledWith('^GDAXI', '1d', '1y');
+    expect(await response.json()).toEqual({
+      data: chart,
+      meta: { requestId: 'chart-test' },
+    });
+  });
+
+  it('rejects unsupported chart parameters before calling Yahoo Finance', async () => {
+    const lookupChart = vi.fn();
+    const app = createApp({
+      lookupInstruments: vi.fn(),
+      lookupChart,
+      cache: null,
+    });
+
+    const response = await app.request(
+      'https://api.example/api/v1/charts/AAPL?interval=5m&range=max',
+      { headers: { Origin: allowedOrigin, 'X-Request-Id': 'invalid-chart-test' } },
+      bindings,
+    );
+
+    expect(response.status).toBe(400);
+    expect(lookupChart).not.toHaveBeenCalled();
+    expect(await response.json()).toMatchObject({
+      error: { code: 'INVALID_INTERVAL' },
+      meta: { requestId: 'invalid-chart-test' },
+    });
+  });
+
+  it('serves fresh chart data from the Worker cache', async () => {
+    const chart: YahooChartData = {
+      timestamp: [1_700_000_000],
+      indicators: {
+        quote: [{
+          open: [100],
+          high: [101],
+          low: [99],
+          close: [100],
+          volume: [1_000],
+        }],
+      },
+      meta: { symbol: 'AAPL', regularMarketPrice: 100 },
+    };
+    const lookupChart = vi.fn();
+    const cache = {
+      match: vi.fn().mockResolvedValue(
+        Response.json({ cachedAt: 9_000, result: chart }),
+      ),
+      put: vi.fn(),
+    } as unknown as Cache;
+    const app = createApp({
+      lookupInstruments: vi.fn(),
+      lookupChart,
+      cache,
+      now: () => 10_000,
+    });
+
+    const response = await app.request(
+      'https://api.example/api/v1/charts/AAPL?interval=1m&range=1d',
+      { headers: { Origin: allowedOrigin } },
+      bindings,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('X-Cache')).toBe('HIT');
+    expect(lookupChart).not.toHaveBeenCalled();
+    expect(cache.put).not.toHaveBeenCalled();
+    expect(await response.json()).toMatchObject({ data: chart });
   });
 
   it('rejects browser origins outside the allowlist', async () => {
