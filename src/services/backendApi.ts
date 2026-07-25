@@ -1,7 +1,7 @@
 import type { ApiError, ApiSuccess } from '../../shared/api/contracts';
 import { config } from '../config';
 
-const DEFAULT_TIMEOUT_MS = 10_000;
+const DEFAULT_TIMEOUT_MS = 30_000;
 
 export class BackendApiError extends Error {
   readonly code: string;
