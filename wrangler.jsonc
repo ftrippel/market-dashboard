@@ -8,9 +8,6 @@
   "observability": {
     "enabled": true
   },
-  "limits": {
-    "subrequests": 10
-  },
   "vars": {
     "ALLOWED_ORIGINS": "https://ftrippel.github.io,http://localhost:5173,http://127.0.0.1:5173"
   }
