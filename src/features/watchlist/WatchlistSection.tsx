@@ -21,11 +21,12 @@ import { useConfirm } from '../../context/ConfirmDialogContext';
 import { useSettings } from '../../context/SettingsContext';
 import { SortableHeader, type SortOrder } from '../../components/common/SortableHeader';
 import { PctCell } from '../../components/common/PctCell';
-import { TrendCell } from '../../components/common/MarketTable';
+import { HoldingsButton, TrendCell } from '../../components/common/MarketTable';
+import { HoldingsFlyover } from '../../components/common/HoldingsFlyover';
 import { SymbolLink } from '../../components/common/TradingViewModal';
 import { getDisplayName, getSymbolMeta } from '../../data/symbolMaps';
 import { useMarketStore } from '../../store/marketStore';
-import type { MarketState } from '../../types';
+import type { Holding, MarketState } from '../../types';
 import { colors, formatHoverTimestamp, formatPrice } from '../../utils/formatting';
 import { useScrollLock } from '../../hooks/useScrollLock';
 import { blurActiveElement, dismissOverlay } from '../../utils/focus';
@@ -1112,6 +1113,9 @@ function WatchlistRow({
   const { sparklineMode } = useSettings();
   const meta = getSymbolMeta(item.sym);
   const displayName = getDisplayName(item.sym, data.name);
+  const holdings: Holding[] =
+    store.holdings[item.sym] ?? instrumentInfo[item.sym]?.holdings ?? [];
+  const [holdingsOpen, setHoldingsOpen] = useState(false);
   const expandCommentPenClick = usePenCompatibleClick(() => onExpandComment(item.sym));
   const handleSetTags = useCallback(
     (tags: string[]) => onUpdateTags(item.sym, tags),
@@ -1123,6 +1127,7 @@ function WatchlistRow({
   );
 
   return (
+    <>
     <tr data-symbol={item.sym} style={{ borderBottom: `1px solid ${colors.rowBorder}` }}>
       <td className="watchlist-td" style={{ textAlign: 'left' }}>
         <SymbolLink sym={item.sym} name={displayName} siblings={siblings} />
@@ -1185,6 +1190,13 @@ function WatchlistRow({
         );
       })}
       <td className="watchlist-td" style={{ textAlign: 'left' }}>
+        {holdings.length > 0 ? (
+          <HoldingsButton onOpen={() => setHoldingsOpen(true)} />
+        ) : (
+          <span style={{ color: colors.text3, fontSize: '9px' }}>—</span>
+        )}
+      </td>
+      <td className="watchlist-td" style={{ textAlign: 'left' }}>
         <EditableWatchlistTags tags={item.tags} activeTags={activeTags} onChange={handleSetTags} />
       </td>
       <td className="watchlist-td" style={{ textAlign: 'left' }}>
@@ -1212,6 +1224,15 @@ function WatchlistRow({
         />
       </td>
     </tr>
+      {holdingsOpen && (
+        <HoldingsFlyover
+          etfSym={item.sym}
+          displayName={displayName}
+          holdings={holdings}
+          onClose={() => setHoldingsOpen(false)}
+        />
+      )}
+    </>
   );
 }
 
@@ -1620,6 +1641,9 @@ export function WatchlistSection({ liveEnabled = false }: { liveEnabled?: boolea
                           />
                         );
                       })}
+                      <th className="watchlist-th" style={{ textAlign: 'left' }}>
+                        Holdings
+                      </th>
                       <SortableHeader
                         label="Tags"
                         sortKey="tags"

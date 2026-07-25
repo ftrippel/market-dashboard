@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { getDisplayName } from '../../data/symbolMaps';
 import { isBackendApiConfigured } from '../../services/backendApi';
 import {
   fetchInstrumentMetadata,
@@ -12,10 +11,7 @@ export function useWatchlistInstrumentInfo(symbols: string[], store: MarketState
   const unresolvedKey = useMemo(
     () =>
       symbols
-        .filter((symbol) => {
-          const existing = findMarketData(store, symbol);
-          return getDisplayName(symbol, existing?.name) === symbol;
-        })
+        .filter((symbol) => !findMarketData(store, symbol))
         .join(','),
     [symbols, store],
   );

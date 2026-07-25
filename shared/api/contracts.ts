@@ -21,6 +21,12 @@ export interface HealthData {
   service: 'market-dashboard-api';
 }
 
+export interface InstrumentHolding {
+  s: string;
+  n: string;
+  w: number;
+}
+
 export interface InstrumentMetadata {
   symbol: string;
   displayName: string;
@@ -28,6 +34,7 @@ export interface InstrumentMetadata {
   longName?: string;
   type: string;
   exchange: string;
+  holdings?: InstrumentHolding[];
 }
 
 export interface InstrumentsData {

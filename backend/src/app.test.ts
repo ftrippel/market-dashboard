@@ -44,6 +44,9 @@ describe('market dashboard backend', () => {
           longName: 'Apple Inc.',
           type: 'EQUITY',
           exchange: 'NMS',
+          holdings: [
+            { s: 'MSFT', n: 'Microsoft Corp.', w: 7.25 },
+          ],
         },
       ],
       missingSymbols: ['MISSING'],
@@ -67,6 +70,9 @@ describe('market dashboard backend', () => {
             longName: 'Apple Inc.',
             type: 'EQUITY',
             exchange: 'NMS',
+            holdings: [
+              { s: 'MSFT', n: 'Microsoft Corp.', w: 7.25 },
+            ],
           },
         ],
         missingSymbols: ['MISSING'],

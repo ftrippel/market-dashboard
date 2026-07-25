@@ -87,7 +87,7 @@ export function TrendCell({ value }: { value?: boolean }) {
   return <span style={{ color: colors.text3, fontSize: '11px' }}>—</span>;
 }
 
-function HoldingsButton({ onOpen }: { onOpen: () => void }) {
+export function HoldingsButton({ onOpen }: { onOpen: () => void }) {
   const openPenClick = usePenCompatibleClick(onOpen);
 
   return (

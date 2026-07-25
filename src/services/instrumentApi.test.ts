@@ -22,6 +22,9 @@ describe('fetchInstrumentMetadata', () => {
           displayName: 'Apple Inc.',
           type: 'EQUITY',
           exchange: 'NMS',
+          holdings: [
+            { s: 'MSFT', n: 'Microsoft Corp.', w: 7.25 },
+          ],
         },
         {
           symbol: '^VIX',
@@ -40,6 +43,9 @@ describe('fetchInstrumentMetadata', () => {
       signal: undefined,
     });
     expect(result.AAPL.displayName).toBe('Apple Inc.');
+    expect(result.AAPL.holdings).toEqual([
+      { s: 'MSFT', n: 'Microsoft Corp.', w: 7.25 },
+    ]);
     expect(result['CBOE:VIX'].displayName).toBe('CBOE Volatility Index');
   });
 

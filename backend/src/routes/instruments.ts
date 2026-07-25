@@ -56,7 +56,7 @@ function cacheFor(dependencies: BackendDependencies): Cache | null {
 
 function cacheKey(c: Context<BackendEnv>, symbols: string[]): Request {
   const url = new URL(c.req.url);
-  url.pathname = '/__cache/api/v1/instruments';
+  url.pathname = '/__cache/api/v1/instruments-v2';
   url.search = new URLSearchParams({ symbols: symbols.join(',') }).toString();
   return new Request(url.toString());
 }

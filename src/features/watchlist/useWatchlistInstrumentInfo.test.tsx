@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { act, renderHook, waitFor } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { InstrumentMetadataBySymbol } from '../../services/instrumentApi';
 import type { MarketState } from '../../types';
 import { fetchInstrumentMetadata } from '../../services/instrumentApi';
@@ -19,6 +19,10 @@ const mockedFetchInstrumentMetadata = vi.mocked(fetchInstrumentMetadata);
 const emptyStore = {} as MarketState;
 
 describe('useWatchlistInstrumentInfo', () => {
+  beforeEach(() => {
+    mockedFetchInstrumentMetadata.mockReset();
+  });
+
   it('lets an in-flight lookup finish when the unresolved symbol set changes', async () => {
     let resolveLookup!: (value: InstrumentMetadataBySymbol) => void;
     mockedFetchInstrumentMetadata.mockReturnValueOnce(
@@ -53,5 +57,24 @@ describe('useWatchlistInstrumentInfo', () => {
     await waitFor(() => {
       expect(result.current.AAPL?.displayName).toBe('Apple Inc.');
     });
+  });
+
+  it('does not look up symbols already included in dashboard market data', () => {
+    const store = {
+      etfs: [
+        {
+          sym: 'SPY',
+          d1: 0,
+          w1: 0,
+          hi52: 0,
+          ytd: 0,
+          spark: [],
+        },
+      ],
+    } as unknown as MarketState;
+
+    renderHook(() => useWatchlistInstrumentInfo(['SPY'], store));
+
+    expect(mockedFetchInstrumentMetadata).not.toHaveBeenCalled();
   });
 });

@@ -36,7 +36,9 @@ Returns the service status.
 
 Returns display metadata for up to 25 comma-separated Yahoo Finance symbols.
 The lookup is batched through `yahoo-finance2`, canonicalized for caching, and
-limited to the fields the browser needs.
+limited to the fields the browser needs. ETF results also include their current
+top-ten holdings so symbols added only to a watchlist can use the same Holdings
+flyover as ETFs in the generated dashboard data.
 
 Successful responses use a shared envelope:
 
