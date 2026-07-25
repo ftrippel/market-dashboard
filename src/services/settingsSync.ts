@@ -24,6 +24,7 @@ import {
   type PreferencesSettings,
 } from './settingsBackup';
 import { createDefaultWatchlistStorage } from '../features/watchlist/watchlistStorage';
+import { createUuid } from '../utils/id';
 import {
   CURRENT_SYNC_BUILD_NUMBER,
   CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN,
@@ -233,7 +234,7 @@ async function fetchRemoteDomain(
             transaction.update(docRef, {
               minimumWriterBuild: currentBuild,
               writerBuildNumber: currentBuild,
-              writeId: crypto.randomUUID(),
+              writeId: createUuid(),
             });
           }
           return currentSnapshot;
@@ -371,7 +372,7 @@ async function uploadDomainWhileRemoteApplyPaused(
         : {
             minimumWriterBuild: Math.max(remoteMinimumBuild ?? 0, currentBuild),
             writerBuildNumber: currentBuild,
-            writeId: crypto.randomUUID(),
+            writeId: createUuid(),
           };
 
     transaction.set(
@@ -568,7 +569,7 @@ async function migrateLegacyDashboardDoc(userId: string): Promise<boolean> {
           : {
               minimumWriterBuild: currentBuild,
               writerBuildNumber: currentBuild,
-              writeId: crypto.randomUUID(),
+              writeId: createUuid(),
             };
       transaction.set(settingsDocRef(userId, domain), {
         data: legacyByDomain[domain],

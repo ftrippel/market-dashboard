@@ -1,3 +1,5 @@
+import { createUuid } from '../utils/id';
+
 export type MaType = 'sma' | 'ema';
 
 export interface MovingAverageConfig {
@@ -19,10 +21,7 @@ export const DEFAULT_CHART_MA_SETTINGS: ChartMaSettings = [
 ];
 
 export function createMaId(): string {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-  return `ma-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+  return createUuid();
 }
 
 export function createDefaultMa(overrides?: Partial<Omit<MovingAverageConfig, 'id'>>): MovingAverageConfig {

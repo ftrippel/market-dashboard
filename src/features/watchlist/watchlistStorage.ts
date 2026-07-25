@@ -1,17 +1,14 @@
 import { touchSettingsModified } from '../../services/settingsEvents';
+import { createUuid } from '../../utils/id';
 import type { Watchlist, WatchlistStorage } from './types';
 
 const STORAGE_KEY = 'agy_watchlists';
 const DEFAULT_WATCHLIST_NAME = 'DEFAULT';
 const UNTITLED_WATCHLIST_NAME = 'UNTITLED';
 
-function createId(): string {
-  return crypto.randomUUID();
-}
-
 function createDefaultWatchlist(): Watchlist {
   return {
-    id: createId(),
+    id: createUuid(),
     name: DEFAULT_WATCHLIST_NAME,
     comment: '',
     items: [],
@@ -159,7 +156,7 @@ export function saveWatchlistStorage(state: WatchlistStorage): void {
 
 export function createWatchlist(name: string): Watchlist {
   return {
-    id: createId(),
+    id: createUuid(),
     name: normalizeWatchlistName(name),
     comment: '',
     items: [],
