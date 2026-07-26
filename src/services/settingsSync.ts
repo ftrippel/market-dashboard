@@ -138,10 +138,16 @@ function isRemoteNewer(
   remoteUpdatedAt: string,
   metadata: DomainSyncMetadata,
 ): boolean {
-  if (metadata.writeId && metadata.writeId !== getServerWriteId(domain)) return true;
   const remoteMs = Date.parse(remoteUpdatedAt);
-  if (!Number.isFinite(remoteMs)) return false;
-  return remoteMs > getServerRevisionMs(domain);
+  if (Number.isFinite(remoteMs)) {
+    const currentMs = getServerRevisionMs(domain);
+    if (remoteMs !== currentMs) return remoteMs > currentMs;
+  }
+
+  // Firestore timestamps are serialized with millisecond precision. Use the
+  // write id only to distinguish writes at the same revision, never to let an
+  // older queued snapshot overwrite a newer confirmed upload.
+  return Boolean(metadata.writeId && metadata.writeId !== getServerWriteId(domain));
 }
 
 function flushPendingRemoteSnapshot(domain: SettingsDomain): void {

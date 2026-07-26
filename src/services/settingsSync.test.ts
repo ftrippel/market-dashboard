@@ -35,7 +35,7 @@ import {
   SETTINGS_DOMAINS,
   type SettingsDomain,
 } from './settingsEvents';
-import { reconcileSettings } from './settingsSync';
+import { applyRemoteSnapshot, reconcileSettings } from './settingsSync';
 
 describe('settings reconciliation', () => {
   beforeEach(() => {
@@ -107,6 +107,48 @@ describe('settings reconciliation', () => {
     for (const domain of SETTINGS_DOMAINS) {
       expect(getServerRevision(domain)).toBe(remoteUpdatedAt);
     }
+  });
+
+  it('ignores an older snapshot even when it has a different write id', () => {
+    const currentData = {
+      watchlists: [
+        {
+          id: 'main',
+          name: 'MAIN',
+          comment: 'Just saved',
+          items: [],
+        },
+      ],
+    };
+    const olderData = {
+      watchlists: [
+        {
+          id: 'main',
+          name: 'MAIN',
+          comment: 'Before edit',
+          items: [],
+        },
+      ],
+    };
+    persistWatchlistStorage({ activeId: 'main', ...currentData });
+    setServerRevision('watchlists', '2026-07-25T10:05:00.000Z');
+    setServerWriteId('watchlists', 'confirmed-write');
+    setSyncBase('watchlists', currentData);
+
+    const remoteApplied = vi.fn();
+    window.addEventListener(REMOTE_SETTINGS_APPLIED_EVENT, remoteApplied);
+
+    const applied = applyRemoteSnapshot(
+      'watchlists',
+      olderData,
+      '2026-07-25T10:00:00.000Z',
+      { schemaVersion: 4, buildNumber: '1', writeId: 'older-write' },
+    );
+
+    window.removeEventListener(REMOTE_SETTINGS_APPLIED_EVENT, remoteApplied);
+    expect(applied).toBe(false);
+    expect(exportWatchlistsForSync()).toEqual(currentData);
+    expect(remoteApplied).not.toHaveBeenCalled();
   });
 
   it('pulls cloud preferences when local defaults differ without a pending edit', async () => {
