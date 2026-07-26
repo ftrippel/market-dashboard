@@ -582,12 +582,18 @@ def _fetch_yfinance_history(sym):
     return df, getattr(ticker, 'history_metadata', None)
 
 def _latest_price_row_has_missing_close(df):
-    """Return True when the newest OHLC row has data but no finite close."""
+    """Return True when the newest traded row has data but no finite close."""
     if df is None or df.empty or 'Close' not in df:
         return False
-    price_columns = [column for column in ('Open', 'High', 'Low', 'Close') if column in df]
+    # With auto_adjust=True, yfinance can blank the entire OHLC set when Yahoo's
+    # raw close is null while preserving that session's non-zero volume. Include
+    # Volume so this partial row triggers the individual quote-metadata repair.
+    traded_columns = [
+        column for column in ('Open', 'High', 'Low', 'Close', 'Volume')
+        if column in df
+    ]
     for _, row in df.iloc[::-1].iterrows():
-        if any(_safe_float(row[column]) is not None for column in price_columns):
+        if any(_safe_float(row[column]) is not None for column in traded_columns):
             return _safe_float(row['Close']) is None
     return False
 
