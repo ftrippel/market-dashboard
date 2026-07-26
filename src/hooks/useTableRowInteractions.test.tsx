@@ -32,7 +32,7 @@ function TestTables({
 
 function dispatchPointer(
   target: Element,
-  type: 'pointerover' | 'pointerout' | 'pointerup',
+  type: 'pointerdown' | 'pointerover' | 'pointerout' | 'pointerup',
   pointerType: 'mouse' | 'pen' | 'touch',
   relatedTarget: EventTarget | null = null,
 ) {
@@ -86,20 +86,37 @@ describe('table row interactions', () => {
     expect(secondRow.hasAttribute('data-row-selected')).toBe(false);
   });
 
-  it('selects on Apple Pencil pointerup without requiring a click', () => {
+  it('deduplicates delayed Apple Pencil clicks and keeps later finger taps working', async () => {
     const { getByTestId } = render(<TestTables />);
     const row = getByTestId('first-row');
 
     act(() => {
+      dispatchPointer(row, 'pointerdown', 'pen');
       dispatchPointer(row, 'pointerup', 'pen');
     });
 
     expect(row.getAttribute('data-row-selected')).toBe('true');
 
+    // iPadOS can dispatch the synthetic click in a later task.
+    await act(() => new Promise((resolve) => window.setTimeout(resolve, 10)));
+    row.dispatchEvent(new MouseEvent('click', { bubbles: true, button: 0 }));
+    expect(row.getAttribute('data-row-selected')).toBe('true');
+
     act(() => {
+      dispatchPointer(row, 'pointerdown', 'pen');
       dispatchPointer(row, 'pointerup', 'pen');
     });
 
+    expect(row.hasAttribute('data-row-selected')).toBe(false);
+
+    // If Safari omits the pen click entirely, a subsequent finger tap must not
+    // be mistaken for that missing synthetic click.
+    act(() => {
+      dispatchPointer(row, 'pointerdown', 'pen');
+      dispatchPointer(row, 'pointerup', 'pen');
+      dispatchPointer(row, 'pointerdown', 'touch');
+    });
+    row.dispatchEvent(new MouseEvent('click', { bubbles: true, button: 0 }));
     expect(row.hasAttribute('data-row-selected')).toBe(false);
   });
 

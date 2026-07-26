@@ -56,7 +56,12 @@ export function useTableRowInteractions({
     }
 
     let pendingPenClickRow: HTMLTableRowElement | null = null;
-    let penClickResetId: number | undefined;
+
+    const handlePointerDown = () => {
+      // Start every physical pointer interaction cleanly. This prevents a pen
+      // tap that did not emit `click` from suppressing a later finger/mouse tap.
+      pendingPenClickRow = null;
+    };
 
     const handlePointerOver = (event: PointerEvent) => {
       if (!highlightRowOnHover || !isHoverPointer(event.pointerType)) return;
@@ -81,10 +86,6 @@ export function useTableRowInteractions({
 
       toggleRowSelection(row);
       pendingPenClickRow = row;
-      window.clearTimeout(penClickResetId);
-      penClickResetId = window.setTimeout(() => {
-        pendingPenClickRow = null;
-      }, 0);
     };
 
     const handleClick = (event: MouseEvent) => {
@@ -97,22 +98,22 @@ export function useTableRowInteractions({
       // repeat the selection work in that case.
       if (row === pendingPenClickRow) {
         pendingPenClickRow = null;
-        window.clearTimeout(penClickResetId);
         return;
       }
 
       toggleRowSelection(row);
     };
 
+    document.addEventListener('pointerdown', handlePointerDown);
     document.addEventListener('pointerover', handlePointerOver);
     document.addEventListener('pointerout', handlePointerOut);
     document.addEventListener('pointerup', handlePointerUp);
     document.addEventListener('click', handleClick);
 
     return () => {
-      window.clearTimeout(penClickResetId);
       root.removeAttribute(HOVER_ENABLED_ATTRIBUTE);
       root.removeAttribute(SELECTION_ENABLED_ATTRIBUTE);
+      document.removeEventListener('pointerdown', handlePointerDown);
       document.removeEventListener('pointerover', handlePointerOver);
       document.removeEventListener('pointerout', handlePointerOut);
       document.removeEventListener('pointerup', handlePointerUp);
