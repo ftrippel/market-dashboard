@@ -132,7 +132,7 @@ Without these variables, the dashboard works as before with local storage and JS
 
 ## Deployment
 
-Production builds use the GitHub Pages base path `/market-dashboard/`. After each 6-hour data fetch (or any push to `main`), GitHub Actions builds and deploys to the `gh-pages` branch. Data-only refreshes retain the latest code build number; the number advances only for a push or manual code deployment.
+Production builds use the GitHub Pages base path `/market-dashboard/`. After each 6-hour data fetch (or any push to `main`), GitHub Actions builds and deploys to the `gh-pages` branch. The numeric build identifier is the Unix timestamp of the code deployment workflow. Data-only refreshes retain the latest code build identifier; it advances only for a push or manual code deployment.
 
 To deploy the Cloudflare Worker locally, copy the example environment file and
 set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`:

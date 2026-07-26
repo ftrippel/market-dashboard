@@ -35,19 +35,29 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Resolve code build number
-        id: build-number
+      - name: Resolve code build timestamp
+        id: build-timestamp
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          to_unix_seconds() {
+            node -e 'const value = Date.parse(process.argv[1]); if (!Number.isFinite(value)) process.exit(1); process.stdout.write(String(Math.floor(value / 1000)))' "$1"
+          }
+
           if [[ "$GITHUB_EVENT_NAME" != "workflow_run" ]]; then
-            echo "value=$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
+            current_run_created_at="$(
+              gh api --method GET \
+                "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+                --jq '.created_at'
+            )"
+            build_timestamp="$(to_unix_seconds "$current_run_created_at")"
+            echo "value=$build_timestamp" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           # A market-data refresh redeploys the existing app. Reuse the most
-          # recent code deployment's build number instead of counting it as a
-          # new app build.
+          # recent code deployment's timestamp instead of counting it as a new
+          # app build.
           latest_push="$(
             gh api --method GET \
               "repos/$GITHUB_REPOSITORY/actions/workflows/deploy.yml/runs" \
@@ -55,7 +65,7 @@ jobs:
               -f event=push \
               -f status=success \
               -F per_page=1 \
-              --jq '.workflow_runs[0].run_number // 0'
+              --jq '.workflow_runs[0].created_at // ""'
           )"
           latest_dispatch="$(
             gh api --method GET \
@@ -64,23 +74,24 @@ jobs:
               -f event=workflow_dispatch \
               -f status=success \
               -F per_page=1 \
-              --jq '.workflow_runs[0].run_number // 0'
+              --jq '.workflow_runs[0].created_at // ""'
           )"
 
-          build_number="$latest_push"
-          if (( latest_dispatch > build_number )); then
-            build_number="$latest_dispatch"
+          build_created_at="$latest_push"
+          if [[ "$latest_dispatch" > "$build_created_at" ]]; then
+            build_created_at="$latest_dispatch"
           fi
-          if (( build_number == 0 )); then
+          if [[ -z "$build_created_at" ]]; then
             echo "No successful code deployment was found." >&2
             exit 1
           fi
 
-          echo "value=$build_number" >> "$GITHUB_OUTPUT"
+          build_timestamp="$(to_unix_seconds "$build_created_at")"
+          echo "value=$build_timestamp" >> "$GITHUB_OUTPUT"
 
       - name: Build
         env:
-          VITE_BUILD_NUMBER: ${{ steps.build-number.outputs.value }}
+          VITE_BUILD_NUMBER: ${{ steps.build-timestamp.outputs.value }}
           VITE_BACKEND_API_URL: https://market-dashboard-api.florian-trippel.workers.dev
           VITE_FIREBASE_API_KEY: AIzaSyBY8nKYYGMcxxmhLpFF1V-LMFQiBgrTYns
           VITE_FIREBASE_AUTH_DOMAIN: market-dashboard-f832e.firebaseapp.com
