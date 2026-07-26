@@ -17,7 +17,12 @@ function TestTables({
     <>
       <table data-testid="first-table">
         <tbody>
-          <tr data-testid="first-row"><td>One</td></tr>
+          <tr data-testid="first-row">
+            <td>
+              One
+              <button type="button" data-testid="row-action">Open dialog</button>
+            </td>
+          </tr>
           <tr data-testid="second-row"><td>Two</td></tr>
         </tbody>
       </table>
@@ -84,6 +89,39 @@ describe('table row interactions', () => {
 
     secondRow.dispatchEvent(new MouseEvent('click', { bubbles: true, button: 0 }));
     expect(secondRow.hasAttribute('data-row-selected')).toBe(false);
+  });
+
+  it('keeps a selected row selected when a row action launches a dialog', () => {
+    const { getByTestId } = render(<TestTables />);
+    const row = getByTestId('first-row');
+    const rowAction = getByTestId('row-action');
+
+    row.dispatchEvent(new MouseEvent('click', { bubbles: true, button: 0 }));
+    expect(row.getAttribute('data-row-selected')).toBe('true');
+
+    rowAction.dispatchEvent(new MouseEvent('click', { bubbles: true, button: 0 }));
+    expect(row.getAttribute('data-row-selected')).toBe('true');
+
+    act(() => {
+      dispatchPointer(rowAction, 'pointerup', 'pen');
+    });
+    expect(row.getAttribute('data-row-selected')).toBe('true');
+  });
+
+  it('preserves a dialog source hover until another row is hovered', () => {
+    const { getByTestId } = render(<TestTables />);
+    const row = getByTestId('first-row');
+    const rowAction = getByTestId('row-action');
+    const secondRow = getByTestId('second-row');
+
+    dispatchPointer(row, 'pointerover', 'pen');
+    rowAction.dispatchEvent(new MouseEvent('click', { bubbles: true, button: 0 }));
+    dispatchPointer(row, 'pointerout', 'pen');
+    expect(row.getAttribute('data-row-hovered')).toBe('true');
+
+    dispatchPointer(secondRow, 'pointerover', 'pen');
+    expect(row.hasAttribute('data-row-hovered')).toBe(false);
+    expect(secondRow.getAttribute('data-row-hovered')).toBe('true');
   });
 
   it('deduplicates delayed Apple Pencil clicks and keeps later finger taps working', async () => {

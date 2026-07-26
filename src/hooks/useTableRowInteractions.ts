@@ -17,6 +17,17 @@ function findBodyRow(target: EventTarget | null): HTMLTableRowElement | null {
     : null;
 }
 
+function isInteractiveRowTarget(
+  target: EventTarget | null,
+  row: HTMLTableRowElement,
+): boolean {
+  if (!(target instanceof Element)) return false;
+  const interactive = target.closest(
+    'a, button, input, select, textarea, [role="button"], [contenteditable="true"]',
+  );
+  return interactive !== null && row.contains(interactive);
+}
+
 function toggleRowSelection(row: HTMLTableRowElement) {
   const table = row.closest('table');
   if (!table) return;
@@ -56,6 +67,16 @@ export function useTableRowInteractions({
     }
 
     let pendingPenClickRow: HTMLTableRowElement | null = null;
+    let pinnedHoverRow: HTMLTableRowElement | null = null;
+
+    const pinHoveredRow = (row: HTMLTableRowElement) => {
+      if (
+        highlightRowOnHover &&
+        row.getAttribute(HOVERED_ATTRIBUTE) === 'true'
+      ) {
+        pinnedHoverRow = row;
+      }
+    };
 
     const handlePointerDown = () => {
       // Start every physical pointer interaction cleanly. This prevents a pen
@@ -65,7 +86,16 @@ export function useTableRowInteractions({
 
     const handlePointerOver = (event: PointerEvent) => {
       if (!highlightRowOnHover || !isHoverPointer(event.pointerType)) return;
-      findBodyRow(event.target)?.setAttribute(HOVERED_ATTRIBUTE, 'true');
+
+      const row = findBodyRow(event.target);
+      if (!row) return;
+
+      if (pinnedHoverRow && pinnedHoverRow !== row) {
+        pinnedHoverRow.removeAttribute(HOVERED_ATTRIBUTE);
+        pinnedHoverRow = null;
+      }
+
+      row.setAttribute(HOVERED_ATTRIBUTE, 'true');
     };
 
     const handlePointerOut = (event: PointerEvent) => {
@@ -74,25 +104,36 @@ export function useTableRowInteractions({
       const row = findBodyRow(event.target);
       if (!row) return;
       if (event.relatedTarget instanceof Node && row.contains(event.relatedTarget)) return;
+      if (row === pinnedHoverRow) return;
 
       row.removeAttribute(HOVERED_ATTRIBUTE);
     };
 
     const handlePointerUp = (event: PointerEvent) => {
-      if (!highlightSelectedRow || !isPenPrimaryTap(event)) return;
+      if (!isPenPrimaryTap(event)) return;
 
       const row = findBodyRow(event.target);
       if (!row) return;
+      if (isInteractiveRowTarget(event.target, row)) {
+        pinHoveredRow(row);
+        return;
+      }
+      if (!highlightSelectedRow) return;
 
       toggleRowSelection(row);
       pendingPenClickRow = row;
     };
 
     const handleClick = (event: MouseEvent) => {
-      if (!highlightSelectedRow || event.button !== 0) return;
+      if (event.button !== 0) return;
 
       const row = findBodyRow(event.target);
       if (!row) return;
+      if (isInteractiveRowTarget(event.target, row)) {
+        pinHoveredRow(row);
+        return;
+      }
+      if (!highlightSelectedRow) return;
 
       // A pen pointerup may be followed by a synthetic click. Do not toggle or
       // repeat the selection work in that case.
