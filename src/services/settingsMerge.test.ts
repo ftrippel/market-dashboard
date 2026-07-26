@@ -6,6 +6,8 @@ import { mergePreferencesForUpload, mergeWatchlistsForUpload } from './settingsM
 const BASE_PREFERENCES: PreferencesSettings = {
   theme: 'dark',
   enableHoverPreview: true,
+  highlightRowOnHover: true,
+  highlightSelectedRow: true,
   sparklineMode: 'line',
   marketColumns: ['d1', 'w1', 'hi52', 'ytd', 'spark', 'trend'],
   defaultMarketSortColumn: 'w1',

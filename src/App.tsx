@@ -16,6 +16,7 @@ import { WatchlistSection } from './features/watchlist/WatchlistSection';
 import { useMarketStore } from './store/marketStore';
 import { useMarketData } from './hooks/useMarketData';
 import { useTableRowInteractions } from './hooks/useTableRowInteractions';
+import { useSettings } from './context/SettingsContext';
 import {
   buildClipboardSnapshot,
   buildShareTweetText,
@@ -56,6 +57,8 @@ function getVisibleSymbols(): string[] {
 
 function DashboardContent() {
   const store = useMarketStore();
+  const { highlightRowOnHover, highlightSelectedRow } = useSettings();
+  useTableRowInteractions({ highlightRowOnHover, highlightSelectedRow });
   const updatePrice = useMarketStore((state) => state.updatePrice);
   const { error: dataError } = useMarketData();
   const { status: syncStatus, statusMessage: syncStatusMessage, syncNow } = useSettingsSync();
@@ -255,8 +258,6 @@ function DashboardContent() {
 const MemoizedDashboardContent = memo(DashboardContent);
 
 function App() {
-  useTableRowInteractions();
-
   return (
     <ConfirmDialogProvider>
       <AuthProvider>

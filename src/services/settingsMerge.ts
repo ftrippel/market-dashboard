@@ -28,6 +28,16 @@ export function mergePreferencesForUpload(
       local.enableHoverPreview,
       remote.enableHoverPreview,
     ),
+    highlightRowOnHover: mergeValue(
+      base.highlightRowOnHover,
+      local.highlightRowOnHover,
+      remote.highlightRowOnHover,
+    ),
+    highlightSelectedRow: mergeValue(
+      base.highlightSelectedRow,
+      local.highlightSelectedRow,
+      remote.highlightSelectedRow,
+    ),
     sparklineMode: mergeValue(base.sparklineMode, local.sparklineMode, remote.sparklineMode),
     marketColumns: mergeValue(base.marketColumns, local.marketColumns, remote.marketColumns),
     defaultMarketSortColumn: mergeValue(

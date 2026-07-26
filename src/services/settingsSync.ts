@@ -539,6 +539,12 @@ async function migrateLegacyDashboardDoc(userId: string): Promise<boolean> {
   const preferences: PreferencesSettings = {
     theme: settings.theme,
     enableHoverPreview: settings.enableHoverPreview,
+    highlightRowOnHover:
+      settings.highlightRowOnHover ??
+      getDefaultPreferencesSettings().highlightRowOnHover,
+    highlightSelectedRow:
+      settings.highlightSelectedRow ??
+      getDefaultPreferencesSettings().highlightSelectedRow,
     sparklineMode: settings.sparklineMode,
     marketColumns:
       settings.marketColumns ?? getDefaultPreferencesSettings().marketColumns,

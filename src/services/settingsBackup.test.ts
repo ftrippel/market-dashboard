@@ -123,12 +123,16 @@ describe('applyWatchlistsFromSync', () => {
       'trend',
     ]);
     expect(parsed?.defaultMarketSortColumn).toBe('w1');
+    expect(parsed?.highlightRowOnHover).toBe(true);
+    expect(parsed?.highlightSelectedRow).toBe(true);
   });
 
   it('normalizes configured Firebase columns and default sorting', () => {
     const parsed = parsePreferencesSettings({
       theme: 'dark',
       enableHoverPreview: true,
+      highlightRowOnHover: false,
+      highlightSelectedRow: false,
       sparklineMode: 'line',
       marketColumns: ['m6', 'price', 'm1', 'bad'],
       defaultMarketSortColumn: 'm6',
@@ -137,5 +141,7 @@ describe('applyWatchlistsFromSync', () => {
 
     expect(parsed?.marketColumns).toEqual(['price', 'm1', 'm6']);
     expect(parsed?.defaultMarketSortColumn).toBe('m6');
+    expect(parsed?.highlightRowOnHover).toBe(false);
+    expect(parsed?.highlightSelectedRow).toBe(false);
   });
 });

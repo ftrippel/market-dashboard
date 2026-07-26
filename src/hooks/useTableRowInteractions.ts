@@ -3,6 +3,13 @@ import { isHoverPointer, isPenPrimaryTap } from '../utils/device';
 
 const HOVERED_ATTRIBUTE = 'data-row-hovered';
 const SELECTED_ATTRIBUTE = 'data-row-selected';
+const HOVER_ENABLED_ATTRIBUTE = 'data-highlight-row-on-hover';
+const SELECTION_ENABLED_ATTRIBUTE = 'data-highlight-selected-row';
+
+interface TableRowInteractionOptions {
+  highlightRowOnHover: boolean;
+  highlightSelectedRow: boolean;
+}
 
 function findBodyRow(target: EventTarget | null): HTMLTableRowElement | null {
   return target instanceof Element
@@ -10,17 +17,17 @@ function findBodyRow(target: EventTarget | null): HTMLTableRowElement | null {
     : null;
 }
 
-function selectRow(row: HTMLTableRowElement) {
+function toggleRowSelection(row: HTMLTableRowElement) {
   const table = row.closest('table');
   if (!table) return;
 
+  const wasSelected = row.getAttribute(SELECTED_ATTRIBUTE) === 'true';
+
   table
     .querySelectorAll<HTMLTableRowElement>(`tbody > tr[${SELECTED_ATTRIBUTE}="true"]`)
-    .forEach((selectedRow) => {
-      if (selectedRow !== row) selectedRow.removeAttribute(SELECTED_ATTRIBUTE);
-    });
+    .forEach((selectedRow) => selectedRow.removeAttribute(SELECTED_ATTRIBUTE));
 
-  row.setAttribute(SELECTED_ATTRIBUTE, 'true');
+  if (!wasSelected) row.setAttribute(SELECTED_ATTRIBUTE, 'true');
 }
 
 /**
@@ -28,18 +35,36 @@ function selectRow(row: HTMLTableRowElement) {
  * rendered into document-level portals. Pointer hover explicitly includes a pen
  * so Apple Pencil hover works on supported iPads.
  */
-export function useTableRowInteractions() {
+export function useTableRowInteractions({
+  highlightRowOnHover,
+  highlightSelectedRow,
+}: TableRowInteractionOptions) {
   useEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute(HOVER_ENABLED_ATTRIBUTE, String(highlightRowOnHover));
+    root.setAttribute(SELECTION_ENABLED_ATTRIBUTE, String(highlightSelectedRow));
+
+    if (!highlightRowOnHover) {
+      document
+        .querySelectorAll(`[${HOVERED_ATTRIBUTE}]`)
+        .forEach((row) => row.removeAttribute(HOVERED_ATTRIBUTE));
+    }
+    if (!highlightSelectedRow) {
+      document
+        .querySelectorAll(`[${SELECTED_ATTRIBUTE}]`)
+        .forEach((row) => row.removeAttribute(SELECTED_ATTRIBUTE));
+    }
+
     let pendingPenClickRow: HTMLTableRowElement | null = null;
     let penClickResetId: number | undefined;
 
     const handlePointerOver = (event: PointerEvent) => {
-      if (!isHoverPointer(event.pointerType)) return;
+      if (!highlightRowOnHover || !isHoverPointer(event.pointerType)) return;
       findBodyRow(event.target)?.setAttribute(HOVERED_ATTRIBUTE, 'true');
     };
 
     const handlePointerOut = (event: PointerEvent) => {
-      if (!isHoverPointer(event.pointerType)) return;
+      if (!highlightRowOnHover || !isHoverPointer(event.pointerType)) return;
 
       const row = findBodyRow(event.target);
       if (!row) return;
@@ -49,12 +74,12 @@ export function useTableRowInteractions() {
     };
 
     const handlePointerUp = (event: PointerEvent) => {
-      if (!isPenPrimaryTap(event)) return;
+      if (!highlightSelectedRow || !isPenPrimaryTap(event)) return;
 
       const row = findBodyRow(event.target);
       if (!row) return;
 
-      selectRow(row);
+      toggleRowSelection(row);
       pendingPenClickRow = row;
       window.clearTimeout(penClickResetId);
       penClickResetId = window.setTimeout(() => {
@@ -63,7 +88,7 @@ export function useTableRowInteractions() {
     };
 
     const handleClick = (event: MouseEvent) => {
-      if (event.button !== 0) return;
+      if (!highlightSelectedRow || event.button !== 0) return;
 
       const row = findBodyRow(event.target);
       if (!row) return;
@@ -76,7 +101,7 @@ export function useTableRowInteractions() {
         return;
       }
 
-      selectRow(row);
+      toggleRowSelection(row);
     };
 
     document.addEventListener('pointerover', handlePointerOver);
@@ -86,10 +111,12 @@ export function useTableRowInteractions() {
 
     return () => {
       window.clearTimeout(penClickResetId);
+      root.removeAttribute(HOVER_ENABLED_ATTRIBUTE);
+      root.removeAttribute(SELECTION_ENABLED_ATTRIBUTE);
       document.removeEventListener('pointerover', handlePointerOver);
       document.removeEventListener('pointerout', handlePointerOut);
       document.removeEventListener('pointerup', handlePointerUp);
       document.removeEventListener('click', handleClick);
     };
-  }, []);
+  }, [highlightRowOnHover, highlightSelectedRow]);
 }

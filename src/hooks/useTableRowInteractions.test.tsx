@@ -1,11 +1,17 @@
 // @vitest-environment jsdom
 
-import { act, render } from '@testing-library/react';
+import { act, cleanup, render } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { useTableRowInteractions } from './useTableRowInteractions';
 
-function TestTables() {
-  useTableRowInteractions();
+function TestTables({
+  highlightRowOnHover = true,
+  highlightSelectedRow = true,
+}: {
+  highlightRowOnHover?: boolean;
+  highlightSelectedRow?: boolean;
+}) {
+  useTableRowInteractions({ highlightRowOnHover, highlightSelectedRow });
 
   return (
     <>
@@ -40,9 +46,7 @@ function dispatchPointer(
 }
 
 describe('table row interactions', () => {
-  afterEach(() => {
-    document.body.innerHTML = '';
-  });
+  afterEach(cleanup);
 
   it('highlights mouse and pen proximity, but not touch movement', () => {
     const { getByTestId } = render(<TestTables />);
@@ -77,6 +81,9 @@ describe('table row interactions', () => {
     otherTableRow.dispatchEvent(new MouseEvent('click', { bubbles: true, button: 0 }));
     expect(secondRow.getAttribute('data-row-selected')).toBe('true');
     expect(otherTableRow.getAttribute('data-row-selected')).toBe('true');
+
+    secondRow.dispatchEvent(new MouseEvent('click', { bubbles: true, button: 0 }));
+    expect(secondRow.hasAttribute('data-row-selected')).toBe(false);
   });
 
   it('selects on Apple Pencil pointerup without requiring a click', () => {
@@ -88,5 +95,24 @@ describe('table row interactions', () => {
     });
 
     expect(row.getAttribute('data-row-selected')).toBe('true');
+
+    act(() => {
+      dispatchPointer(row, 'pointerup', 'pen');
+    });
+
+    expect(row.hasAttribute('data-row-selected')).toBe(false);
+  });
+
+  it('does not highlight or select rows when both display options are disabled', () => {
+    const { getByTestId } = render(
+      <TestTables highlightRowOnHover={false} highlightSelectedRow={false} />,
+    );
+    const row = getByTestId('first-row');
+
+    dispatchPointer(row, 'pointerover', 'pen');
+    row.dispatchEvent(new MouseEvent('click', { bubbles: true, button: 0 }));
+
+    expect(row.hasAttribute('data-row-hovered')).toBe(false);
+    expect(row.hasAttribute('data-row-selected')).toBe(false);
   });
 });

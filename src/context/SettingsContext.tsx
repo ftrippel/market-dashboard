@@ -24,6 +24,10 @@ export type SparklineMode = 'none' | 'line' | 'bar' | 'dot';
 interface SettingsContextValue {
   enableHoverPreview: boolean;
   setEnableHoverPreview: (val: boolean) => void;
+  highlightRowOnHover: boolean;
+  setHighlightRowOnHover: (val: boolean) => void;
+  highlightSelectedRow: boolean;
+  setHighlightSelectedRow: (val: boolean) => void;
   sparklineMode: SparklineMode;
   setSparklineMode: (mode: SparklineMode) => void;
   marketColumns: MarketColumnKey[];
@@ -43,6 +47,11 @@ function readHoverPreview(): boolean {
   const stored = localStorage.getItem('enableHoverPreview');
   if (stored !== null) return stored === 'true';
   return config.tradingView.enableHoverPreview;
+}
+
+function readBooleanSetting(key: string, fallback: boolean): boolean {
+  const stored = localStorage.getItem(key);
+  return stored === null ? fallback : stored === 'true';
 }
 
 function readSparklineMode(): SparklineMode {
@@ -100,6 +109,12 @@ function persistChartMaSettingsToStorage(settings: ChartMaSettings): void {
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [enableHoverPreview, setEnableHoverPreviewState] = useState<boolean>(readHoverPreview);
+  const [highlightRowOnHover, setHighlightRowOnHoverState] = useState<boolean>(() =>
+    readBooleanSetting('highlightRowOnHover', true),
+  );
+  const [highlightSelectedRow, setHighlightSelectedRowState] = useState<boolean>(() =>
+    readBooleanSetting('highlightSelectedRow', true),
+  );
   const [sparklineMode, setSparklineModeState] = useState<SparklineMode>(readSparklineMode);
   const [marketColumns, setMarketColumnsState] = useState<MarketColumnKey[]>(readMarketColumns);
   const [defaultMarketSortColumn, setDefaultMarketSortColumnState] =
@@ -110,6 +125,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     const handleRemoteApply = (event: Event) => {
       if (!isRemoteSettingsAppliedEvent(event) || event.detail.domain !== 'preferences') return;
       setEnableHoverPreviewState(readHoverPreview());
+      setHighlightRowOnHoverState(readBooleanSetting('highlightRowOnHover', true));
+      setHighlightSelectedRowState(readBooleanSetting('highlightSelectedRow', true));
       setSparklineModeState(readSparklineMode());
       setMarketColumnsState(readMarketColumns());
       setDefaultMarketSortColumnState(readDefaultMarketSortColumn());
@@ -123,6 +140,18 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const setEnableHoverPreview = useCallback((val: boolean) => {
     setEnableHoverPreviewState(val);
     localStorage.setItem('enableHoverPreview', String(val));
+    touchSettingsModified('preferences');
+  }, []);
+
+  const setHighlightRowOnHover = useCallback((val: boolean) => {
+    setHighlightRowOnHoverState(val);
+    localStorage.setItem('highlightRowOnHover', String(val));
+    touchSettingsModified('preferences');
+  }, []);
+
+  const setHighlightSelectedRow = useCallback((val: boolean) => {
+    setHighlightSelectedRowState(val);
+    localStorage.setItem('highlightSelectedRow', String(val));
     touchSettingsModified('preferences');
   }, []);
 
@@ -180,6 +209,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       value={{
         enableHoverPreview,
         setEnableHoverPreview,
+        highlightRowOnHover,
+        setHighlightRowOnHover,
+        highlightSelectedRow,
+        setHighlightSelectedRow,
         sparklineMode,
         setSparklineMode,
         marketColumns,

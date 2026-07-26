@@ -35,11 +35,13 @@ import {
   type SettingsDomain,
 } from './settingsEvents';
 
-export const SETTINGS_EXPORT_VERSION = 3;
+export const SETTINGS_EXPORT_VERSION = 4;
 
 export interface PreferencesSettings {
   theme: Theme;
   enableHoverPreview: boolean;
+  highlightRowOnHover: boolean;
+  highlightSelectedRow: boolean;
   sparklineMode: SparklineMode;
   marketColumns: MarketColumnKey[];
   defaultMarketSortColumn: SortableMarketColumnKey;
@@ -56,6 +58,8 @@ export interface DashboardSettingsExport {
   exportedAt: string;
   theme: Theme;
   enableHoverPreview: boolean;
+  highlightRowOnHover: boolean;
+  highlightSelectedRow: boolean;
   sparklineMode: SparklineMode;
   marketColumns: MarketColumnKey[];
   defaultMarketSortColumn: SortableMarketColumnKey;
@@ -67,6 +71,8 @@ export interface DashboardSettingsExport {
 const STORAGE_KEYS = {
   theme: 'market-dashboard-theme',
   enableHoverPreview: 'enableHoverPreview',
+  highlightRowOnHover: 'highlightRowOnHover',
+  highlightSelectedRow: 'highlightSelectedRow',
   sparklineMode: 'sparklineMode',
   marketColumns: 'marketColumns',
   defaultMarketSortColumn: 'defaultMarketSortColumn',
@@ -205,6 +211,8 @@ export function exportPreferencesSettings(): PreferencesSettings {
       STORAGE_KEYS.enableHoverPreview,
       config.tradingView.enableHoverPreview,
     ),
+    highlightRowOnHover: readBoolean(STORAGE_KEYS.highlightRowOnHover, true),
+    highlightSelectedRow: readBoolean(STORAGE_KEYS.highlightSelectedRow, true),
     sparklineMode: readSparklineMode(),
     marketColumns: readMarketColumns(),
     defaultMarketSortColumn: readDefaultMarketSortColumn(),
@@ -223,6 +231,8 @@ export function getDefaultPreferencesSettings(): PreferencesSettings {
   return {
     theme: 'dark',
     enableHoverPreview: config.tradingView.enableHoverPreview,
+    highlightRowOnHover: true,
+    highlightSelectedRow: true,
     sparklineMode: 'line',
     marketColumns: [...DEFAULT_MARKET_COLUMNS],
     defaultMarketSortColumn: DEFAULT_MARKET_SORT_COLUMN,
@@ -294,6 +304,8 @@ export function applyPreferencesSettings(
 ): void {
   localStorage.setItem(STORAGE_KEYS.theme, data.theme);
   localStorage.setItem(STORAGE_KEYS.enableHoverPreview, String(data.enableHoverPreview));
+  localStorage.setItem(STORAGE_KEYS.highlightRowOnHover, String(data.highlightRowOnHover));
+  localStorage.setItem(STORAGE_KEYS.highlightSelectedRow, String(data.highlightSelectedRow));
   localStorage.setItem(STORAGE_KEYS.sparklineMode, data.sparklineMode);
   localStorage.setItem(STORAGE_KEYS.marketColumns, JSON.stringify(data.marketColumns));
   localStorage.setItem(
@@ -441,6 +453,10 @@ function parseSharedSettings(raw: Record<string, unknown>): Omit<DashboardSettin
   return {
     theme,
     enableHoverPreview: raw.enableHoverPreview,
+    highlightRowOnHover:
+      typeof raw.highlightRowOnHover === 'boolean' ? raw.highlightRowOnHover : true,
+    highlightSelectedRow:
+      typeof raw.highlightSelectedRow === 'boolean' ? raw.highlightSelectedRow : true,
     sparklineMode,
     marketColumns: parseMarketColumns(raw.marketColumns),
     defaultMarketSortColumn: isSortableMarketColumnKey(raw.defaultMarketSortColumn)
@@ -458,7 +474,7 @@ export function parseDashboardSettingsExport(raw: unknown): DashboardSettingsExp
   }
 
   const version = raw.version;
-  if (version !== 1 && version !== 2 && version !== 3) {
+  if (version !== 1 && version !== 2 && version !== 3 && version !== 4) {
     throw new Error(`Unsupported settings version: ${String(raw.version)}`);
   }
 
@@ -479,6 +495,8 @@ export function importDashboardSettings(data: DashboardSettingsExport): void {
     {
       theme: data.theme,
       enableHoverPreview: data.enableHoverPreview,
+      highlightRowOnHover: data.highlightRowOnHover,
+      highlightSelectedRow: data.highlightSelectedRow,
       sparklineMode: data.sparklineMode,
       marketColumns: data.marketColumns,
       defaultMarketSortColumn: data.defaultMarketSortColumn,
@@ -545,6 +563,10 @@ export function parsePreferencesSettings(value: unknown): PreferencesSettings | 
   return {
     theme,
     enableHoverPreview: value.enableHoverPreview,
+    highlightRowOnHover:
+      typeof value.highlightRowOnHover === 'boolean' ? value.highlightRowOnHover : true,
+    highlightSelectedRow:
+      typeof value.highlightSelectedRow === 'boolean' ? value.highlightSelectedRow : true,
     sparklineMode,
     marketColumns: parseMarketColumns(value.marketColumns),
     defaultMarketSortColumn: isSortableMarketColumnKey(value.defaultMarketSortColumn)

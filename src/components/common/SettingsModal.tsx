@@ -59,6 +59,10 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
   const {
     enableHoverPreview,
     setEnableHoverPreview,
+    highlightRowOnHover,
+    setHighlightRowOnHover,
+    highlightSelectedRow,
+    setHighlightSelectedRow,
     sparklineMode,
     setSparklineMode,
     marketColumns,
@@ -86,6 +90,8 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
 
   const closePenClick = usePenCompatibleClick(close);
   const hoverPreviewPenToggle = usePenCheckboxToggle(setEnableHoverPreview);
+  const rowHoverPenToggle = usePenCheckboxToggle(setHighlightRowOnHover);
+  const selectedRowPenToggle = usePenCheckboxToggle(setHighlightSelectedRow);
   const sparklineModePenActivate = usePenSelectActivate();
   const importInputRef = useRef<HTMLInputElement>(null);
   const [activeTab, setActiveTab] = useState<SettingsTab>('display');
@@ -263,7 +269,8 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
       <div
         id="settings-modal-box"
         style={{
-          width: 'min(460px, 95vw)',
+          width: 'min(460px, calc(100vw - 24px))',
+          maxHeight: 'calc(100dvh - 24px)',
           background: 'var(--bg)',
           border: '1px solid var(--border2)',
           borderRadius: '6px',
@@ -273,7 +280,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
           boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.4)',
         }}
       >
-        <div id="tv-modal-hdr" style={{ padding: '10px 14px' }}>
+        <div id="tv-modal-hdr" style={{ padding: '10px 14px', flexShrink: 0 }}>
           <div
             id="tv-modal-title"
             style={{
@@ -304,6 +311,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
         <div
           style={{
             display: 'flex',
+            flexShrink: 0,
             flexWrap: 'wrap',
             gap: '6px',
             padding: '10px 14px 0',
@@ -322,7 +330,18 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
           ))}
         </div>
 
-        <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '16px', minHeight: '280px' }}>
+        <div
+          className="settings-modal-content"
+          style={{
+            padding: '20px 24px',
+            display: 'flex',
+            flex: '1 1 auto',
+            flexDirection: 'column',
+            gap: '16px',
+            minHeight: 0,
+            overflowY: 'auto',
+          }}
+        >
           {activeTab === 'display' && (
             <>
               <label
@@ -353,6 +372,69 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
                 When enabled, hovering over any financial ticker symbol displays a 1-year daily historical line chart to the left or right of the symbol.
               </p>
+
+              <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div>
+                  <div style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+                    Table Row Highlighting
+                  </div>
+                  <p style={{ margin: '4px 0 0', fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                    Control transient hover highlighting and persistent row selection independently.
+                  </p>
+                </div>
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                  }}
+                >
+                  <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+                    Highlight row on hovering
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={highlightRowOnHover}
+                    onChange={(event) => setHighlightRowOnHover(event.target.checked)}
+                    onPointerUp={rowHoverPenToggle}
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      accentColor: 'var(--accent)',
+                      cursor: 'pointer',
+                    }}
+                  />
+                </label>
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                  }}
+                >
+                  <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+                    Highlight selected row
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={highlightSelectedRow}
+                    onChange={(event) => setHighlightSelectedRow(event.target.checked)}
+                    onPointerUp={selectedRowPenToggle}
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      accentColor: 'var(--accent)',
+                      cursor: 'pointer',
+                    }}
+                  />
+                </label>
+              </div>
 
               <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
 
@@ -750,6 +832,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
             background: 'var(--bg2)',
             borderTop: '1px solid var(--border)',
             display: 'flex',
+            flexShrink: 0,
             justifyContent: 'flex-end',
           }}
         >
