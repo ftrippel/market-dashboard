@@ -7,4 +7,7 @@ process.env.VITE_BUILD_TIME ??= new Date().toISOString()
 export default defineConfig({
   plugins: [react()],
   base: '/market-dashboard/',
+  build: {
+    sourcemap: false,
+  },
 })
