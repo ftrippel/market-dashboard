@@ -28,7 +28,9 @@
   --red-dim-bg:        rgba(242, 54, 69, 0.12);
   --neutral-dim-bg:    rgba(61, 90, 120, 0.15);
   --row-border:        rgba(31, 90, 255, 0.1);
-  --row-hover-bg:      rgba(31, 90, 255, 0.03);
+  --row-hover-bg:      rgba(31, 90, 255, 0.08);
+  --row-selected-bg:   rgba(31, 90, 255, 0.14);
+  --row-selected-hover-bg: rgba(31, 90, 255, 0.18);
   --bench-row-bg:      rgba(31, 90, 255, 0.04);
   --modal-backdrop:    rgba(0, 0, 0, 0.82);
   --snap-flash:        rgba(31, 90, 255, 0.05);
@@ -75,7 +77,9 @@
   --red-dim-bg:        rgba(255, 90, 103, 0.14);
   --neutral-dim-bg:    rgba(107, 119, 133, 0.2);
   --row-border:        rgba(91, 140, 255, 0.12);
-  --row-hover-bg:      rgba(91, 140, 255, 0.06);
+  --row-hover-bg:      rgba(91, 140, 255, 0.12);
+  --row-selected-bg:   rgba(91, 140, 255, 0.2);
+  --row-selected-hover-bg: rgba(91, 140, 255, 0.26);
   --bench-row-bg:      rgba(91, 140, 255, 0.08);
   --modal-backdrop:    rgba(0, 0, 0, 0.88);
   --snap-flash:        rgba(91, 140, 255, 0.08);
@@ -686,6 +690,28 @@ body::before {
 .table-scroll th,
 .table-scroll td {
   white-space: nowrap;
+}
+
+.table-scroll tbody > tr > td {
+  transition: background-color .1s ease;
+}
+
+.table-scroll tbody > tr:hover > td,
+.table-scroll tbody > tr[data-row-hovered="true"] > td {
+  background-color: var(--row-hover-bg);
+}
+
+.table-scroll tbody > tr[data-row-selected="true"] > td {
+  background-color: var(--row-selected-bg);
+}
+
+.table-scroll tbody > tr[data-row-selected="true"] > td:first-child {
+  box-shadow: inset 3px 0 var(--accent);
+}
+
+.table-scroll tbody > tr[data-row-selected="true"]:hover > td,
+.table-scroll tbody > tr[data-row-selected="true"][data-row-hovered="true"] > td {
+  background-color: var(--row-selected-hover-bg);
 }
 
 /* Layout grids (match original HTML) */

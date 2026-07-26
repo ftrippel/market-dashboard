@@ -15,6 +15,7 @@ import { PositionCalculator } from './features/calculator/PositionCalculator';
 import { WatchlistSection } from './features/watchlist/WatchlistSection';
 import { useMarketStore } from './store/marketStore';
 import { useMarketData } from './hooks/useMarketData';
+import { useTableRowInteractions } from './hooks/useTableRowInteractions';
 import {
   buildClipboardSnapshot,
   buildShareTweetText,
@@ -254,6 +255,8 @@ function DashboardContent() {
 const MemoizedDashboardContent = memo(DashboardContent);
 
 function App() {
+  useTableRowInteractions();
+
   return (
     <ConfirmDialogProvider>
       <AuthProvider>

@@ -94,13 +94,6 @@ export const Table: React.FC<TableProps> = ({
             key={idx}
             style={{
               borderBottom: `1px solid ${colors.rowBorder}`,
-              transition: 'background .1s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = colors.rowHoverBg;
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
             }}
           >
             {columns.map((col) => {
