@@ -782,7 +782,6 @@ function WatchlistNoteEditor({
   onExpand: () => void;
 }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [showExpand, setShowExpand] = useState(false);
 
   const syncHeight = useCallback(() => {
     const textarea = textareaRef.current;
@@ -791,7 +790,6 @@ function WatchlistNoteEditor({
     textarea.style.height = 'auto';
     const scrollHeight = textarea.scrollHeight;
     const overflows = scrollHeight > WATCHLIST_NOTE_MAX_INLINE_HEIGHT;
-    setShowExpand(overflows);
     textarea.style.height = `${Math.min(scrollHeight, WATCHLIST_NOTE_MAX_INLINE_HEIGHT)}px`;
     textarea.style.overflowY = overflows ? 'auto' : 'hidden';
   }, []);
@@ -814,17 +812,15 @@ function WatchlistNoteEditor({
         onInput={syncHeight}
         placeholder="Add notes for this watchlist…"
       />
-      {showExpand && (
-        <button
-          type="button"
-          className="table-expand-btn watchlist-note-expand-btn"
-          title="Open watchlist comment editor"
-          aria-label="Open watchlist comment editor"
-          {...expandPenClick}
-        >
-          <Icon name="open_in_full" size="xs" />
-        </button>
-      )}
+      <button
+        type="button"
+        className="table-expand-btn watchlist-note-expand-btn"
+        title="Open watchlist comment editor"
+        aria-label="Open watchlist comment editor"
+        {...expandPenClick}
+      >
+        <Icon name="open_in_full" size="xs" />
+      </button>
     </div>
   );
 }
