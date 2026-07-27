@@ -271,6 +271,25 @@ describe('market dashboard backend', () => {
     });
   });
 
+  it('allows same-origin browser requests on the deployed Worker domain', async () => {
+    const app = appWithLookup(vi.fn());
+    const response = await app.request(
+      'https://dashboard.example/api/v1/health',
+      {
+        headers: {
+          Origin: 'https://dashboard.example',
+          'X-Request-Id': 'same-origin-test',
+        },
+      },
+      bindings,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe(
+      'https://dashboard.example',
+    );
+  });
+
   it('returns a stable API error when Yahoo Finance fails', async () => {
     const app = appWithLookup(async () => {
       throw new Error('upstream unavailable');

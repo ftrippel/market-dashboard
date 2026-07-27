@@ -20,13 +20,14 @@ function allowedOrigins(value?: string): string[] {
 export const apiCors = createMiddleware<BackendEnv>(async (c, next) => {
   const origin = c.req.header('Origin');
   const origins = allowedOrigins(c.env.ALLOWED_ORIGINS);
+  const requestOrigin = new URL(c.req.url).origin;
 
-  if (origin && !origins.includes(origin)) {
+  if (origin && origin !== requestOrigin && !origins.includes(origin)) {
     return failure(c, 403, 'ORIGIN_NOT_ALLOWED', 'This origin is not allowed to use the API.');
   }
 
   const middleware = cors({
-    origin: origin ?? origins[0],
+    origin: origin ?? requestOrigin,
     allowMethods: ['GET', 'OPTIONS'],
     allowHeaders: ['Content-Type', 'X-Request-Id'],
     exposeHeaders: ['X-Request-Id', 'X-Cache'],

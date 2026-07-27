@@ -4,10 +4,18 @@ function readPositiveIntEnv(value: string | undefined, fallback: number): number
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+const backendApiUrl =
+  import.meta.env.PROD && import.meta.env.BASE_URL === '/'
+    ? window.location.origin
+    : (import.meta.env.VITE_BACKEND_API_URL ?? '').replace(/\/+$/, '');
+
 export const config = {
   backend: {
-    /** Base URL of the versioned market-dashboard backend (without /api/v1). */
-    apiUrl: (import.meta.env.VITE_BACKEND_API_URL ?? '').replace(/\/+$/, ''),
+    /**
+     * Base URL of the versioned market-dashboard backend (without /api/v1).
+     * Root production builds run on the full-stack Worker and use its origin.
+     */
+    apiUrl: backendApiUrl,
   },
   liveData: {
     /** Delay between Yahoo price fetches when symbols are visible (ms). */

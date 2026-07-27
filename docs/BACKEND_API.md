@@ -1,9 +1,9 @@
 # Backend API
 
-The market dashboard keeps its React application on GitHub Pages and uses a
-separate Hono application on Cloudflare Workers for operations that cannot run
-reliably in a browser. The Worker handles Yahoo Finance metadata and chart
-requests so the production frontend does not depend on a public CORS proxy.
+The market dashboard deploys its React application and Hono API together on
+Cloudflare Workers. Static assets are served directly by Cloudflare while
+`/api/*` requests run the Worker application. GitHub Pages remains a second
+frontend host and calls the public Worker API.
 
 ## Configuration
 
@@ -14,8 +14,10 @@ VITE_BACKEND_API_URL=https://market-dashboard-api.florian-trippel.workers.dev
 ```
 
 The value is an origin without `/api/v1`. The frontend API client appends the
-versioned route prefix. If the value is absent, backend-powered metadata is
-skipped and Yahoo chart requests use the public CORS-proxy fallback.
+versioned route prefix. A root-path production build automatically uses its own
+origin when the value is absent; this is the Cloudflare deployment. Other
+builds skip backend-powered metadata and use the public CORS-proxy fallback
+when the value is absent.
 
 For local backend development:
 
@@ -23,8 +25,9 @@ For local backend development:
 npm run dev:backend
 ```
 
-Wrangler serves the Worker locally. Set the frontend variable to the printed
-Worker origin while running the Vite development server separately.
+This builds the root-hosted frontend and starts Wrangler with both static assets
+and API routes. To run Vite separately, set `VITE_BACKEND_API_URL` to the
+printed Worker origin.
 
 ## Implemented routes
 
@@ -82,13 +85,22 @@ See [Caching](#caching) for the chart cache durations and configuration.
 
 ## Caching
 
-The backend uses two distinct cache layers:
+The application uses three distinct cache layers:
 
-1. The Cloudflare Worker Cache API reduces requests from the Worker to Yahoo.
-2. HTTP `Cache-Control` headers determine whether callers such as browsers or
+1. Cloudflare Workers Static Assets caches the frontend globally.
+2. The Cloudflare Worker Cache API reduces requests from the Worker to Yahoo.
+3. HTTP `Cache-Control` headers determine whether callers such as browsers or
    shared proxies may reuse a response.
 
-### Worker Cache API
+### Frontend static assets
+
+Vite's content-hashed files under `/assets/*` are browser-cacheable for one
+year and marked immutable. `index.html` and `data.json` must revalidate on each
+use, with content-based ETags avoiding unnecessary downloads when they have not
+changed. Each deployment attaches the complete static asset manifest to the
+same Worker version as the API.
+
+### Backend Worker Cache API
 
 | Data | Fresh for | Retained for stale fallback | Configuration |
 |---|---:|---:|---|
@@ -138,7 +150,7 @@ belong in `backend/src/routes`, upstream integrations in
 
 ## Deployment
 
-The `Deploy Backend` GitHub Actions workflow requires:
+The `Deploy Frontend and Worker` GitHub Actions workflow requires:
 
 - `CLOUDFLARE_API_TOKEN`, scoped to edit Workers
 - `CLOUDFLARE_ACCOUNT_ID`
@@ -150,8 +162,10 @@ variables, and run:
 npm run deploy:backend
 ```
 
-This command type-checks the backend and then uses the repository's installed
-Wrangler version to load `.env`, build, bundle, and deploy the Worker.
+The preferred command name is `npm run deploy:cloudflare`;
+`npm run deploy:backend` remains an alias. It type-checks both applications and
+then uses the repository's installed Wrangler version to load `.env`, build,
+bundle, and deploy the frontend assets and API together.
 
-The Worker origin is set directly as `VITE_BACKEND_API_URL` in the existing
-GitHub Pages workflow and is baked into the Vite build.
+The Cloudflare build uses its own origin automatically. The Worker origin is
+set directly as `VITE_BACKEND_API_URL` in the GitHub Pages build.

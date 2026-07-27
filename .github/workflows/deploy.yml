@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Deploy Frontend and Worker
 
 on:
   push:
@@ -15,7 +15,7 @@ permissions:
   actions: read
 
 concurrency:
-  group: pages
+  group: production
   cancel-in-progress: true
 
 jobs:
@@ -34,6 +34,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Test
+        run: npm test
 
       - name: Resolve code build timestamp
         id: build-timestamp
@@ -89,7 +92,7 @@ jobs:
           build_timestamp="$(to_unix_seconds "$build_created_at")"
           echo "value=$build_timestamp" >> "$GITHUB_OUTPUT"
 
-      - name: Build
+      - name: Build for GitHub Pages
         env:
           VITE_BUILD_NUMBER: ${{ steps.build-timestamp.outputs.value }}
           VITE_BACKEND_API_URL: https://market-dashboard-api.florian-trippel.workers.dev
@@ -101,11 +104,8 @@ jobs:
           VITE_FIREBASE_APP_ID: 1:923810954895:web:7588911a204b75f407fafa
         run: npm run build
 
-      - name: Verify dist output
-        run: node scripts/verify-dist.mjs
-
-      - name: List dist files
-        run: find dist -type f | sort
+      - name: Verify GitHub Pages output
+        run: node scripts/verify-dist.mjs pages
 
       - name: Deploy to gh-pages branch
         uses: peaceiris/actions-gh-pages@v4.1.0
@@ -113,3 +113,24 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           commit_message: 'deploy: ${{ github.sha }}'
+
+      - name: Build for Cloudflare
+        env:
+          VITE_BUILD_NUMBER: ${{ steps.build-timestamp.outputs.value }}
+          VITE_FIREBASE_API_KEY: AIzaSyBY8nKYYGMcxxmhLpFF1V-LMFQiBgrTYns
+          VITE_FIREBASE_AUTH_DOMAIN: market-dashboard-f832e.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: market-dashboard-f832e
+          VITE_FIREBASE_STORAGE_BUCKET: market-dashboard-f832e.firebasestorage.app
+          VITE_FIREBASE_MESSAGING_SENDER_ID: "923810954895"
+          VITE_FIREBASE_APP_ID: 1:923810954895:web:7588911a204b75f407fafa
+        run: npm run build:cloudflare
+
+      - name: Verify Cloudflare output
+        run: node scripts/verify-dist.mjs cloudflare
+
+      - name: Deploy frontend and API to Cloudflare
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy

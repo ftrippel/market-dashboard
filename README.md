@@ -2,15 +2,17 @@
 
 A React dashboard for futures, equities, commodities, market breadth, and a position calculator.
 
-Live version: [https://ftrippel.github.io/market-dashboard](https://ftrippel.github.io/market-dashboard)
+Live versions:
+
+- Cloudflare Worker: [https://market-dashboard-api.florian-trippel.workers.dev](https://market-dashboard-api.florian-trippel.workers.dev)
+- GitHub Pages fallback: [https://ftrippel.github.io/market-dashboard](https://ftrippel.github.io/market-dashboard)
 
 React rewrite of the original [market-dashboard](https://github.com/clementang17-alt/market-dashboard) by [Clement Ang](https://github.com/clementang17-alt/market-dashboard).
 
 **Stack:** React 19, TypeScript, Zustand, Vite
 
-The optional backend is a versioned Hono API on Cloudflare Workers. It handles
-server-side integrations such as Yahoo Finance instrument metadata while the
-React application remains hosted on GitHub Pages. See
+The versioned Hono API and React frontend are deployed together on Cloudflare
+Workers. GitHub Pages remains a second frontend host and calls the same API. See
 [`docs/BACKEND_API.md`](docs/BACKEND_API.md).
 
 ## Data flow
@@ -112,7 +114,7 @@ VITE_FIREBASE_APP_ID=...
 
 Settings are stored per user in Firestore as separate documents under `users/{uid}/settings/` (`preferences`, `calculator`, `watchlists`) and sync in real time across devices.
 
-6. Add your dev and production domains under **Authentication → Settings → Authorized domains** (e.g. `localhost`, `ftrippel.github.io`).
+6. Add your dev and production domains under **Authentication → Settings → Authorized domains** (e.g. `localhost`, `ftrippel.github.io`, and `market-dashboard-api.florian-trippel.workers.dev`).
 
 Without these variables, the dashboard works as before with local storage and JSON export/import only.
 
@@ -121,10 +123,12 @@ Without these variables, the dashboard works as before with local storage and JS
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Start Vite dev server |
-| `npm run dev:backend` | Start the Cloudflare Worker backend locally |
-| `npm run build` | Type-check and build for production |
+| `npm run dev:backend` | Build and start the full-stack Cloudflare Worker locally |
+| `npm run build` | Type-check and build for GitHub Pages |
+| `npm run build:cloudflare` | Type-check and build the root-hosted Worker frontend |
 | `npm run build:backend` | Type-check the Worker backend |
-| `npm run deploy:backend` | Deploy the Worker with Wrangler |
+| `npm run deploy:cloudflare` | Build and deploy the frontend and API with Wrangler |
+| `npm run deploy:backend` | Compatibility alias for `deploy:cloudflare` |
 | `npm run preview` | Preview production build locally |
 | `npm run preview:pages` | Preview with GitHub Pages base path |
 | `npm run verify:dist` | Build and verify `dist/` output |
@@ -132,18 +136,29 @@ Without these variables, the dashboard works as before with local storage and JS
 
 ## Deployment
 
-Production builds use the GitHub Pages base path `/market-dashboard/`. After each 6-hour data fetch (or any push to `main`), GitHub Actions builds and deploys to the `gh-pages` branch. The numeric build identifier is the Unix timestamp of the code deployment workflow. Data-only refreshes retain the latest code build identifier; it advances only for a push or manual code deployment.
+After each 6-hour data fetch (or any push to `main`), the deployment workflow
+builds both hosting variants:
+
+- Cloudflare serves the React assets at `/` and runs Hono for `/api/*`.
+- GitHub Pages serves the same frontend from `/market-dashboard/` and uses the
+  public Worker API URL.
+
+The numeric build identifier is the Unix timestamp of the code deployment
+workflow. Data-only refreshes retain the latest code build identifier; it
+advances only for a push or manual code deployment.
 
 To deploy the Cloudflare Worker locally, copy the example environment file and
 set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`:
 
 ```bash
 cp .env.example .env
-npm run deploy:backend
+npm run deploy:cloudflare
 ```
 
-This single command type-checks the backend, then lets the project-local
-Wrangler installation build, bundle, and deploy the Worker.
+This command type-checks both applications, builds the root-hosted frontend,
+and lets the project-local Wrangler installation deploy the frontend assets and
+API as one Worker version. The previous `deploy:backend` command remains as an
+alias.
 
 ## License
 
