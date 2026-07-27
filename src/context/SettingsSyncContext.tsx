@@ -175,12 +175,12 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
     try {
       const result = await withInitialSyncRetry(() => reconcileSettings(userId));
       markSynced(summarizeReconcileResult(result));
+      setSessionReady(true);
     } catch (err) {
       setStatus('error');
       setStatusMessage(err instanceof Error ? err.message : 'Cloud sync failed.');
     } finally {
       syncingRef.current = false;
-      setSessionReady(true);
     }
   }, [clearUploadTimers, markSynced, userId]);
 

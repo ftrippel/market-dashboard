@@ -125,4 +125,21 @@ describe('SettingsSyncProvider text editing', () => {
     window.removeEventListener(REMOTE_SETTINGS_APPLIED_EVENT, remoteApplied);
     expect(remoteApplied).toHaveBeenCalledOnce();
   });
+
+  it('does not start live sync after the initial build check fails', async () => {
+    syncMocks.reconcileSettings.mockRejectedValue(
+      new Error('This app build is too old to sync. Reload the app before editing settings.'),
+    );
+
+    render(
+      <SettingsSyncProvider>
+        <TestEditor />
+      </SettingsSyncProvider>,
+    );
+
+    await vi.advanceTimersByTimeAsync(3_000);
+
+    expect(syncMocks.reconcileSettings).toHaveBeenCalledTimes(3);
+    expect(syncMocks.subscribeToRemoteSettings).not.toHaveBeenCalled();
+  });
 });

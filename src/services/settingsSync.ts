@@ -82,6 +82,7 @@ interface DomainSyncMetadata {
   schemaVersion: number;
   buildNumber: string;
   writeId: string | null;
+  minimumWriterBuild?: number;
 }
 
 function settingsDocRef(userId: string, domain: SettingsDomain) {
@@ -109,12 +110,16 @@ function getCurrentMetadata(domain: SettingsDomain): DomainSyncMetadata {
     schemaVersion: CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN[domain],
     buildNumber: CURRENT_SYNC_BUILD_NUMBER,
     writeId: null,
+    minimumWriterBuild: 0,
   };
 }
 
 function normalizeRemoteMetadata(
   domain: SettingsDomain,
-  payload: Pick<RemoteDocPayload, 'schemaVersion' | 'buildNumber' | 'writeId'>,
+  payload: Pick<
+    RemoteDocPayload,
+    'schemaVersion' | 'buildNumber' | 'writeId' | 'minimumWriterBuild'
+  >,
 ): DomainSyncMetadata {
   const fallback = getCurrentMetadata(domain);
   return {
@@ -124,7 +129,17 @@ function normalizeRemoteMetadata(
         : 0,
     buildNumber: typeof payload.buildNumber === 'string' ? payload.buildNumber : fallback.buildNumber,
     writeId: typeof payload.writeId === 'string' ? payload.writeId : null,
+    minimumWriterBuild:
+      typeof payload.minimumWriterBuild === 'number' &&
+      Number.isFinite(payload.minimumWriterBuild)
+        ? Math.max(0, Math.floor(payload.minimumWriterBuild))
+        : 0,
   };
+}
+
+function canCurrentBuildApply(metadata: DomainSyncMetadata): boolean {
+  const currentBuild = parseBuildNumberAsInt(CURRENT_SYNC_BUILD_NUMBER);
+  return currentBuild === null || currentBuild >= (metadata.minimumWriterBuild ?? 0);
 }
 
 function stampLocalMetadata(domain: SettingsDomain, metadata: DomainSyncMetadata): void {
@@ -618,6 +633,11 @@ export function applyRemoteSnapshot(
   metadata?: DomainSyncMetadata,
 ): boolean {
   const remoteMetadata = metadata ?? getCurrentMetadata(domain);
+  // A live listener can receive the same document that made the initial
+  // reconcile reject this build. Never let that listener bypass writer
+  // protection and apply settings (especially the theme) afterward.
+  if (!canCurrentBuildApply(remoteMetadata)) return false;
+
   if (isRemoteApplyPaused(domain)) {
     // Returning false here means "queued for deferred apply", not "unchanged".
     pendingRemoteSnapshots.set(domain, { data, updatedAt, metadata: remoteMetadata });
