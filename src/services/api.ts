@@ -1,6 +1,7 @@
 import type { MarketData, MarketState, Holding } from '../types';
 import { isYieldSymbol, isYahooFetchable, toYahooFinanceSymbol } from '../data/symbolMaps';
 import type {
+  YahooQuoteSnapshot,
   YahooChartData,
   YahooChartInterval,
   YahooChartRange,
@@ -464,8 +465,65 @@ function computeMetricsFromChartResult(
   };
 }
 
-export async function fetchYahooFinanceMarketMetrics(sym: string): Promise<YahooMarketMetrics | null> {
-  const result = await fetchYahooFinanceChartResult(sym, '1y');
+function quoteSnapshotFromChartResult(
+  sym: string,
+  result: YahooChartData | null,
+): YahooQuoteSnapshot | null {
+  const regularMarketPrice = result?.meta?.regularMarketPrice;
+  const previousClose = result?.meta?.previousClose ?? result?.meta?.chartPreviousClose;
+  if (
+    typeof regularMarketPrice !== 'number' ||
+    !Number.isFinite(regularMarketPrice) ||
+    typeof previousClose !== 'number' ||
+    !Number.isFinite(previousClose) ||
+    previousClose === 0
+  ) {
+    return null;
+  }
+
+  return {
+    symbol: toYahooFinanceSymbol(sym),
+    regularMarketPrice,
+    previousClose,
+    ...(result?.meta?.regularMarketTime == null
+      ? {}
+      : { regularMarketTime: result.meta.regularMarketTime }),
+  };
+}
+
+export async function fetchYahooFinanceMarketMetrics(
+  sym: string,
+  quoteSnapshot?: YahooQuoteSnapshot | Promise<YahooQuoteSnapshot | undefined>,
+): Promise<YahooMarketMetrics | null> {
+  const resultPromise = fetchYahooFinanceChartResult(sym, '1y');
+  let snapshot = await quoteSnapshot;
+  const result = await resultPromise;
   if (!result) return null;
-  return computeMetricsFromChartResult(sym, result);
+
+  if (!snapshot) {
+    const dailyPreviousClose = result.meta?.previousClose;
+    if (
+      typeof dailyPreviousClose !== 'number' ||
+      !Number.isFinite(dailyPreviousClose) ||
+      dailyPreviousClose === 0
+    ) {
+      snapshot = quoteSnapshotFromChartResult(
+        sym,
+        await fetchYahooFinanceChartResult(sym, '1d', '1m'),
+      ) ?? undefined;
+    }
+  }
+
+  if (!snapshot) return computeMetricsFromChartResult(sym, result);
+  return computeMetricsFromChartResult(sym, {
+    ...result,
+    meta: {
+      ...result.meta,
+      regularMarketPrice: snapshot.regularMarketPrice,
+      previousClose: snapshot.previousClose,
+      ...(snapshot.regularMarketTime == null
+        ? {}
+        : { regularMarketTime: snapshot.regularMarketTime }),
+    },
+  });
 }

@@ -42,6 +42,18 @@ export interface InstrumentsData {
   missingSymbols: string[];
 }
 
+export interface YahooQuoteSnapshot {
+  symbol: string;
+  regularMarketPrice: number;
+  previousClose: number;
+  regularMarketTime?: number;
+}
+
+export interface YahooQuotesData {
+  quotes: YahooQuoteSnapshot[];
+  missingSymbols: string[];
+}
+
 export type YahooChartInterval = '1m' | '1d';
 export type YahooChartRange = '1d' | '1y' | '2y';
 

@@ -53,6 +53,12 @@ YF_BATCH_SIZE = int(os.environ.get('YF_BATCH_SIZE', '25'))
 YF_BATCH_PAUSE = float(os.environ.get('YF_BATCH_PAUSE', '1.0'))
 YF_INFO_PAUSE = float(os.environ.get('YF_INFO_PAUSE', '0.3'))
 YF_HOLDINGS_PAUSE = float(os.environ.get('YF_HOLDINGS_PAUSE', '0.4'))
+YAHOO_QUOTE_BATCH_SIZE = 25
+MARKET_DATA_API_URL = os.environ.get(
+    'MARKET_DATA_API_URL',
+    os.environ.get('VITE_BACKEND_API_URL', ''),
+).rstrip('/')
+YAHOO_QUOTE_SNAPSHOTS = {}
 
 # ── MASSIVE API CONFIG ─────────────────────────────────────────────────────────
 MASSIVE_API_KEY = os.environ.get('MASSIVE_API_KEY', '')
@@ -392,6 +398,53 @@ def _metadata_market_timestamp(metadata):
     except Exception:
         return None
 
+def fetch_yahoo_quote_snapshots(tickers):
+    """Fetch authoritative current/previous-close snapshots in backend batches."""
+    if not MARKET_DATA_API_URL:
+        return {}
+
+    snapshots = {}
+    symbols = sorted(set(tickers))
+    batches = [
+        symbols[i:i + YAHOO_QUOTE_BATCH_SIZE]
+        for i in range(0, len(symbols), YAHOO_QUOTE_BATCH_SIZE)
+    ]
+    print(f"Fetching Yahoo quote snapshots ({len(symbols)} symbols, {len(batches)} batches)...")
+    for batch_index, batch in enumerate(batches, 1):
+        try:
+            response = requests.get(
+                f'{MARKET_DATA_API_URL}/api/v1/quotes',
+                params={'symbols': ','.join(batch)},
+                timeout=30,
+            )
+            response.raise_for_status()
+            payload = response.json().get('data', {})
+            for quote in payload.get('quotes', []):
+                symbol = quote.get('symbol')
+                market_price = _safe_float(quote.get('regularMarketPrice'))
+                previous_close = _safe_float(quote.get('previousClose'))
+                if not symbol or market_price is None or previous_close in (None, 0):
+                    continue
+                snapshots[symbol] = {
+                    'regularMarketPrice': market_price,
+                    'previousClose': previous_close,
+                    'regularMarketTime': quote.get('regularMarketTime'),
+                }
+        except Exception as error:
+            print(f"  ⚠ Quote batch {batch_index}/{len(batches)} failed: {error}")
+
+    print(f"✓ Yahoo quote snapshots: {len(snapshots)}/{len(symbols)}")
+    return snapshots
+
+def _metadata_with_quote_snapshot(sym, metadata):
+    """Overlay batch quote fields without discarding useful history metadata."""
+    snapshot = YAHOO_QUOTE_SNAPSHOTS.get(sym)
+    if not snapshot:
+        return metadata
+    merged = dict(metadata) if isinstance(metadata, dict) else {}
+    merged.update(snapshot)
+    return merged
+
 def _repair_latest_close_from_metadata(df, metadata):
     """Repair or append the latest daily close from yfinance quote metadata.
 
@@ -685,6 +738,7 @@ def fetch_batch(tickers, retries=3):
     return results
 
 def extract_metrics(df, sym, metadata=None, yield_syms=None):
+    metadata = _metadata_with_quote_snapshot(sym, metadata)
     df = _repair_latest_close_from_metadata(df, metadata)
     df = df[df['Close'].map(lambda value: _safe_float(value) is not None)]
     if len(df) < 2:
@@ -980,6 +1034,8 @@ def fetch_breadth():
 
 # ── MAIN FETCH ──────────────────────────────────────────────────────────────────────────────────────────────────────
 def fetch_all(prices_only=False):
+    global YAHOO_QUOTE_SNAPSHOTS
+
     # Always load existing data.json so we can fall back to it if the API fails
     existing = {}
     out_path = DATA_PATH
@@ -1018,6 +1074,13 @@ def fetch_all(prices_only=False):
         print(f"✓ MASSIVE_API_KEY found — using Massive API for treasury yields only")
     else:
         print(f"⚠ MASSIVE_API_KEY not set — all data via yfinance")
+
+    quote_tickers = [
+        sym
+        for _, tickers_key in BATCH_SECTIONS + INDIVIDUAL_SECTIONS
+        for sym in tickers_for(tickers_key)
+    ] + tickers_for('yields')
+    YAHOO_QUOTE_SNAPSHOTS = fetch_yahoo_quote_snapshots(quote_tickers)
 
     # Fetch global indices individually (batch download returns stale data for non-US indices)
     for out_key, tickers_key in yf_individual_batches:

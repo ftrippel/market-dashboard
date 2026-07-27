@@ -21,7 +21,7 @@ vi.mock('yahoo-finance2/modules/quoteSummary', () => ({
   default: vi.fn(),
 }));
 
-import { lookupYahooInstruments } from './yahooFinance';
+import { lookupYahooInstruments, lookupYahooQuotes } from './yahooFinance';
 
 describe('lookupYahooInstruments', () => {
   beforeEach(() => {
@@ -87,5 +87,34 @@ describe('lookupYahooInstruments', () => {
         exchange: 'NMS',
       },
     ]);
+  });
+
+  it('normalizes authoritative price and previous-close snapshots', async () => {
+    yahooMocks.quote.mockResolvedValue([
+      {
+        symbol: 'AAPL',
+        regularMarketPrice: 336.97,
+        regularMarketPreviousClose: 333.02,
+        regularMarketTime: new Date('2026-07-27T13:35:14Z'),
+      },
+      {
+        symbol: 'MISSING',
+        regularMarketPrice: 10,
+      },
+    ]);
+
+    const result = await lookupYahooQuotes(['AAPL', 'MISSING']);
+
+    expect(result).toEqual({
+      quotes: [
+        {
+          symbol: 'AAPL',
+          regularMarketPrice: 336.97,
+          previousClose: 333.02,
+          regularMarketTime: 1_785_159_314,
+        },
+      ],
+      missingSymbols: ['MISSING'],
+    });
   });
 });

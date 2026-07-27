@@ -37,6 +37,7 @@ jobs:
         run: uv run python scripts/fetch_data.py
         env:
           MASSIVE_API_KEY: ${{ secrets.MASSIVE_API_KEY }}
+          MARKET_DATA_API_URL: https://market-dashboard-api.florian-trippel.workers.dev
 
       - name: Commit and push data.json
         run: |

@@ -28,6 +28,10 @@ Daily candles remain the source for `1W`, `52W Hi`, `YTD`, and sparkline history
 does not supply a usable market snapshot, `1D%` falls back to the final two available daily
 candles.
 
+The browser and scheduled Python refresh request quote snapshots in batches of up to 25
+symbols. This keeps `1D%` independent of missing daily candles without adding one quote
+request per instrument.
+
 ### Why the old calculation failed
 
 On 2026-07-24 during the European session, yfinance returned the following daily histories:
@@ -43,6 +47,12 @@ On 2026-07-24 during the European session, yfinance returned the following daily
 The individual equities were missing Jul 23 in their daily series, so comparing the last
 two rows measured a two-session move. Yahoo's `regularMarketChangePercent` independently
 matched the calculation from `regularMarketPrice` and `previousClose`.
+
+On 2026-07-27, Yahoo's US daily histories contained a 2026-07-24 timestamp with null OHLCV
+values for instruments including `AAPL`, while the quote snapshot still supplied the valid
+2026-07-24 previous close. The batch quote overlay prevents that null candle from turning
+the displayed `1D%` into a multi-session change. Longer-period history remains dependent on
+Yahoo repairing the missing candle.
 
 ## Real-time versus delayed data
 

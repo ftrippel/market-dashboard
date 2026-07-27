@@ -82,6 +82,50 @@ describe('market dashboard backend', () => {
     });
   });
 
+  it('returns authoritative Yahoo quote snapshots in batches', async () => {
+    const lookupQuotes = vi.fn().mockResolvedValue({
+      quotes: [
+        {
+          symbol: 'AAPL',
+          regularMarketPrice: 336.97,
+          previousClose: 333.02,
+          regularMarketTime: 1_785_159_314,
+        },
+      ],
+      missingSymbols: ['MISSING'],
+    });
+    const app = createApp({
+      lookupInstruments: vi.fn(),
+      lookupQuotes,
+      cache: null,
+    });
+
+    const response = await app.request(
+      'https://api.example/api/v1/quotes?symbols=missing,aapl,AAPL',
+      { headers: { Origin: allowedOrigin, 'X-Request-Id': 'quote-test' } },
+      bindings,
+    );
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get('Cache-Control')).toBe('no-store');
+    expect(response.headers.get('X-Cache')).toBe('MISS');
+    expect(lookupQuotes).toHaveBeenCalledWith(['AAPL', 'MISSING']);
+    expect(await response.json()).toEqual({
+      data: {
+        quotes: [
+          {
+            symbol: 'AAPL',
+            regularMarketPrice: 336.97,
+            previousClose: 333.02,
+            regularMarketTime: 1_785_159_314,
+          },
+        ],
+        missingSymbols: ['MISSING'],
+      },
+      meta: { requestId: 'quote-test' },
+    });
+  });
+
   it('rejects invalid symbols before calling Yahoo Finance', async () => {
     const lookup = vi.fn();
     const app = appWithLookup(lookup);

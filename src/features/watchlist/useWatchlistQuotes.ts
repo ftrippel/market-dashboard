@@ -4,6 +4,7 @@ import {
   fetchYahooFinancePrice,
   type YahooMarketMetrics,
 } from '../../services/api';
+import { fetchYahooQuoteSnapshots } from '../../services/quoteApi';
 import { config } from '../../config';
 import { useMarketStore } from '../../store/marketStore';
 import type { MarketState } from '../../types';
@@ -41,10 +42,16 @@ export function useWatchlistQuotes(
     let active = true;
 
     const fetchAll = async () => {
+      const snapshotsPromise = fetchYahooQuoteSnapshots(missingSymbols).catch((err) => {
+        console.warn('Failed to fetch batch Yahoo quote snapshots:', err);
+        return null;
+      });
+
       for (const sym of missingSymbols) {
         if (!active) return;
         try {
-          const res = await fetchYahooFinanceMarketMetrics(sym);
+          const quoteSnapshot = snapshotsPromise.then((snapshots) => snapshots?.[sym]);
+          const res = await fetchYahooFinanceMarketMetrics(sym, quoteSnapshot);
           if (!active || !res) continue;
           setQuotes((prev) => ({
             ...prev,
@@ -131,6 +138,11 @@ export function useWatchlistQuotes(
       setRefetching(true);
 
       try {
+        const snapshotsPromise = fetchYahooQuoteSnapshots(syms).catch((err) => {
+          console.warn('Failed to fetch batch Yahoo quote snapshots:', err);
+          return null;
+        });
+
         for (let i = 0; i < syms.length; i++) {
           if (runId !== refetchRunIdRef.current) return;
           if (i > 0) await delay(REFETCH_MIN_INTERVAL_MS);
@@ -138,7 +150,8 @@ export function useWatchlistQuotes(
 
           const sym = syms[i];
           try {
-            const res = await fetchYahooFinanceMarketMetrics(sym);
+            const quoteSnapshot = snapshotsPromise.then((snapshots) => snapshots?.[sym]);
+            const res = await fetchYahooFinanceMarketMetrics(sym, quoteSnapshot);
             if (runId !== refetchRunIdRef.current || !res) continue;
 
             setQuotes((prev) => ({

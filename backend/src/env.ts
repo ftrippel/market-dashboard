@@ -2,6 +2,7 @@ import type {
   InstrumentMetadata,
   YahooChartData,
   YahooChartInterval,
+  YahooQuoteSnapshot,
   YahooChartRange,
 } from '../../shared/api/contracts';
 
@@ -23,8 +24,14 @@ export interface InstrumentLookupResult {
   missingSymbols: string[];
 }
 
+export interface QuoteLookupResult {
+  quotes: YahooQuoteSnapshot[];
+  missingSymbols: string[];
+}
+
 export interface BackendDependencies {
   lookupInstruments: (symbols: string[]) => Promise<InstrumentLookupResult>;
+  lookupQuotes?: (symbols: string[]) => Promise<QuoteLookupResult>;
   lookupChart?: (
     symbol: string,
     interval: YahooChartInterval,

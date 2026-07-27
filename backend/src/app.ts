@@ -6,11 +6,13 @@ import { requestId } from './middleware/requestId';
 import { registerChartRoutes } from './routes/charts';
 import { registerHealthRoutes } from './routes/health';
 import { registerInstrumentRoutes } from './routes/instruments';
-import { lookupYahooInstruments } from './services/yahooFinance';
+import { registerQuoteRoutes } from './routes/quotes';
+import { lookupYahooInstruments, lookupYahooQuotes } from './services/yahooFinance';
 
 export function createApp(
   dependencies: BackendDependencies = {
     lookupInstruments: lookupYahooInstruments,
+    lookupQuotes: lookupYahooQuotes,
   },
 ): Hono<BackendEnv> {
   const app = new Hono<BackendEnv>();
@@ -21,6 +23,7 @@ export function createApp(
   registerHealthRoutes(app);
   registerChartRoutes(app, dependencies);
   registerInstrumentRoutes(app, dependencies);
+  registerQuoteRoutes(app, dependencies);
 
   app.notFound((c) => failure(c, 404, 'NOT_FOUND', 'The requested API route was not found.'));
   app.onError((error, c) => {

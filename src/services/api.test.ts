@@ -149,30 +149,59 @@ describe('fetchYahooFinanceMarketMetrics', () => {
     expect(metrics?.d1).toBe(6.45);
   });
 
-  it('repairs a missing current daily close without making a second request', async () => {
+  it('repairs a missing current daily close from a provided quote snapshot', async () => {
     mockYahooChart({
       closes: [100, 102, null],
       highs: [101, 103, 106],
       regularMarketPrice: 105,
     });
 
-    const metrics = await fetchYahooFinanceMarketMetrics('TEST');
+    const metrics = await fetchYahooFinanceMarketMetrics('TEST', {
+      symbol: 'TEST',
+      regularMarketPrice: 105,
+      previousClose: 102,
+      regularMarketTime: 1_784_879_618,
+    });
 
     expect(metrics?.price).toBe(105);
     expect(metrics?.d1).toBe(2.94);
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 
-  it('adds the current session when daily history ends on the previous session', async () => {
+  it('adds the current session from a provided quote snapshot', async () => {
     mockYahooChart({
       closes: [100, 102],
       regularMarketPrice: 105,
     });
 
-    const metrics = await fetchYahooFinanceMarketMetrics('TEST');
+    const metrics = await fetchYahooFinanceMarketMetrics('TEST', {
+      symbol: 'TEST',
+      regularMarketPrice: 105,
+      previousClose: 102,
+      regularMarketTime: 1_784_879_618,
+    });
 
     expect(metrics?.price).toBe(105);
     expect(metrics?.d1).toBe(2.94);
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the quote snapshot when the previous daily session is null', async () => {
+    mockYahooChart({
+      closes: [321.66, null, 336.97],
+      highs: [323.3, null, 338.14],
+      regularMarketPrice: 336.97,
+    });
+
+    const metrics = await fetchYahooFinanceMarketMetrics('AAPL', {
+      symbol: 'AAPL',
+      regularMarketPrice: 336.97,
+      previousClose: 333.02,
+      regularMarketTime: 1_785_164_114,
+    });
+
+    expect(metrics?.price).toBe(336.97);
+    expect(metrics?.d1).toBe(1.19);
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 

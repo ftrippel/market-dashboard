@@ -7,6 +7,9 @@ from scripts import fetch_data
 
 
 class LatestCloseRepairTests(unittest.TestCase):
+    def tearDown(self):
+        fetch_data.YAHOO_QUOTE_SNAPSHOTS = {}
+
     def test_volume_only_latest_row_triggers_individual_repair(self):
         batch_history = pd.DataFrame(
             {
@@ -52,6 +55,31 @@ class LatestCloseRepairTests(unittest.TestCase):
         )
 
         self.assertFalse(fetch_data._latest_price_row_has_missing_close(history))
+
+    def test_batch_quote_snapshot_is_authoritative_for_price_and_one_day_change(self):
+        history = pd.DataFrame(
+            {
+                'Open': [321.73, 334.90],
+                'High': [323.30, 338.14],
+                'Low': [319.35, 334.02],
+                'Close': [321.66, 336.97],
+                'Volume': [40_840_800, 14_700_000],
+            },
+            index=pd.to_datetime(['2026-07-23', '2026-07-27']),
+        )
+        fetch_data.YAHOO_QUOTE_SNAPSHOTS = {
+            'AAPL': {
+                'regularMarketPrice': 336.97,
+                'previousClose': 333.02,
+                'regularMarketTime': 1_785_164_114,
+            },
+        }
+
+        metrics = fetch_data.extract_metrics(history, 'AAPL', yield_syms=[])
+
+        self.assertEqual(metrics['price'], 336.97)
+        self.assertEqual(metrics['d1'], 1.19)
+        self.assertEqual(metrics['updatedAt'], 1_785_164_114_000)
 
 
 if __name__ == '__main__':
