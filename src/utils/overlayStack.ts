@@ -6,6 +6,8 @@ type DismissHandler = () => void;
 
 const LEAVE_CONFIRM_MESSAGE = 'Go back to the previous page?';
 const ROOT_GUARD_KEY = '__rootGuard';
+const ROOT_GUARD_OWNER_KEY = '__rootGuardOwner';
+const rootGuardOwner = crypto.randomUUID();
 
 interface StackEntry {
   id: symbol;
@@ -24,16 +26,25 @@ let leaveConfirmationOpen = false;
 function getHistoryGuardDepth(state: unknown): number {
   if (!state || typeof state !== 'object' || !(ROOT_GUARD_KEY in state)) return 0;
 
-  const depth = (state as Record<string, unknown>).depth;
-  // Legacy guards had no depth and were created during startup, so Safari may
-  // have marked them as skippable. Treat them as unarmed and replace them from
-  // the next real user interaction.
+  const guardState = state as Record<string, unknown>;
+  if (guardState[ROOT_GUARD_OWNER_KEY] !== rootGuardOwner) return 0;
+
+  const depth = guardState.depth;
+  // Legacy guards and guards inherited after a page refresh belong to another
+  // document. Treat them as unarmed and replace them on the next user interaction.
   return typeof depth === 'number' && depth > 0 ? depth : 0;
 }
 
 function pushHistoryGuard() {
   historyGuardDepth++;
-  history.pushState({ [ROOT_GUARD_KEY]: true, depth: historyGuardDepth }, '');
+  history.pushState(
+    {
+      [ROOT_GUARD_KEY]: true,
+      [ROOT_GUARD_OWNER_KEY]: rootGuardOwner,
+      depth: historyGuardDepth,
+    },
+    '',
+  );
 }
 
 /**

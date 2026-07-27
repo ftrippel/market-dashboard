@@ -26,9 +26,10 @@ describe('overlay back navigation', () => {
     unregisterSecond = pushOverlayDismiss(dismissSecond);
 
     expect(pushState).toHaveBeenCalledTimes(2);
+    const rootGuardState = pushState.mock.calls[0][0];
 
     window.dispatchEvent(
-      new PopStateEvent('popstate', { state: { __rootGuard: true, depth: 1 } }),
+      new PopStateEvent('popstate', { state: rootGuardState }),
     );
     expect(dismissSecond).toHaveBeenCalledOnce();
     expect(dismissFirst).not.toHaveBeenCalled();
