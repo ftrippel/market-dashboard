@@ -4,6 +4,13 @@ function readPositiveIntEnv(value: string | undefined, fallback: number): number
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function readBooleanEnv(value: string | undefined, fallback: boolean): boolean {
+  if (value === undefined || value === '') return fallback;
+  if (value.toLowerCase() === 'true') return true;
+  if (value.toLowerCase() === 'false') return false;
+  return fallback;
+}
+
 const backendApiUrl =
   import.meta.env.PROD && import.meta.env.BASE_URL === '/'
     ? window.location.origin
@@ -22,6 +29,16 @@ export const config = {
     refreshIntervalMs: readPositiveIntEnv(import.meta.env.VITE_LIVE_DATA_REFRESH_MS, 1000),
     /** Retry delay when no symbols are visible in the viewport (ms). */
     idleRetryIntervalMs: readPositiveIntEnv(import.meta.env.VITE_LIVE_DATA_IDLE_RETRY_MS, 2000),
+  },
+  sync: {
+    /**
+     * Check the deployed build marker before syncing settings.
+     * Set VITE_ENABLE_BUILD_VERSION_CHECK=false at build time to disable it.
+     */
+    enableBuildVersionCheck: readBooleanEnv(
+      import.meta.env.VITE_ENABLE_BUILD_VERSION_CHECK,
+      true,
+    ),
   },
   tradingView: {
     /** Enable hover preview chart (disabled by default). */

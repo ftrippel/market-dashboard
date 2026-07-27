@@ -31,6 +31,7 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_APP_ID?: string;
   readonly VITE_BUILD_NUMBER?: string;
   readonly VITE_BUILD_TIME?: string;
+  readonly VITE_ENABLE_BUILD_VERSION_CHECK?: string;
 }
 
 interface ImportMeta {

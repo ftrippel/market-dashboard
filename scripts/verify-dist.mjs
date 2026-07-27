@@ -10,7 +10,7 @@ if (!validTargets.has(target)) {
   process.exit(1);
 }
 
-const required = ['index.html', 'data.json', '.nojekyll', 'favicon.png', '_headers'];
+const required = ['index.html', 'data.json', 'build-version.json', '.nojekyll', 'favicon.png', '_headers'];
 const sourceMapDirective = /(?:\/\/|\/\*)[#@]\s*sourceMappingURL\s*=/i;
 
 function listFiles(directory) {

@@ -251,7 +251,11 @@ function DashboardContent() {
           <div className="sync-error-banner" role="alert" aria-live="assertive">
             <Icon name="sync_problem" size="md" className="sync-error-banner-icon" />
             <div className="sync-error-banner-content">
-              <strong>Cloud sync failed</strong>
+              <strong>
+                {syncStatusMessage?.includes('newer app version')
+                  ? 'App update required'
+                  : 'Cloud sync failed'}
+              </strong>
               <span>Your latest changes may only be stored on this device.</span>
               {syncStatusMessage && <small>{syncStatusMessage}</small>}
             </div>

@@ -26,6 +26,7 @@ import {
   SETTINGS_CHANGED_EVENT,
   SETTINGS_DOMAINS,
 } from '../services/settingsEvents';
+import { assertCurrentBuild } from '../services/buildVersion';
 
 export type SyncStatus = 'idle' | 'syncing' | 'synced' | 'error';
 
@@ -147,6 +148,7 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
       setStatusMessage('Saving to cloud…');
 
       try {
+        await assertCurrentBuild();
         let pendingDomains = uniqueDomains;
         while (pendingDomains.length > 0) {
           await Promise.all(pendingDomains.map((domain) => uploadDomain(userId, domain)));
@@ -173,6 +175,7 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
     clearUploadTimers();
 
     try {
+      await assertCurrentBuild();
       const result = await withInitialSyncRetry(() => reconcileSettings(userId));
       markSynced(summarizeReconcileResult(result));
       setSessionReady(true);
@@ -193,6 +196,7 @@ export function SettingsSyncProvider({ children }: { children: ReactNode }) {
     clearUploadTimers();
 
     try {
+      await assertCurrentBuild();
       const result = await reconcileSettings(userId);
       markSynced(summarizeReconcileResult(result));
     } catch (err) {
