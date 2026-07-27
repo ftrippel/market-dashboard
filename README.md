@@ -114,7 +114,7 @@ VITE_FIREBASE_APP_ID=...
 
 Settings are stored per user in Firestore as separate documents under `users/{uid}/settings/` (`preferences`, `calculator`, `watchlists`) and sync in real time across devices.
 
-6. Add your dev and production domains under **Authentication → Settings → Authorized domains** (e.g. `localhost`, `ftrippel.github.io`, and `market-dashboard-api.florian-trippel.workers.dev`).
+6. Add your dev and production domains under **Authentication → Settings → Authorized domains** (e.g. `localhost`, `ftrippel.github.io`, `market-dashboard-api.florian-trippel.workers.dev`, and `stockmarket-dashboard.com`).
 
 Without these variables, the dashboard works as before with local storage and JSON export/import only.
 
