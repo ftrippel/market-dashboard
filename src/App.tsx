@@ -30,6 +30,60 @@ import { buildLabel } from './buildInfo';
 import { Icon } from './components/common/Icon';
 import './App.css';
 
+const SCROLL_POSITION_KEY = 'market-dashboard-scroll-position';
+
+function useRefreshScrollRestoration(layoutReady: boolean) {
+  const savedPositionRef = useRef<number | null>(null);
+  const restoredRef = useRef(false);
+
+  useEffect(() => {
+    const savedPosition = Number(sessionStorage.getItem(SCROLL_POSITION_KEY));
+    savedPositionRef.current = Number.isFinite(savedPosition) && savedPosition > 0
+      ? savedPosition
+      : null;
+
+    const previousScrollRestoration = history.scrollRestoration;
+    history.scrollRestoration = 'manual';
+
+    const savePosition = () => {
+      if (!restoredRef.current) return;
+      sessionStorage.setItem(SCROLL_POSITION_KEY, String(window.scrollY));
+    };
+
+    window.addEventListener('scroll', savePosition, { passive: true });
+    window.addEventListener('pagehide', savePosition);
+
+    return () => {
+      savePosition();
+      window.removeEventListener('scroll', savePosition);
+      window.removeEventListener('pagehide', savePosition);
+      history.scrollRestoration = previousScrollRestoration;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!layoutReady || restoredRef.current) return;
+
+    restoredRef.current = true;
+    const savedPosition = savedPositionRef.current;
+    if (savedPosition === null) return;
+
+    const frameId = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const root = document.documentElement;
+        const previousScrollBehavior = root.style.scrollBehavior;
+        root.style.scrollBehavior = 'auto';
+        window.scrollTo(0, savedPosition);
+        requestAnimationFrame(() => {
+          root.style.scrollBehavior = previousScrollBehavior;
+        });
+      });
+    });
+
+    return () => cancelAnimationFrame(frameId);
+  }, [layoutReady]);
+}
+
 function getVisibleSymbols(): string[] {
   const elements = document.querySelectorAll('[data-symbol]');
   const visible: string[] = [];
@@ -167,6 +221,7 @@ function DashboardContent() {
   }, [showToast, store]);
 
   const dataReady = !store.loading && store.futures.length > 0;
+  useRefreshScrollRestoration(!store.loading);
 
   return (
     <div className="app">
