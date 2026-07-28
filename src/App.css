@@ -705,25 +705,25 @@ body::before {
   white-space: nowrap;
 }
 
-.table-scroll thead > tr > th:first-child,
-.table-scroll tbody > tr > td:first-child {
+[data-freeze-first-column="true"] .table-scroll thead > tr > th:first-child,
+[data-freeze-first-column="true"] .table-scroll tbody > tr > td:first-child {
   position: sticky;
   left: 0;
 }
 
-.table-scroll thead > tr > th:first-child {
+[data-freeze-first-column="true"] .table-scroll thead > tr > th:first-child {
   z-index: 2;
   background: var(--bg3);
   box-shadow: 1px 0 var(--border);
 }
 
-.table-scroll tbody > tr > td:first-child {
+[data-freeze-first-column="true"] .table-scroll tbody > tr > td:first-child {
   z-index: 1;
   background: var(--bg2);
   box-shadow: 1px 0 var(--border);
 }
 
-.table-scroll tbody > tr.bench-row > td:first-child {
+[data-freeze-first-column="true"] .table-scroll tbody > tr.bench-row > td:first-child {
   background: linear-gradient(var(--bench-row-bg), var(--bench-row-bg)), var(--bg2);
 }
 
@@ -736,8 +736,8 @@ body::before {
   background-color: var(--row-hover-bg);
 }
 
-[data-highlight-row-on-hover="true"] .table-scroll tbody > tr:hover > td:first-child,
-[data-highlight-row-on-hover="true"] .table-scroll tbody > tr[data-row-hovered="true"] > td:first-child {
+[data-freeze-first-column="true"][data-highlight-row-on-hover="true"] .table-scroll tbody > tr:hover > td:first-child,
+[data-freeze-first-column="true"][data-highlight-row-on-hover="true"] .table-scroll tbody > tr[data-row-hovered="true"] > td:first-child {
   background: linear-gradient(var(--row-hover-bg), var(--row-hover-bg)), var(--bg2);
 }
 
@@ -746,8 +746,11 @@ body::before {
 }
 
 [data-highlight-selected-row="true"] .table-scroll tbody > tr[data-row-selected="true"] > td:first-child {
-  background: linear-gradient(var(--row-selected-bg), var(--row-selected-bg)), var(--bg2);
   box-shadow: inset 3px 0 var(--accent);
+}
+
+[data-freeze-first-column="true"][data-highlight-selected-row="true"] .table-scroll tbody > tr[data-row-selected="true"] > td:first-child {
+  background: linear-gradient(var(--row-selected-bg), var(--row-selected-bg)), var(--bg2);
 }
 
 [data-highlight-row-on-hover="true"][data-highlight-selected-row="true"] .table-scroll tbody > tr[data-row-selected="true"]:hover > td,
@@ -755,8 +758,8 @@ body::before {
   background-color: var(--row-selected-hover-bg);
 }
 
-[data-highlight-row-on-hover="true"][data-highlight-selected-row="true"] .table-scroll tbody > tr[data-row-selected="true"]:hover > td:first-child,
-[data-highlight-row-on-hover="true"][data-highlight-selected-row="true"] .table-scroll tbody > tr[data-row-selected="true"][data-row-hovered="true"] > td:first-child {
+[data-freeze-first-column="true"][data-highlight-row-on-hover="true"][data-highlight-selected-row="true"] .table-scroll tbody > tr[data-row-selected="true"]:hover > td:first-child,
+[data-freeze-first-column="true"][data-highlight-row-on-hover="true"][data-highlight-selected-row="true"] .table-scroll tbody > tr[data-row-selected="true"][data-row-hovered="true"] > td:first-child {
   background: linear-gradient(var(--row-selected-hover-bg), var(--row-selected-hover-bg)), var(--bg2);
 }
 

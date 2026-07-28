@@ -28,6 +28,11 @@ export function mergePreferencesForUpload(
       local.enableHoverPreview,
       remote.enableHoverPreview,
     ),
+    freezeFirstColumn: mergeValue(
+      base.freezeFirstColumn,
+      local.freezeFirstColumn,
+      remote.freezeFirstColumn,
+    ),
     highlightRowOnHover: mergeValue(
       base.highlightRowOnHover,
       local.highlightRowOnHover,

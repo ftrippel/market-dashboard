@@ -35,11 +35,12 @@ import {
   type SettingsDomain,
 } from './settingsEvents';
 
-export const SETTINGS_EXPORT_VERSION = 4;
+export const SETTINGS_EXPORT_VERSION = 5;
 
 export interface PreferencesSettings {
   theme: Theme;
   enableHoverPreview: boolean;
+  freezeFirstColumn: boolean;
   highlightRowOnHover: boolean;
   highlightSelectedRow: boolean;
   sparklineMode: SparklineMode;
@@ -58,6 +59,7 @@ export interface DashboardSettingsExport {
   exportedAt: string;
   theme: Theme;
   enableHoverPreview: boolean;
+  freezeFirstColumn: boolean;
   highlightRowOnHover: boolean;
   highlightSelectedRow: boolean;
   sparklineMode: SparklineMode;
@@ -71,6 +73,7 @@ export interface DashboardSettingsExport {
 const STORAGE_KEYS = {
   theme: 'market-dashboard-theme',
   enableHoverPreview: 'enableHoverPreview',
+  freezeFirstColumn: 'freezeFirstColumn',
   highlightRowOnHover: 'highlightRowOnHover',
   highlightSelectedRow: 'highlightSelectedRow',
   sparklineMode: 'sparklineMode',
@@ -211,6 +214,7 @@ export function exportPreferencesSettings(): PreferencesSettings {
       STORAGE_KEYS.enableHoverPreview,
       config.tradingView.enableHoverPreview,
     ),
+    freezeFirstColumn: readBoolean(STORAGE_KEYS.freezeFirstColumn, true),
     highlightRowOnHover: readBoolean(STORAGE_KEYS.highlightRowOnHover, true),
     highlightSelectedRow: readBoolean(STORAGE_KEYS.highlightSelectedRow, true),
     sparklineMode: readSparklineMode(),
@@ -231,6 +235,7 @@ export function getDefaultPreferencesSettings(): PreferencesSettings {
   return {
     theme: 'dark',
     enableHoverPreview: config.tradingView.enableHoverPreview,
+    freezeFirstColumn: true,
     highlightRowOnHover: true,
     highlightSelectedRow: true,
     sparklineMode: 'line',
@@ -304,6 +309,7 @@ export function applyPreferencesSettings(
 ): void {
   localStorage.setItem(STORAGE_KEYS.theme, data.theme);
   localStorage.setItem(STORAGE_KEYS.enableHoverPreview, String(data.enableHoverPreview));
+  localStorage.setItem(STORAGE_KEYS.freezeFirstColumn, String(data.freezeFirstColumn));
   localStorage.setItem(STORAGE_KEYS.highlightRowOnHover, String(data.highlightRowOnHover));
   localStorage.setItem(STORAGE_KEYS.highlightSelectedRow, String(data.highlightSelectedRow));
   localStorage.setItem(STORAGE_KEYS.sparklineMode, data.sparklineMode);
@@ -453,6 +459,8 @@ function parseSharedSettings(raw: Record<string, unknown>): Omit<DashboardSettin
   return {
     theme,
     enableHoverPreview: raw.enableHoverPreview,
+    freezeFirstColumn:
+      typeof raw.freezeFirstColumn === 'boolean' ? raw.freezeFirstColumn : true,
     highlightRowOnHover:
       typeof raw.highlightRowOnHover === 'boolean' ? raw.highlightRowOnHover : true,
     highlightSelectedRow:
@@ -474,7 +482,7 @@ export function parseDashboardSettingsExport(raw: unknown): DashboardSettingsExp
   }
 
   const version = raw.version;
-  if (version !== 1 && version !== 2 && version !== 3 && version !== 4) {
+  if (version !== 1 && version !== 2 && version !== 3 && version !== 4 && version !== 5) {
     throw new Error(`Unsupported settings version: ${String(raw.version)}`);
   }
 
@@ -495,6 +503,7 @@ export function importDashboardSettings(data: DashboardSettingsExport): void {
     {
       theme: data.theme,
       enableHoverPreview: data.enableHoverPreview,
+      freezeFirstColumn: data.freezeFirstColumn,
       highlightRowOnHover: data.highlightRowOnHover,
       highlightSelectedRow: data.highlightSelectedRow,
       sparklineMode: data.sparklineMode,
@@ -563,6 +572,8 @@ export function parsePreferencesSettings(value: unknown): PreferencesSettings | 
   return {
     theme,
     enableHoverPreview: value.enableHoverPreview,
+    freezeFirstColumn:
+      typeof value.freezeFirstColumn === 'boolean' ? value.freezeFirstColumn : true,
     highlightRowOnHover:
       typeof value.highlightRowOnHover === 'boolean' ? value.highlightRowOnHover : true,
     highlightSelectedRow:

@@ -5,8 +5,10 @@ const HOVERED_ATTRIBUTE = 'data-row-hovered';
 const SELECTED_ATTRIBUTE = 'data-row-selected';
 const HOVER_ENABLED_ATTRIBUTE = 'data-highlight-row-on-hover';
 const SELECTION_ENABLED_ATTRIBUTE = 'data-highlight-selected-row';
+const FREEZE_FIRST_COLUMN_ATTRIBUTE = 'data-freeze-first-column';
 
 interface TableRowInteractionOptions {
+  freezeFirstColumn: boolean;
   highlightRowOnHover: boolean;
   highlightSelectedRow: boolean;
 }
@@ -47,11 +49,13 @@ function toggleRowSelection(row: HTMLTableRowElement) {
  * so Apple Pencil hover works on supported iPads.
  */
 export function useTableRowInteractions({
+  freezeFirstColumn,
   highlightRowOnHover,
   highlightSelectedRow,
 }: TableRowInteractionOptions) {
   useEffect(() => {
     const root = document.documentElement;
+    root.setAttribute(FREEZE_FIRST_COLUMN_ATTRIBUTE, String(freezeFirstColumn));
     root.setAttribute(HOVER_ENABLED_ATTRIBUTE, String(highlightRowOnHover));
     root.setAttribute(SELECTION_ENABLED_ATTRIBUTE, String(highlightSelectedRow));
 
@@ -152,6 +156,7 @@ export function useTableRowInteractions({
     document.addEventListener('click', handleClick);
 
     return () => {
+      root.removeAttribute(FREEZE_FIRST_COLUMN_ATTRIBUTE);
       root.removeAttribute(HOVER_ENABLED_ATTRIBUTE);
       root.removeAttribute(SELECTION_ENABLED_ATTRIBUTE);
       document.removeEventListener('pointerdown', handlePointerDown);
@@ -160,5 +165,5 @@ export function useTableRowInteractions({
       document.removeEventListener('pointerup', handlePointerUp);
       document.removeEventListener('click', handleClick);
     };
-  }, [highlightRowOnHover, highlightSelectedRow]);
+  }, [freezeFirstColumn, highlightRowOnHover, highlightSelectedRow]);
 }

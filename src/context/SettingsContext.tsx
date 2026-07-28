@@ -24,6 +24,8 @@ export type SparklineMode = 'none' | 'line' | 'bar' | 'dot';
 interface SettingsContextValue {
   enableHoverPreview: boolean;
   setEnableHoverPreview: (val: boolean) => void;
+  freezeFirstColumn: boolean;
+  setFreezeFirstColumn: (val: boolean) => void;
   highlightRowOnHover: boolean;
   setHighlightRowOnHover: (val: boolean) => void;
   highlightSelectedRow: boolean;
@@ -109,6 +111,9 @@ function persistChartMaSettingsToStorage(settings: ChartMaSettings): void {
 
 export function SettingsProvider({ children }: { children: ReactNode }) {
   const [enableHoverPreview, setEnableHoverPreviewState] = useState<boolean>(readHoverPreview);
+  const [freezeFirstColumn, setFreezeFirstColumnState] = useState<boolean>(() =>
+    readBooleanSetting('freezeFirstColumn', true),
+  );
   const [highlightRowOnHover, setHighlightRowOnHoverState] = useState<boolean>(() =>
     readBooleanSetting('highlightRowOnHover', true),
   );
@@ -125,6 +130,7 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
     const handleRemoteApply = (event: Event) => {
       if (!isRemoteSettingsAppliedEvent(event) || event.detail.domain !== 'preferences') return;
       setEnableHoverPreviewState(readHoverPreview());
+      setFreezeFirstColumnState(readBooleanSetting('freezeFirstColumn', true));
       setHighlightRowOnHoverState(readBooleanSetting('highlightRowOnHover', true));
       setHighlightSelectedRowState(readBooleanSetting('highlightSelectedRow', true));
       setSparklineModeState(readSparklineMode());
@@ -140,6 +146,12 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
   const setEnableHoverPreview = useCallback((val: boolean) => {
     setEnableHoverPreviewState(val);
     localStorage.setItem('enableHoverPreview', String(val));
+    touchSettingsModified('preferences');
+  }, []);
+
+  const setFreezeFirstColumn = useCallback((val: boolean) => {
+    setFreezeFirstColumnState(val);
+    localStorage.setItem('freezeFirstColumn', String(val));
     touchSettingsModified('preferences');
   }, []);
 
@@ -209,6 +221,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
       value={{
         enableHoverPreview,
         setEnableHoverPreview,
+        freezeFirstColumn,
+        setFreezeFirstColumn,
         highlightRowOnHover,
         setHighlightRowOnHover,
         highlightSelectedRow,

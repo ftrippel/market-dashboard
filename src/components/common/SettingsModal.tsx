@@ -59,6 +59,8 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
   const {
     enableHoverPreview,
     setEnableHoverPreview,
+    freezeFirstColumn,
+    setFreezeFirstColumn,
     highlightRowOnHover,
     setHighlightRowOnHover,
     highlightSelectedRow,
@@ -90,6 +92,7 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
 
   const closePenClick = usePenCompatibleClick(close);
   const hoverPreviewPenToggle = usePenCheckboxToggle(setEnableHoverPreview);
+  const freezeFirstColumnPenToggle = usePenCheckboxToggle(setFreezeFirstColumn);
   const rowHoverPenToggle = usePenCheckboxToggle(setHighlightRowOnHover);
   const selectedRowPenToggle = usePenCheckboxToggle(setHighlightSelectedRow);
   const sparklineModePenActivate = usePenSelectActivate();
@@ -372,6 +375,39 @@ export function SettingsModal({ open, onClose }: SettingsModalProps) {
               <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
                 When enabled, hovering over any financial ticker symbol displays a 1-year daily historical line chart to the left or right of the symbol.
               </p>
+
+              <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                  }}
+                >
+                  <span style={{ fontSize: '13px', color: 'var(--text)', fontWeight: 500 }}>
+                    Freeze First Table Column
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={freezeFirstColumn}
+                    onChange={(event) => setFreezeFirstColumn(event.target.checked)}
+                    onPointerUp={freezeFirstColumnPenToggle}
+                    style={{
+                      width: '18px',
+                      height: '18px',
+                      accentColor: 'var(--accent)',
+                      cursor: 'pointer',
+                    }}
+                  />
+                </label>
+                <p style={{ margin: 0, fontSize: '11px', color: 'var(--text2)', lineHeight: '1.4' }}>
+                  Keep the first column visible while scrolling a table horizontally.
+                </p>
+              </div>
 
               <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '4px 0' }} />
 

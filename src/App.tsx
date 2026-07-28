@@ -111,8 +111,8 @@ function getVisibleSymbols(): string[] {
 
 function DashboardContent() {
   const store = useMarketStore();
-  const { highlightRowOnHover, highlightSelectedRow } = useSettings();
-  useTableRowInteractions({ highlightRowOnHover, highlightSelectedRow });
+  const { freezeFirstColumn, highlightRowOnHover, highlightSelectedRow } = useSettings();
+  useTableRowInteractions({ freezeFirstColumn, highlightRowOnHover, highlightSelectedRow });
   const updatePrice = useMarketStore((state) => state.updatePrice);
   const { error: dataError } = useMarketData();
   const { status: syncStatus, statusMessage: syncStatusMessage, syncNow } = useSettingsSync();

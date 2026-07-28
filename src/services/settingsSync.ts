@@ -560,6 +560,9 @@ async function migrateLegacyDashboardDoc(userId: string): Promise<boolean> {
   const preferences: PreferencesSettings = {
     theme: settings.theme,
     enableHoverPreview: settings.enableHoverPreview,
+    freezeFirstColumn:
+      settings.freezeFirstColumn ??
+      getDefaultPreferencesSettings().freezeFirstColumn,
     highlightRowOnHover:
       settings.highlightRowOnHover ??
       getDefaultPreferencesSettings().highlightRowOnHover,

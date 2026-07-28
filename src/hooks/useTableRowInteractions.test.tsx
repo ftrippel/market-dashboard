@@ -5,13 +5,15 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { useTableRowInteractions } from './useTableRowInteractions';
 
 function TestTables({
+  freezeFirstColumn = true,
   highlightRowOnHover = true,
   highlightSelectedRow = true,
 }: {
+  freezeFirstColumn?: boolean;
   highlightRowOnHover?: boolean;
   highlightSelectedRow?: boolean;
 }) {
-  useTableRowInteractions({ highlightRowOnHover, highlightSelectedRow });
+  useTableRowInteractions({ freezeFirstColumn, highlightRowOnHover, highlightSelectedRow });
 
   return (
     <>
@@ -52,6 +54,16 @@ function dispatchPointer(
 
 describe('table row interactions', () => {
   afterEach(cleanup);
+
+  it('exposes the first-column freeze setting to table CSS', () => {
+    const { rerender } = render(<TestTables />);
+
+    expect(document.documentElement.getAttribute('data-freeze-first-column')).toBe('true');
+
+    rerender(<TestTables freezeFirstColumn={false} />);
+
+    expect(document.documentElement.getAttribute('data-freeze-first-column')).toBe('false');
+  });
 
   it('highlights mouse and pen proximity, but not touch movement', () => {
     const { getByTestId } = render(<TestTables />);

@@ -155,6 +155,7 @@ describe('settings reconciliation', () => {
     const localPreferences = exportPreferencesSettings();
     const remotePreferences = {
       ...localPreferences,
+      freezeFirstColumn: false,
       marketColumns: ['d1', 'w1', 'm3', 'm6'],
       defaultMarketSortColumn: 'm3',
     };
@@ -201,6 +202,7 @@ describe('settings reconciliation', () => {
       'm6',
     ]);
     expect(localStorage.getItem('defaultMarketSortColumn')).toBe('m3');
+    expect(localStorage.getItem('freezeFirstColumn')).toBe('false');
   });
 
   it('merges a pending preference edit without restoring stale columns', async () => {

@@ -16,7 +16,7 @@ const SYNC_BASE_PREFIX = 'dashboard-settings-sync-base-';
 const SYNC_USER_KEY = 'dashboard-settings-sync-user';
 const LEGACY_LAST_MODIFIED_PREFIX = 'dashboard-settings-last-modified-';
 export const CURRENT_SYNC_SCHEMA_VERSION_BY_DOMAIN: Record<SettingsDomain, number> = {
-  preferences: 4,
+  preferences: 5,
   calculator: 2,
   watchlists: 4,
 };

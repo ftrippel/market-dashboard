@@ -123,6 +123,7 @@ describe('applyWatchlistsFromSync', () => {
       'trend',
     ]);
     expect(parsed?.defaultMarketSortColumn).toBe('w1');
+    expect(parsed?.freezeFirstColumn).toBe(true);
     expect(parsed?.highlightRowOnHover).toBe(true);
     expect(parsed?.highlightSelectedRow).toBe(true);
   });
@@ -131,6 +132,7 @@ describe('applyWatchlistsFromSync', () => {
     const parsed = parsePreferencesSettings({
       theme: 'dark',
       enableHoverPreview: true,
+      freezeFirstColumn: false,
       highlightRowOnHover: false,
       highlightSelectedRow: false,
       sparklineMode: 'line',
@@ -141,6 +143,7 @@ describe('applyWatchlistsFromSync', () => {
 
     expect(parsed?.marketColumns).toEqual(['price', 'm1', 'm6']);
     expect(parsed?.defaultMarketSortColumn).toBe('m6');
+    expect(parsed?.freezeFirstColumn).toBe(false);
     expect(parsed?.highlightRowOnHover).toBe(false);
     expect(parsed?.highlightSelectedRow).toBe(false);
   });

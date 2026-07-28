@@ -6,6 +6,7 @@ import { mergePreferencesForUpload, mergeWatchlistsForUpload } from './settingsM
 const BASE_PREFERENCES: PreferencesSettings = {
   theme: 'dark',
   enableHoverPreview: true,
+  freezeFirstColumn: true,
   highlightRowOnHover: true,
   highlightSelectedRow: true,
   sparklineMode: 'line',
@@ -19,6 +20,7 @@ describe('mergePreferencesForUpload', () => {
     const local = { ...BASE_PREFERENCES, theme: 'light' as const };
     const remote = {
       ...BASE_PREFERENCES,
+      freezeFirstColumn: false,
       marketColumns: ['d1', 'w1', 'm3', 'm6'] as PreferencesSettings['marketColumns'],
       defaultMarketSortColumn: 'm3' as const,
     };
