@@ -1,13 +1,14 @@
 import { useEffect, useRef } from 'react';
 import { showConfirm } from './confirmDialog';
 import { isTypingTarget } from './focus';
+import { createUuid } from './id';
 
 type DismissHandler = () => void;
 
 const LEAVE_CONFIRM_MESSAGE = 'Go back to the previous page?';
 const ROOT_GUARD_KEY = '__rootGuard';
 const ROOT_GUARD_OWNER_KEY = '__rootGuardOwner';
-const rootGuardOwner = crypto.randomUUID();
+const rootGuardOwner = createUuid();
 
 interface StackEntry {
   id: symbol;

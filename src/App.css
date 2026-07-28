@@ -714,13 +714,11 @@ body::before {
 [data-freeze-first-column="true"] .table-scroll thead > tr > th:first-child {
   z-index: 2;
   background: var(--bg3);
-  box-shadow: 1px 0 var(--border);
 }
 
 [data-freeze-first-column="true"] .table-scroll tbody > tr > td:first-child {
   z-index: 1;
   background: var(--bg2);
-  box-shadow: 1px 0 var(--border);
 }
 
 [data-freeze-first-column="true"] .table-scroll tbody > tr.bench-row > td:first-child {
