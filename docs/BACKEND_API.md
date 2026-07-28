@@ -12,7 +12,7 @@ Frontend configuration uses Vite environment variables. Vite substitutes every
 frontend build:
 
 ```dotenv
-VITE_BACKEND_API_URL=https://market-dashboard-api.florian-trippel.workers.dev
+VITE_BACKEND_API_URL=https://market-dashboard.florian-trippel.workers.dev
 ```
 
 The value is an origin without `/api/v1`. The frontend API client appends the

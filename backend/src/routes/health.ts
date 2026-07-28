@@ -7,7 +7,7 @@ export function registerHealthRoutes(app: Hono<BackendEnv>): void {
   app.get('/api/v1/health', (c) =>
     success<HealthData>(c, {
       status: 'ok',
-      service: 'market-dashboard-api',
+      service: 'market-dashboard',
     }),
   );
 }

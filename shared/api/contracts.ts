@@ -18,7 +18,7 @@ export interface ApiError {
 
 export interface HealthData {
   status: 'ok';
-  service: 'market-dashboard-api';
+  service: 'market-dashboard';
 }
 
 export interface InstrumentHolding {

@@ -30,7 +30,7 @@ describe('market dashboard backend', () => {
     expect(response.headers.get('Access-Control-Allow-Origin')).toBe(allowedOrigin);
     expect(response.headers.get('X-Request-Id')).toBe('health-test');
     expect(await response.json()).toEqual({
-      data: { status: 'ok', service: 'market-dashboard-api' },
+      data: { status: 'ok', service: 'market-dashboard' },
       meta: { requestId: 'health-test' },
     });
   });

@@ -4,7 +4,7 @@ A React dashboard for futures, equities, commodities, market breadth, and a posi
 
 Live versions:
 
-- Cloudflare Worker: [https://market-dashboard-api.florian-trippel.workers.dev](https://market-dashboard-api.florian-trippel.workers.dev)
+- Cloudflare Worker: [https://market-dashboard.florian-trippel.workers.dev](https://market-dashboard.florian-trippel.workers.dev)
 - GitHub Pages fallback: [https://ftrippel.github.io/market-dashboard](https://ftrippel.github.io/market-dashboard)
 
 React rewrite of the original [market-dashboard](https://github.com/clementang17-alt/market-dashboard) by [Clement Ang](https://github.com/clementang17-alt/market-dashboard).
@@ -114,7 +114,7 @@ VITE_FIREBASE_APP_ID=...
 
 Settings are stored per user in Firestore as separate documents under `users/{uid}/settings/` (`preferences`, `calculator`, `watchlists`) and sync in real time across devices.
 
-6. Add your dev and production domains under **Authentication → Settings → Authorized domains** (e.g. `localhost`, `ftrippel.github.io`, `market-dashboard-api.florian-trippel.workers.dev`, and `stockmarket-dashboard.com`).
+6. Add your dev and production domains under **Authentication → Settings → Authorized domains** (e.g. `localhost`, `ftrippel.github.io`, `market-dashboard.florian-trippel.workers.dev`, and `stockmarket-dashboard.com`).
 
 Without these variables, the dashboard works as before with local storage and JSON export/import only.
 
