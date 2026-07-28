@@ -6,6 +6,7 @@ import {
   formatCrosshairChange,
   type CrosshairInfo,
 } from '../../utils/chartInteractionController';
+import { formatChartDate } from '../../utils/chartDate';
 import { colors } from '../../utils/formatting';
 
 interface TradingViewMiniChartProps {
@@ -81,6 +82,9 @@ export const TradingViewMiniChart = memo(function TradingViewMiniChart({
       },
       timeScale: {
         borderVisible: false,
+      },
+      localization: {
+        timeFormatter: formatChartDate,
       },
       crosshair: {
         mode: CrosshairMode.Normal,
@@ -171,7 +175,9 @@ export const TradingViewMiniChart = memo(function TradingViewMiniChart({
             background: isDark ? '#0f1419' : '#ffffff',
           }}
         >
-          <span style={{ color: isDark ? '#e6edf3' : '#131722' }}>{displayInfo.date}</span>
+          <span style={{ color: isDark ? '#e6edf3' : '#131722' }}>
+            {formatChartDate(displayInfo.date)}
+          </span>
           <span
             style={{
               color:

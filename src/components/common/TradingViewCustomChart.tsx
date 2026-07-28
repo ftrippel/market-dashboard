@@ -12,6 +12,7 @@ import {
   type ChartInteractionUi,
   type CrosshairInfo,
 } from '../../utils/chartInteractionController';
+import { formatChartDate } from '../../utils/chartDate';
 import { colors } from '../../utils/formatting';
 import { MeasureToolPrimitive } from '../../utils/measureToolPrimitive';
 import { usePenCompatibleClick } from '../../utils/penClick';
@@ -120,6 +121,9 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
       timeScale: {
         borderColor: isDark ? '#2a2e39' : '#d1d4dc',
         rightOffset: RIGHT_OFFSET_BARS,
+      },
+      localization: {
+        timeFormatter: formatChartDate,
       },
       crosshair: {
         mode: CrosshairMode.Normal,
@@ -254,7 +258,9 @@ export const TradingViewCustomChart = memo(function TradingViewCustomChart({
               fontSize: '10px',
             }}
           >
-            <span style={{ color: theme === 'dark' ? '#e6edf3' : '#131722' }}>{displayInfo.date}</span>
+            <span style={{ color: theme === 'dark' ? '#e6edf3' : '#131722' }}>
+              {formatChartDate(displayInfo.date)}
+            </span>
             <span style={{ color: theme === 'dark' ? '#9aa5b4' : '#686d78' }}>
               {displayInfo.close.toFixed(priceDecimals)}
             </span>
