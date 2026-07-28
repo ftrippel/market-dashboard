@@ -141,8 +141,8 @@ workflow. Data-only refreshes retain the latest code build identifier; it
 advances only for a push or manual code deployment.
 
 To deploy the Cloudflare Worker locally, copy the example environment file and
-set `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, and the comma-separated
-`ALLOWED_ORIGINS` CORS allowlist:
+set `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_WORKER_NAME` and the comma-separated
+`ALLOWED_ORIGINS` CORS allowlist.
 
 ```bash
 cp .env.example .env

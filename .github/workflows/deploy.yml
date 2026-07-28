@@ -33,6 +33,7 @@ jobs:
       VITE_LIVE_DATA_IDLE_RETRY_MS: ${{ vars.VITE_LIVE_DATA_IDLE_RETRY_MS }}
       VITE_ENABLE_BUILD_VERSION_CHECK: ${{ vars.VITE_ENABLE_BUILD_VERSION_CHECK }}
       ALLOWED_ORIGINS: ${{ vars.ALLOWED_ORIGINS }}
+      CLOUDFLARE_WORKER_NAME: ${{ vars.CLOUDFLARE_WORKER_NAME }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -153,4 +154,4 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: deploy --var "ALLOWED_ORIGINS:${{ vars.ALLOWED_ORIGINS }}"
+          command: deploy --name "${{ env.CLOUDFLARE_WORKER_NAME }}" --var "ALLOWED_ORIGINS:${{ vars.ALLOWED_ORIGINS }}"

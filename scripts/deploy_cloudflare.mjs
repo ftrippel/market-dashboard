@@ -8,6 +8,7 @@ const projectRoot = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const fileEnv = loadEnv('production', projectRoot, '');
 const deploymentEnv = { ...fileEnv, ...process.env };
 const allowedOrigins = deploymentEnv.ALLOWED_ORIGINS?.trim();
+const workerName = deploymentEnv.CLOUDFLARE_WORKER_NAME?.trim();
 
 if (!allowedOrigins) {
   console.error('ALLOWED_ORIGINS must be set in .env or the shell before deploying.');
@@ -15,9 +16,16 @@ if (!allowedOrigins) {
 }
 
 const wranglerPath = resolve(projectRoot, 'node_modules/wrangler/bin/wrangler.js');
-const wranglerArguments = ['deploy', ...process.argv.slice(2)];
+const commandArguments = process.argv.slice(2);
+const hasWorkerNameArgument = commandArguments.some(
+  (argument) => argument === '--name' || argument.startsWith('--name='),
+);
+const wranglerArguments = ['deploy', ...commandArguments];
 if (existsSync(resolve(projectRoot, '.env'))) {
   wranglerArguments.push('--env-file', '.env');
+}
+if (workerName && !hasWorkerNameArgument) {
+  wranglerArguments.push('--name', workerName);
 }
 wranglerArguments.push('--var', `ALLOWED_ORIGINS:${allowedOrigins}`);
 

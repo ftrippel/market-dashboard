@@ -170,6 +170,7 @@ The `Deploy Frontend and Worker` GitHub Actions workflow requires:
 - GitHub Actions repository variables:
   - `ALLOWED_ORIGINS`
 - Optional GitHub Actions repository variables:
+  - `CLOUDFLARE_WORKER_NAME`
   - `VITE_FIREBASE_API_KEY`
   - `VITE_FIREBASE_AUTH_DOMAIN`
   - `VITE_FIREBASE_PROJECT_ID`
@@ -180,11 +181,11 @@ The `Deploy Frontend and Worker` GitHub Actions workflow requires:
   - `VITE_LIVE_DATA_IDLE_RETRY_MS`
   - `VITE_ENABLE_BUILD_VERSION_CHECK`
 
-The `VITE_*` values are public browser configuration and belong in repository
-variables, not secrets. `ALLOWED_ORIGINS` is also non-sensitive configuration.
-The workflow passes it to `wrangler deploy --var`, which attaches it to the
-deployed Worker as a runtime binding. Firebase configuration is optional, but
-the workflow requires either all six Firebase variables or none of them.
+The `VITE_*` values, `CLOUDFLARE_WORKER_NAME`, and `ALLOWED_ORIGINS` are
+non-sensitive configuration and belong in repository variables, not secrets.
+The workflow passes the configured Worker name to `wrangler deploy --name` and
+the origin list to `wrangler deploy --var`. Firebase configuration is optional,
+but the workflow requires either all six Firebase variables or none of them.
 
 For a local deployment, copy `.env.example` to `.env`, set the same two
 Cloudflare credentials, set `ALLOWED_ORIGINS`, and run:
@@ -195,5 +196,6 @@ npm run deploy:cloudflare
 
 It type-checks both applications and then uses the repository's installed
 Wrangler version to load `.env`, pass the CORS allowlist as a Worker binding,
-build, bundle, and deploy the frontend assets and API together. The Cloudflare
-build uses its own origin automatically.
+build, bundle, and deploy the frontend assets and API together.
+`CLOUDFLARE_WORKER_NAME` in `.env` overrides the default name in
+`wrangler.jsonc`. The Cloudflare build uses its own origin automatically.
