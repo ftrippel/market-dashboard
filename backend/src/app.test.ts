@@ -271,6 +271,23 @@ describe('market dashboard backend', () => {
     });
   });
 
+  it('only falls back to local cross-origin callers when the binding is absent', async () => {
+    const app = appWithLookup(vi.fn());
+    const localResponse = await app.request(
+      'https://api.example/api/v1/health',
+      { headers: { Origin: 'http://localhost:5173' } },
+      {},
+    );
+    const productionResponse = await app.request(
+      'https://api.example/api/v1/health',
+      { headers: { Origin: allowedOrigin } },
+      {},
+    );
+
+    expect(localResponse.status).toBe(200);
+    expect(productionResponse.status).toBe(403);
+  });
+
   it('allows same-origin browser requests on the deployed Worker domain', async () => {
     const app = appWithLookup(vi.fn());
     const response = await app.request(

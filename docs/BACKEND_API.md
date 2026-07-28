@@ -7,7 +7,9 @@ frontend host and calls the public Worker API.
 
 ## Configuration
 
-The frontend reads the backend origin from `VITE_BACKEND_API_URL`:
+Frontend configuration uses Vite environment variables. Vite substitutes every
+`VITE_*` value while building the browser bundle, so changing one requires a new
+frontend build:
 
 ```dotenv
 VITE_BACKEND_API_URL=https://market-dashboard-api.florian-trippel.workers.dev
@@ -18,6 +20,17 @@ versioned route prefix. A root-path production build automatically uses its own
 origin when the value is absent; this is the Cloudflare deployment. Other
 builds skip backend-powered metadata and use the public CORS-proxy fallback
 when the value is absent.
+
+The Worker reads its CORS allowlist from the `ALLOWED_ORIGINS` runtime binding:
+
+```dotenv
+ALLOWED_ORIGINS=https://stockmarket-dashboard.com,https://ftrippel.github.io,http://localhost:5173
+```
+
+Values must be complete origins without paths or trailing slashes. Same-origin
+requests are always accepted and do not have to be listed. When the binding is
+absent, only `http://localhost:5173` and `http://127.0.0.1:5173` are accepted as
+cross-origin callers.
 
 For local backend development:
 
@@ -152,11 +165,31 @@ belong in `backend/src/routes`, upstream integrations in
 
 The `Deploy Frontend and Worker` GitHub Actions workflow requires:
 
-- `CLOUDFLARE_API_TOKEN`, scoped to edit Workers
-- `CLOUDFLARE_ACCOUNT_ID`
+- GitHub Actions secrets:
+  - `CLOUDFLARE_API_TOKEN`, scoped to edit Workers
+  - `CLOUDFLARE_ACCOUNT_ID`
+- GitHub Actions repository variables:
+  - `VITE_BACKEND_API_URL`
+  - `ALLOWED_ORIGINS`
+- Optional GitHub Actions repository variables:
+  - `VITE_FIREBASE_API_KEY`
+  - `VITE_FIREBASE_AUTH_DOMAIN`
+  - `VITE_FIREBASE_PROJECT_ID`
+  - `VITE_FIREBASE_STORAGE_BUCKET`
+  - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+  - `VITE_FIREBASE_APP_ID`
+  - `VITE_LIVE_DATA_REFRESH_MS`
+  - `VITE_LIVE_DATA_IDLE_RETRY_MS`
+  - `VITE_ENABLE_BUILD_VERSION_CHECK`
+
+The `VITE_*` values are public browser configuration and belong in repository
+variables, not secrets. `ALLOWED_ORIGINS` is also non-sensitive configuration.
+The workflow passes it to `wrangler deploy --var`, which attaches it to the
+deployed Worker as a runtime binding. Firebase configuration is optional, but
+the workflow requires either all six Firebase variables or none of them.
 
 For a local deployment, copy `.env.example` to `.env`, set the same two
-variables, and run:
+Cloudflare credentials, set `ALLOWED_ORIGINS`, and run:
 
 ```bash
 npm run deploy:backend
@@ -164,8 +197,10 @@ npm run deploy:backend
 
 The preferred command name is `npm run deploy:cloudflare`;
 `npm run deploy:backend` remains an alias. It type-checks both applications and
-then uses the repository's installed Wrangler version to load `.env`, build,
-bundle, and deploy the frontend assets and API together.
+then uses the repository's installed Wrangler version to load `.env`, pass the
+CORS allowlist as a Worker binding, build, bundle, and deploy the frontend
+assets and API together.
 
 The Cloudflare build uses its own origin automatically. The Worker origin is
-set directly as `VITE_BACKEND_API_URL` in the GitHub Pages build.
+set through the `VITE_BACKEND_API_URL` repository variable in the GitHub Pages
+build.

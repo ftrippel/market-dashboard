@@ -14,7 +14,7 @@
     "build": "tsc -b && vite build",
     "build:cloudflare": "tsc -b && vite build --base /",
     "build:backend": "tsc -p tsconfig.worker.json",
-    "deploy:cloudflare": "npm run build:cloudflare && wrangler deploy --env-file .env",
+    "deploy:cloudflare": "npm run build:cloudflare && node scripts/deploy_cloudflare.mjs",
     "deploy:backend": "npm run deploy:cloudflare",
     "verify:dist": "npm run build && node scripts/verify-dist.mjs",
     "preview:pages": "vite preview --base /market-dashboard/",

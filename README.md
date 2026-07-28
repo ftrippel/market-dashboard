@@ -148,7 +148,8 @@ workflow. Data-only refreshes retain the latest code build identifier; it
 advances only for a push or manual code deployment.
 
 To deploy the Cloudflare Worker locally, copy the example environment file and
-set `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`:
+set `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, and the comma-separated
+`ALLOWED_ORIGINS` CORS allowlist:
 
 ```bash
 cp .env.example .env
@@ -157,8 +158,13 @@ npm run deploy:cloudflare
 
 This command type-checks both applications, builds the root-hosted frontend,
 and lets the project-local Wrangler installation deploy the frontend assets and
-API as one Worker version. The previous `deploy:backend` command remains as an
-alias.
+API as one Worker version. Build-time `VITE_*` values are read from `.env`;
+`ALLOWED_ORIGINS` is deployed as a Worker runtime binding. The previous
+`deploy:backend` command remains as an alias.
+
+CI reads the same non-sensitive configuration from GitHub Actions repository
+variables. See [Backend API configuration](docs/BACKEND_API.md#configuration)
+for the complete list. Cloudflare credentials remain GitHub Actions secrets.
 
 ## License
 

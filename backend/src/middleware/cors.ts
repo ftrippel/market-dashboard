@@ -4,8 +4,6 @@ import type { BackendEnv } from '../env';
 import { failure } from '../http';
 
 const DEFAULT_ALLOWED_ORIGINS = [
-  'https://stockmarket-dashboard.com',
-  'https://ftrippel.github.io',
   'http://localhost:5173',
   'http://127.0.0.1:5173',
 ];
