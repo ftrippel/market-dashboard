@@ -11,7 +11,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
   actions: read
 
 concurrency:
@@ -23,7 +23,6 @@ jobs:
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     env:
-      VITE_BACKEND_API_URL: ${{ vars.VITE_BACKEND_API_URL }}
       VITE_FIREBASE_API_KEY: ${{ vars.VITE_FIREBASE_API_KEY }}
       VITE_FIREBASE_AUTH_DOMAIN: ${{ vars.VITE_FIREBASE_AUTH_DOMAIN }}
       VITE_FIREBASE_PROJECT_ID: ${{ vars.VITE_FIREBASE_PROJECT_ID }}
@@ -50,7 +49,6 @@ jobs:
       - name: Validate deployment configuration
         run: |
           required_variables=(
-            VITE_BACKEND_API_URL
             ALLOWED_ORIGINS
           )
           firebase_variables=(
@@ -142,28 +140,13 @@ jobs:
           build_timestamp="$(to_unix_seconds "$build_created_at")"
           echo "value=$build_timestamp" >> "$GITHUB_OUTPUT"
 
-      - name: Build for GitHub Pages
-        env:
-          VITE_BUILD_NUMBER: ${{ steps.build-timestamp.outputs.value }}
-        run: npm run build
-
-      - name: Verify GitHub Pages output
-        run: node scripts/verify-dist.mjs pages
-
-      - name: Deploy to gh-pages branch
-        uses: peaceiris/actions-gh-pages@v4.1.0
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          commit_message: 'deploy: ${{ github.sha }}'
-
       - name: Build for Cloudflare
         env:
           VITE_BUILD_NUMBER: ${{ steps.build-timestamp.outputs.value }}
         run: npm run build:cloudflare
 
       - name: Verify Cloudflare output
-        run: node scripts/verify-dist.mjs cloudflare
+        run: node scripts/verify-dist.mjs
 
       - name: Deploy frontend and API to Cloudflare
         uses: cloudflare/wrangler-action@v3

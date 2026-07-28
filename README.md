@@ -2,18 +2,16 @@
 
 A React dashboard for futures, equities, commodities, market breadth, and a position calculator.
 
-Live versions:
+Live version:
 
 - Cloudflare Worker: [https://market-dashboard.florian-trippel.workers.dev](https://market-dashboard.florian-trippel.workers.dev)
-- GitHub Pages fallback: [https://ftrippel.github.io/market-dashboard](https://ftrippel.github.io/market-dashboard)
 
 React rewrite of the original [market-dashboard](https://github.com/clementang17-alt/market-dashboard) by [Clement Ang](https://github.com/clementang17-alt/market-dashboard).
 
 **Stack:** React 19, TypeScript, Zustand, Vite
 
 The versioned Hono API and React frontend are deployed together on Cloudflare
-Workers. GitHub Pages remains a second frontend host and calls the same API. See
-[`docs/BACKEND_API.md`](docs/BACKEND_API.md).
+Workers. See [`docs/BACKEND_API.md`](docs/BACKEND_API.md).
 
 ## Data flow
 
@@ -114,7 +112,7 @@ VITE_FIREBASE_APP_ID=...
 
 Settings are stored per user in Firestore as separate documents under `users/{uid}/settings/` (`preferences`, `calculator`, `watchlists`) and sync in real time across devices.
 
-6. Add your dev and production domains under **Authentication → Settings → Authorized domains** (e.g. `localhost`, `ftrippel.github.io`, `market-dashboard.florian-trippel.workers.dev`, and `stockmarket-dashboard.com`).
+6. Add your dev and production domains under **Authentication → Settings → Authorized domains** (e.g. `localhost`, `market-dashboard.florian-trippel.workers.dev`, and `stockmarket-dashboard.com`).
 
 Without these variables, the dashboard works as before with local storage and JSON export/import only.
 
@@ -124,24 +122,19 @@ Without these variables, the dashboard works as before with local storage and JS
 |---------|-------------|
 | `npm run dev` | Start Vite dev server |
 | `npm run dev:backend` | Build and start the full-stack Cloudflare Worker locally |
-| `npm run build` | Type-check and build for GitHub Pages |
+| `npm run build` | Type-check and build with the configured base path |
 | `npm run build:cloudflare` | Type-check and build the root-hosted Worker frontend |
 | `npm run build:backend` | Type-check the Worker backend |
 | `npm run deploy:cloudflare` | Build and deploy the frontend and API with Wrangler |
-| `npm run deploy:backend` | Compatibility alias for `deploy:cloudflare` |
 | `npm run preview` | Preview production build locally |
-| `npm run preview:pages` | Preview with GitHub Pages base path |
 | `npm run verify:dist` | Build and verify `dist/` output |
 | `npm run lint` | Run oxlint |
 
 ## Deployment
 
 After each 6-hour data fetch (or any push to `main`), the deployment workflow
-builds both hosting variants:
-
-- Cloudflare serves the React assets at `/` and runs Hono for `/api/*`.
-- GitHub Pages serves the same frontend from `/market-dashboard/` and uses the
-  public Worker API URL.
+builds and deploys the application to Cloudflare. Cloudflare serves the React
+assets at `/` and runs Hono for `/api/*`.
 
 The numeric build identifier is the Unix timestamp of the code deployment
 workflow. Data-only refreshes retain the latest code build identifier; it
@@ -159,8 +152,7 @@ npm run deploy:cloudflare
 This command type-checks both applications, builds the root-hosted frontend,
 and lets the project-local Wrangler installation deploy the frontend assets and
 API as one Worker version. Build-time `VITE_*` values are read from `.env`;
-`ALLOWED_ORIGINS` is deployed as a Worker runtime binding. The previous
-`deploy:backend` command remains as an alias.
+`ALLOWED_ORIGINS` is deployed as a Worker runtime binding.
 
 CI reads the same non-sensitive configuration from GitHub Actions repository
 variables. See [Backend API configuration](docs/BACKEND_API.md#configuration)

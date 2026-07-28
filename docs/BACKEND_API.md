@@ -2,8 +2,7 @@
 
 The market dashboard deploys its React application and Hono API together on
 Cloudflare Workers. Static assets are served directly by Cloudflare while
-`/api/*` requests run the Worker application. GitHub Pages remains a second
-frontend host and calls the public Worker API.
+`/api/*` requests run the Worker application.
 
 ## Configuration
 
@@ -24,7 +23,7 @@ when the value is absent.
 The Worker reads its CORS allowlist from the `ALLOWED_ORIGINS` runtime binding:
 
 ```dotenv
-ALLOWED_ORIGINS=https://stockmarket-dashboard.com,https://ftrippel.github.io,http://localhost:5173
+ALLOWED_ORIGINS=https://stockmarket-dashboard.com,http://localhost:5173
 ```
 
 Values must be complete origins without paths or trailing slashes. Same-origin
@@ -169,7 +168,6 @@ The `Deploy Frontend and Worker` GitHub Actions workflow requires:
   - `CLOUDFLARE_API_TOKEN`, scoped to edit Workers
   - `CLOUDFLARE_ACCOUNT_ID`
 - GitHub Actions repository variables:
-  - `VITE_BACKEND_API_URL`
   - `ALLOWED_ORIGINS`
 - Optional GitHub Actions repository variables:
   - `VITE_FIREBASE_API_KEY`
@@ -192,15 +190,10 @@ For a local deployment, copy `.env.example` to `.env`, set the same two
 Cloudflare credentials, set `ALLOWED_ORIGINS`, and run:
 
 ```bash
-npm run deploy:backend
+npm run deploy:cloudflare
 ```
 
-The preferred command name is `npm run deploy:cloudflare`;
-`npm run deploy:backend` remains an alias. It type-checks both applications and
-then uses the repository's installed Wrangler version to load `.env`, pass the
-CORS allowlist as a Worker binding, build, bundle, and deploy the frontend
-assets and API together.
-
-The Cloudflare build uses its own origin automatically. The Worker origin is
-set through the `VITE_BACKEND_API_URL` repository variable in the GitHub Pages
-build.
+It type-checks both applications and then uses the repository's installed
+Wrangler version to load `.env`, pass the CORS allowlist as a Worker binding,
+build, bundle, and deploy the frontend assets and API together. The Cloudflare
+build uses its own origin automatically.

@@ -3,7 +3,7 @@ import type { YahooChartData } from '../../shared/api/contracts';
 import type { InstrumentLookupResult } from './env';
 import { createApp } from './app';
 
-const allowedOrigin = 'https://ftrippel.github.io';
+const allowedOrigin = 'https://dashboard.example';
 const bindings = { ALLOWED_ORIGINS: `${allowedOrigin},http://localhost:5173` };
 
 function appWithLookup(
