@@ -1,87 +1,87 @@
 {
-  "generated_at": "2026-08-13T02:22:24Z",
+  "generated_at": "2026-08-13T07:41:16Z",
   "futures": [
     {
       "sym": "ES=F",
-      "price": 7771.5,
-      "d1": 0.01,
-      "w1": 0.48,
-      "m1": 2.06,
-      "m3": 4.04,
-      "m6": 11.65,
-      "hi52": -0.62,
-      "ytd": 12.62,
+      "price": 7777.0,
+      "d1": 0.08,
+      "w1": 0.55,
+      "m1": 2.13,
+      "m3": 4.12,
+      "m6": 11.73,
+      "hi52": -0.55,
+      "ytd": 12.7,
       "spark": [
         0.58,
         -0.04,
         -0.38,
-        0.32,
-        -0.01
+        0.3,
+        0.08
       ],
-      "updatedAt": 1786587138000,
+      "updatedAt": 1786606273000,
       "ema_uptrend": true,
       "name": "E-Mini S&P 500 Sep 26"
     },
     {
       "sym": "NQ=F",
-      "price": 29863.75,
-      "d1": 0.8,
-      "w1": 0.84,
-      "m1": 0.25,
-      "m3": 2.38,
-      "m6": 18.42,
-      "hi52": -3.57,
-      "ytd": 17.64,
+      "price": 29867.25,
+      "d1": 0.05,
+      "w1": 1.29,
+      "m1": 0.59,
+      "m3": 1.32,
+      "m6": 18.11,
+      "hi52": -3.55,
+      "ytd": 17.66,
       "spark": [
-        -0.43,
         1.18,
         -0.33,
         -0.37,
-        0.8
+        0.77,
+        0.05
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786606273000,
       "ema_uptrend": true,
       "name": "Nasdaq 100 Sep 26"
     },
     {
       "sym": "RTY=F",
-      "price": 3056.5,
-      "d1": 0.12,
-      "w1": 1.58,
-      "m1": 2.16,
-      "m3": 7.16,
-      "m6": 14.24,
-      "hi52": -0.39,
-      "ytd": 21.17,
+      "price": 3057.1,
+      "d1": 0.14,
+      "w1": 1.6,
+      "m1": 2.18,
+      "m3": 7.18,
+      "m6": 14.26,
+      "hi52": -0.37,
+      "ytd": 21.19,
       "spark": [
         1.08,
         -0.55,
         0.35,
-        0.7,
-        -0.01
+        0.57,
+        0.14
       ],
-      "updatedAt": 1786587119000,
+      "updatedAt": 1786606274000,
       "ema_uptrend": true,
       "name": "E-mini Russell 2000 Index Futur"
     },
     {
       "sym": "YM=F",
-      "price": 53833.0,
-      "d1": -0.07,
-      "w1": -0.33,
-      "m1": 1.76,
-      "m3": 8.12,
-      "m6": 7.23,
-      "hi52": -1.91,
-      "ytd": 10.73,
+      "price": 53909.0,
+      "d1": 0.07,
+      "w1": -0.19,
+      "m1": 1.91,
+      "m3": 8.27,
+      "m6": 7.38,
+      "hi52": -1.78,
+      "ytd": 10.89,
       "spark": [
         0.26,
         -0.16,
         -0.34,
-        -0.09,
-        -0.0
+        -0.02,
+        0.07
       ],
-      "updatedAt": 1786587139000,
+      "updatedAt": 1786606273000,
       "ema_uptrend": true,
       "name": "Mini Dow Jones Indus.-$5 Sep 26"
     }
@@ -89,43 +89,43 @@
   "dxvix": [
     {
       "sym": "DX-Y.NYB",
-      "price": 99.982,
-      "d1": -0.03,
-      "w1": 0.01,
-      "m1": -0.52,
-      "m3": 1.53,
-      "m6": 3.26,
-      "hi52": -1.79,
-      "ytd": 1.59,
+      "price": 100.003,
+      "d1": -0.01,
+      "w1": 0.03,
+      "m1": -0.49,
+      "m3": 1.55,
+      "m6": 3.28,
+      "hi52": -1.77,
+      "ytd": 1.61,
       "spark": [
         -0.37,
         0.21,
         0.01,
-        0.17,
-        -0.0
+        0.19,
+        -0.01
       ],
-      "updatedAt": 1786587139000,
+      "updatedAt": 1786606275000,
       "ema_uptrend": false,
       "name": "ICE US Dollar Index - Index - C"
     },
     {
       "sym": "^VIX",
-      "price": 14.55,
-      "d1": -4.78,
-      "w1": -7.97,
-      "m1": -11.82,
-      "m3": -18.58,
-      "m6": -17.56,
-      "hi52": -58.78,
-      "ytd": 0.28,
+      "price": 14.67,
+      "d1": 0.82,
+      "w1": -3.17,
+      "m1": -6.38,
+      "m3": -15.01,
+      "m6": -29.54,
+      "hi52": -58.44,
+      "ytd": 1.1,
       "spark": [
-        -4.17,
         -1.65,
         3.76,
         -1.16,
-        -4.78
+        -4.78,
+        0.82
       ],
-      "updatedAt": 1786565701000,
+      "updatedAt": 1786605976000,
       "ema_uptrend": false,
       "name": "CBOE Volatility Index"
     }
@@ -133,106 +133,106 @@
   "metals": [
     {
       "sym": "GC=F",
-      "price": 4471.3999,
-      "d1": 2.02,
-      "w1": 5.31,
-      "m1": 10.1,
-      "m3": -4.41,
-      "m6": -10.64,
-      "hi52": -19.96,
-      "ytd": 3.64,
+      "price": 4431.2,
+      "d1": -0.81,
+      "w1": 4.46,
+      "m1": 9.57,
+      "m3": -5.67,
+      "m6": -12.63,
+      "hi52": -20.68,
+      "ytd": 2.71,
       "spark": [
-        -0.09,
         2.33,
         0.49,
         0.49,
-        2.02
+        0.59,
+        0.51
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786606273000,
       "ema_uptrend": true,
       "name": "Gold Aug 26"
     },
     {
       "sym": "SI=F",
-      "price": 65.765,
-      "d1": 0.1,
-      "w1": 7.04,
-      "m1": 15.15,
-      "m3": -26.01,
-      "m6": -21.48,
-      "hi52": -45.78,
-      "ytd": -6.79,
+      "price": 64.81,
+      "d1": -1.35,
+      "w1": 5.49,
+      "m1": 13.48,
+      "m3": -27.09,
+      "m6": -22.62,
+      "hi52": -46.57,
+      "ytd": -8.14,
       "spark": [
         3.08,
         2.8,
         -0.52,
-        1.57,
-        -0.03
+        1.21,
+        -1.14
       ],
-      "updatedAt": 1786587140000,
+      "updatedAt": 1786606255000,
       "ema_uptrend": true,
       "name": "Silver Sep 26"
     },
     {
       "sym": "HG=F",
-      "price": 6.565,
-      "d1": -0.71,
-      "w1": -2.06,
-      "m1": 3.71,
-      "m3": 1.23,
-      "m6": 11.35,
-      "hi52": -2.42,
-      "ytd": 16.4,
+      "price": 6.5215,
+      "d1": -1.42,
+      "w1": -2.47,
+      "m1": 3.62,
+      "m3": -1.72,
+      "m6": 9.62,
+      "hi52": -3.07,
+      "ytd": 15.63,
       "spark": [
-        -0.24,
         -1.74,
         0.37,
         0.27,
-        -0.71
+        -0.23,
+        -1.14
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786606275000,
       "ema_uptrend": true,
       "name": "Copper Sep 26"
     },
     {
       "sym": "PL=F",
-      "price": 1761.4,
-      "d1": 0.89,
-      "w1": 1.38,
-      "m1": 7.96,
-      "m3": -16.52,
-      "m6": -15.79,
-      "hi52": -38.25,
-      "ytd": -17.14,
+      "price": 1736.8,
+      "d1": -1.84,
+      "w1": 0.45,
+      "m1": 6.45,
+      "m3": -20.59,
+      "m6": -18.76,
+      "hi52": -39.11,
+      "ytd": -18.3,
       "spark": [
-        -0.48,
         1.22,
         -0.32,
         0.07,
-        0.89
+        0.88,
+        -1.38
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786606267000,
       "ema_uptrend": true,
       "name": "Platinum Oct 26"
     },
     {
       "sym": "PA=F",
-      "price": 1370.0,
-      "d1": 0.29,
-      "w1": 0.39,
-      "m1": 5.5,
-      "m3": -7.79,
-      "m6": -20.47,
-      "hi52": -36.86,
-      "ytd": -17.87,
+      "price": 1348.5,
+      "d1": -1.85,
+      "w1": -1.78,
+      "m1": 5.09,
+      "m3": -11.92,
+      "m6": -22.29,
+      "hi52": -37.85,
+      "ytd": -19.15,
       "spark": [
-        0.6,
         0.09,
         0.23,
         -0.81,
-        0.29
+        0.3,
+        -1.58
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786606252000,
       "ema_uptrend": true,
       "name": "Palladium Sep 26"
     }
@@ -240,43 +240,43 @@
   "commod": [
     {
       "sym": "CL=F",
-      "price": 82.17,
-      "d1": -1.24,
-      "w1": 9.24,
-      "m1": 3.57,
-      "m3": -19.58,
-      "m6": 28.47,
-      "hi52": -31.23,
-      "ytd": 43.35,
+      "price": 82.47,
+      "d1": -0.96,
+      "w1": 6.7,
+      "m1": 3.61,
+      "m3": -18.36,
+      "m6": 27.6,
+      "hi52": -30.98,
+      "ytd": 43.88,
       "spark": [
-        2.75,
         1.15,
         5.05,
         1.3,
-        -1.24
+        0.08,
+        -0.96
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786606274000,
       "ema_uptrend": true,
       "name": "Crude Oil Sep 26"
     },
     {
       "sym": "NG=F",
-      "price": 2.789,
-      "d1": 0.8,
-      "w1": 3.76,
-      "m1": -3.96,
-      "m3": -1.9,
-      "m6": -10.47,
-      "hi52": -64.37,
-      "ytd": -22.91,
+      "price": 2.793,
+      "d1": -0.39,
+      "w1": 5.8,
+      "m1": -4.48,
+      "m3": -2.48,
+      "m6": -11.59,
+      "hi52": -64.32,
+      "ytd": -22.8,
       "spark": [
-        -1.79,
         0.83,
         4.96,
         -0.97,
-        0.8
+        1.34,
+        -0.39
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786606202000,
       "ema_uptrend": false,
       "name": "Natural Gas Aug 26"
     },
@@ -297,7 +297,7 @@
         1.34,
         -0.24
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "United States Oil Fund"
     }
@@ -364,190 +364,190 @@
   "global": [
     {
       "sym": "^N225",
-      "price": 68593.75,
-      "d1": 1.58,
-      "w1": 3.46,
-      "m1": 2.01,
-      "m3": 9.48,
-      "m6": 27.45,
-      "hi52": -5.82,
-      "ytd": 32.34,
+      "price": 68308.59,
+      "d1": 1.16,
+      "w1": 3.03,
+      "m1": 1.59,
+      "m3": 9.03,
+      "m6": 26.93,
+      "hi52": -6.21,
+      "ytd": 31.79,
       "spark": [
         -0.93,
         -0.12,
         2.08,
         0.83,
-        1.58
+        1.16
       ],
-      "updatedAt": 1786586845000,
+      "updatedAt": 1786603503000,
       "ema_uptrend": true,
       "name": "Nikkei 225"
     },
     {
       "sym": "^KS11",
-      "price": 6857.15,
-      "d1": 4.23,
-      "w1": 8.91,
-      "m1": 0.0,
-      "m3": -12.58,
-      "m6": 32.8,
-      "hi52": -26.94,
-      "ytd": 59.11,
+      "price": 6813.34,
+      "d1": 3.56,
+      "w1": 8.21,
+      "m1": -0.63,
+      "m3": -13.14,
+      "m6": 31.95,
+      "hi52": -27.41,
+      "ytd": 58.1,
       "spark": [
         -0.6,
         0.65,
         0.73,
         3.68,
-        4.23
+        3.56
       ],
-      "updatedAt": 1786586540000,
+      "updatedAt": 1786602770000,
       "ema_uptrend": false,
       "name": "KOSPI Composite Index"
     },
     {
       "sym": "^NSEI",
-      "price": 24435.95,
-      "d1": -0.15,
-      "w1": -0.77,
-      "m1": 1.6,
-      "m3": 4.37,
-      "m6": -4.71,
-      "hi52": -7.35,
-      "ytd": -6.54,
+      "price": 24369.4,
+      "d1": -0.42,
+      "w1": -1.08,
+      "m1": 1.21,
+      "m3": 2.87,
+      "m6": -5.15,
+      "hi52": -7.6,
+      "ytd": -6.8,
       "spark": [
-        0.05,
         -0.27,
         0.05,
         -0.46,
-        -0.15
+        -0.15,
+        -0.27
       ],
-      "updatedAt": 1786528870000,
+      "updatedAt": 1786606877000,
       "ema_uptrend": true,
       "name": "NIFTY 50"
     },
     {
       "sym": "000001.SS",
-      "price": 3963.3408,
-      "d1": 0.42,
-      "w1": 1.61,
-      "m1": 0.2,
-      "m3": -4.16,
-      "m6": -2.57,
-      "hi52": -6.94,
-      "ytd": -1.49,
+      "price": 3926.9648,
+      "d1": -0.18,
+      "w1": 0.68,
+      "m1": -0.72,
+      "m3": -5.04,
+      "m6": -3.46,
+      "hi52": -7.79,
+      "ytd": -2.4,
       "spark": [
         1.02,
         0.67,
         -0.82,
         0.32,
-        0.42
+        -0.5
       ],
-      "updatedAt": 1786586840000,
+      "updatedAt": 1786604429000,
       "ema_uptrend": true,
       "name": "SSE Composite Index"
     },
     {
       "sym": "000300.SS",
-      "price": 4714.8496,
-      "d1": 0.51,
-      "w1": 0.41,
-      "m1": -4.59,
-      "m3": -0.46,
-      "m6": -0.48,
-      "hi52": -6.9,
-      "ytd": -0.06,
+      "price": 4663.951,
+      "d1": -0.57,
+      "w1": -0.67,
+      "m1": -5.62,
+      "m3": -1.53,
+      "m6": -1.56,
+      "hi52": -7.9,
+      "ytd": -1.14,
       "spark": [
         2.15,
         -0.2,
         -1.85,
         -3.6,
-        4.1
+        2.98
       ],
-      "updatedAt": 1786586840000,
+      "updatedAt": 1786604429000,
       "ema_uptrend": false,
       "name": "CSI 300 Index"
     },
     {
       "sym": "^HSI",
-      "price": 25395.48,
-      "d1": -0.18,
-      "w1": -0.53,
-      "m1": 2.89,
-      "m3": -3.76,
-      "m6": -5.41,
-      "hi52": -9.48,
-      "ytd": -3.58,
+      "price": 25367.09,
+      "d1": -1.11,
+      "w1": -0.64,
+      "m1": 2.78,
+      "m3": -3.87,
+      "m6": -5.51,
+      "hi52": -9.58,
+      "ytd": -3.69,
       "spark": [
         0.54,
         1.05,
         -1.1,
         -0.83,
-        -0.18
+        -0.29
       ],
-      "updatedAt": 1786586844000,
+      "updatedAt": 1786605976000,
       "ema_uptrend": true,
       "name": "HANG SENG INDEX"
     },
     {
       "sym": "^FTSE",
-      "price": 10833.15,
-      "d1": -0.1,
-      "w1": -0.51,
-      "m1": 2.88,
-      "m3": 4.44,
-      "m6": 3.45,
-      "hi52": -1.42,
-      "ytd": 8.86,
+      "price": 10783.62,
+      "d1": -0.46,
+      "w1": -0.78,
+      "m1": 2.55,
+      "m3": 5.77,
+      "m6": 3.66,
+      "hi52": -1.87,
+      "ytd": 8.37,
       "spark": [
-        -0.19,
         0.31,
         -0.35,
         -0.17,
-        -0.1
+        -0.1,
+        -0.46
       ],
-      "updatedAt": 1786548930000,
+      "updatedAt": 1786605978000,
       "ema_uptrend": true,
       "name": "FTSE 100"
     },
     {
       "sym": "^FCHI",
-      "price": 8674.94,
-      "d1": -0.46,
-      "w1": 0.07,
-      "m1": 3.68,
-      "m3": 9.08,
-      "m6": 4.01,
-      "hi52": -0.91,
-      "ytd": 5.85,
+      "price": 8684.99,
+      "d1": 0.12,
+      "w1": -0.17,
+      "m1": 3.61,
+      "m3": 8.73,
+      "m6": 4.49,
+      "hi52": -0.8,
+      "ytd": 5.98,
       "spark": [
-        0.35,
         0.17,
         0.13,
         -0.13,
-        -0.46
+        -0.46,
+        0.12
       ],
-      "updatedAt": 1786550702000,
+      "updatedAt": 1786605975000,
       "ema_uptrend": true,
       "name": "CAC 40"
     },
     {
       "sym": "^GDAXI",
-      "price": 26331.07,
-      "d1": -0.23,
-      "w1": 0.78,
-      "m1": 4.71,
-      "m3": 9.94,
-      "m6": 5.95,
-      "hi52": -0.91,
-      "ytd": 7.3,
+      "price": 26421.33,
+      "d1": 0.34,
+      "w1": 1.08,
+      "m1": 5.69,
+      "m3": 8.69,
+      "m6": 6.05,
+      "hi52": -0.57,
+      "ytd": 7.67,
       "spark": [
-        0.05,
         0.69,
         0.02,
         0.26,
-        -0.23
+        -0.23,
+        0.34
       ],
-      "updatedAt": 1786550400000,
+      "updatedAt": 1786605978000,
       "ema_uptrend": true,
       "name": "DAX                           P"
     }
@@ -570,7 +570,7 @@
         -0.32,
         0.25
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "State Street SPDR S&P 500 ETF T"
     },
@@ -668,8 +668,8 @@
       "m1": 3.52,
       "m3": 9.06,
       "m6": 11.09,
-      "hi52": -0.14,
-      "ytd": 18.59,
+      "hi52": -0.15,
+      "ytd": 18.6,
       "spark": [
         -0.28,
         0.42,
@@ -677,7 +677,7 @@
         0.15,
         0.42
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "Vanguard Value ETF"
     },
@@ -782,7 +782,7 @@
         -0.7,
         0.23
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "Vanguard Mega Cap Growth ETF"
     },
@@ -803,7 +803,7 @@
         -0.66,
         0.32
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "Vanguard Growth ETF"
     },
@@ -1334,7 +1334,7 @@
         5.23,
         -1.51
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "AdvisorShares Pure US Cannabis"
     },
@@ -1355,7 +1355,7 @@
         1.34,
         -0.24
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "United States Oil Fund"
     },
@@ -1376,7 +1376,7 @@
         -0.15,
         0.75
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "VanEck Junior Gold Miners ETF"
     },
@@ -1418,7 +1418,7 @@
         -0.41,
         0.93
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "VanEck Gold Miners ETF"
     },
@@ -1460,14 +1460,14 @@
         0.54,
         0.31
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "ARK Genomic Revolution ETF"
     },
     {
       "sym": "OUNZ",
       "price": 42.41,
-      "d1": 0.52,
+      "d1": 0.95,
       "w1": 8.22,
       "m1": 10.27,
       "m3": -6.83,
@@ -1481,7 +1481,7 @@
         1.08,
         0.52
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "VanEck Merk Gold ETF"
     },
@@ -1509,7 +1509,7 @@
     {
       "sym": "IDNA",
       "price": 35.42,
-      "d1": 0.45,
+      "d1": 0.62,
       "w1": 7.64,
       "m1": 7.5,
       "m3": 19.44,
@@ -1523,7 +1523,7 @@
         1.38,
         0.45
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "iShares Genomics Immunology and"
     },
@@ -1544,7 +1544,7 @@
         0.96,
         -0.5
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "VanEck Oil Services ETF"
     },
@@ -1565,7 +1565,7 @@
         0.2,
         0.96
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "ARK Innovation ETF"
     },
@@ -1656,12 +1656,12 @@
     {
       "sym": "NANR",
       "price": 85.9,
-      "d1": 0.62,
+      "d1": 0.14,
       "w1": 5.92,
       "m1": 11.07,
       "m3": 2.24,
       "m6": 7.17,
-      "hi52": -0.13,
+      "hi52": -0.34,
       "ytd": 25.57,
       "spark": [
         0.75,
@@ -1670,7 +1670,7 @@
         2.79,
         0.62
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564771000,
       "ema_uptrend": true,
       "name": "State Street SPDR S&P North Ame"
     },
@@ -1712,7 +1712,7 @@
         1.78,
         0.07
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "Global X Uranium ETF"
     },
@@ -1775,7 +1775,7 @@
         0.15,
         1.9
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "Procure Space ETF"
     },
@@ -1796,7 +1796,7 @@
         0.68,
         3.31
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "WisdomTree Quantum Computing Fu"
     },
@@ -1817,7 +1817,7 @@
         -0.69,
         1.29
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "United States Natural Gas Fund"
     },
@@ -1838,7 +1838,7 @@
         -0.14,
         0.49
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564801000,
       "ema_uptrend": true,
       "name": "iShares Biotechnology ETF"
     },
@@ -1850,7 +1850,7 @@
       "m1": 8.6,
       "m3": 16.92,
       "m6": 13.37,
-      "hi52": -0.25,
+      "hi52": -0.33,
       "ytd": 15.79,
       "spark": [
         0.09,
@@ -1859,7 +1859,7 @@
         -0.03,
         0.25
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "VanEck Biotech ETF"
     },
@@ -1901,14 +1901,14 @@
         0.41,
         0.81
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "ARK Space & Defense Innovation"
     },
     {
       "sym": "WCLD",
       "price": 39.63,
-      "d1": -1.05,
+      "d1": -0.95,
       "w1": 4.4,
       "m1": 14.57,
       "m3": 36.75,
@@ -1922,7 +1922,7 @@
         2.67,
         -1.05
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "WisdomTree Cloud Computing Fund"
     },
@@ -2006,7 +2006,7 @@
         0.78,
         4.0
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "iShares U.S. Digital Infrastruc"
     },
@@ -2027,7 +2027,7 @@
         1.87,
         -0.55
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "VanEck Uranium and Nuclear ETF"
     },
@@ -2048,14 +2048,14 @@
         1.4,
         0.35
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "State Street SPDR S&P Aerospace"
     },
     {
       "sym": "CLOU",
       "price": 27.77,
-      "d1": -1.14,
+      "d1": -0.68,
       "w1": 3.93,
       "m1": 15.18,
       "m3": 23.53,
@@ -2069,7 +2069,7 @@
         2.97,
         -1.14
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564801000,
       "ema_uptrend": true,
       "name": "Global X Cloud Computing ETF"
     },
@@ -2090,7 +2090,7 @@
         -0.39,
         0.99
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "SPDR Gold Shares"
     },
@@ -2111,7 +2111,7 @@
         -0.84,
         1.48
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "Global X Lithium & Battery Tech"
     },
@@ -2139,7 +2139,7 @@
     {
       "sym": "ARKQ",
       "price": 128.93,
-      "d1": 0.81,
+      "d1": 0.49,
       "w1": 3.28,
       "m1": 6.82,
       "m3": -6.03,
@@ -2153,7 +2153,7 @@
         0.03,
         0.81
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564801000,
       "ema_uptrend": true,
       "name": "ARK Autonomous Technology & Rob"
     },
@@ -2195,7 +2195,7 @@
         1.16,
         -1.06
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "Invesco WilderHill Clean Energy"
     },
@@ -2216,14 +2216,14 @@
         0.91,
         2.32
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "iShares PHLX SOX Semiconductor"
     },
     {
       "sym": "PICK",
       "price": 63.67,
-      "d1": -0.73,
+      "d1": -0.03,
       "w1": 2.99,
       "m1": 12.57,
       "m3": -2.59,
@@ -2237,7 +2237,7 @@
         0.79,
         -0.73
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "iShares MSCI Global Select Meta"
     },
@@ -2258,14 +2258,14 @@
         -0.68,
         0.47
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564801000,
       "ema_uptrend": true,
       "name": "First Trust NASDAQ Cybersecurit"
     },
     {
       "sym": "ARKW",
       "price": 151.13,
-      "d1": 1.04,
+      "d1": 0.81,
       "w1": 2.8,
       "m1": 3.53,
       "m3": 1.55,
@@ -2279,7 +2279,7 @@
         1.12,
         1.04
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564801000,
       "ema_uptrend": true,
       "name": "ARK Next Generation Internet ET"
     },
@@ -2321,7 +2321,7 @@
         0.62,
         2.08
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "VanEck Semiconductor ETF"
     },
@@ -2363,7 +2363,7 @@
         0.42,
         1.46
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "ProShares Short VIX Short Term"
     },
@@ -2405,14 +2405,14 @@
         0.54,
         0.64
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "Alerian MLP ETF"
     },
     {
       "sym": "SPPP",
       "price": 14.28,
-      "d1": 0.28,
+      "d1": 0.92,
       "w1": 2.07,
       "m1": 11.3,
       "m3": -13.92,
@@ -2426,7 +2426,7 @@
         0.0,
         0.28
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "\"Sprott Physical Platinum and P"
     },
@@ -2447,7 +2447,7 @@
         1.62,
         -0.7
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "Invesco Solar ETF"
     },
@@ -2475,7 +2475,7 @@
     {
       "sym": "ASHR",
       "price": 35.03,
-      "d1": 0.2,
+      "d1": 1.01,
       "w1": 1.98,
       "m1": 1.54,
       "m3": -4.05,
@@ -2489,7 +2489,7 @@
         -0.46,
         0.2
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "Xtrackers Harvest CSI 300 China"
     },
@@ -2516,7 +2516,7 @@
     {
       "sym": "ARKF",
       "price": 42.82,
-      "d1": -0.65,
+      "d1": -0.93,
       "w1": 1.95,
       "m1": 3.63,
       "m3": 0.66,
@@ -2530,7 +2530,7 @@
         0.28,
         -0.65
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "ARK Blockchain & Fintech Innova"
     },
@@ -2621,7 +2621,7 @@
     {
       "sym": "BUZZ",
       "price": 36.46,
-      "d1": 2.65,
+      "d1": 2.33,
       "w1": 1.45,
       "m1": 3.05,
       "m3": -3.06,
@@ -2635,7 +2635,7 @@
         -0.64,
         2.65
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "VanEck Social Sentiment ETF"
     },
@@ -2677,7 +2677,7 @@
         -0.96,
         0.36
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "First Trust DJ Internet Index F"
     },
@@ -2698,14 +2698,14 @@
         0.16,
         0.88
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564801000,
       "ema_uptrend": true,
       "name": "Global X Robotics & Artificial"
     },
     {
       "sym": "BAI",
       "price": 46.04,
-      "d1": 4.12,
+      "d1": 3.65,
       "w1": 1.32,
       "m1": 1.37,
       "m3": -4.8,
@@ -2719,7 +2719,7 @@
         -0.79,
         4.12
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "iShares A.I. Innovation and Tec"
     },
@@ -2740,7 +2740,7 @@
         -1.25,
         2.74
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "Teucrium Wheat Fund ETV"
     },
@@ -2810,7 +2810,7 @@
     {
       "sym": "AIQ",
       "price": 63.77,
-      "d1": 0.41,
+      "d1": 0.9,
       "w1": 1.01,
       "m1": 4.03,
       "m3": 1.46,
@@ -2824,7 +2824,7 @@
         0.25,
         0.41
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564801000,
       "ema_uptrend": true,
       "name": "Global X Artificial Intelligenc"
     },
@@ -2929,14 +2929,14 @@
         -0.13,
         0.47
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564801000,
       "ema_uptrend": true,
       "name": "iShares MSCI ACWI ETF"
     },
     {
       "sym": "IDRV",
       "price": 37.2077,
-      "d1": -0.34,
+      "d1": 0.17,
       "w1": 0.68,
       "m1": 2.36,
       "m3": -17.19,
@@ -2950,7 +2950,7 @@
         0.23,
         -0.34
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564216000,
       "ema_uptrend": true,
       "name": "iShares Self-Driving EV and Tec"
     },
@@ -2971,7 +2971,7 @@
         0.4,
         1.08
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564801000,
       "ema_uptrend": true,
       "name": "Invesco KBW Bank ETF"
     },
@@ -2992,7 +2992,7 @@
         -0.09,
         1.78
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "Invesco S&P 500 Momentum ETF"
     },
@@ -3013,7 +3013,7 @@
         0.03,
         0.21
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "Invesco Aerospace & Defense ETF"
     },
@@ -3097,7 +3097,7 @@
         0.0,
         0.21
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "Invesco DB USD Index Bullish Fu"
     },
@@ -3118,7 +3118,7 @@
         -0.32,
         0.25
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "State Street SPDR S&P 500 ETF T"
     },
@@ -3160,7 +3160,7 @@
         0.04,
         0.13
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "iShares iBoxx $ High Yield Corp"
     },
@@ -3202,7 +3202,7 @@
         1.03,
         0.74
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "State Street SPDR S&P Regional"
     },
@@ -3265,7 +3265,7 @@
         0.12,
         -0.51
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "VanEck Agribusiness ETF"
     },
@@ -3286,7 +3286,7 @@
         0.57,
         0.21
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "Vanguard Industrials ETF"
     },
@@ -3356,7 +3356,7 @@
     {
       "sym": "PAVE",
       "price": 58.49,
-      "d1": 0.33,
+      "d1": -0.36,
       "w1": -0.15,
       "m1": 4.02,
       "m3": 2.72,
@@ -3370,7 +3370,7 @@
         -0.66,
         0.33
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "Global X U.S. Infrastructure De"
     },
@@ -3391,14 +3391,14 @@
         0.09,
         0.09
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "Vanguard Intermediate-Term Trea"
     },
     {
       "sym": "FDRV",
       "price": 18.1066,
-      "d1": -0.43,
+      "d1": -0.38,
       "w1": -0.2,
       "m1": -1.31,
       "m3": -9.94,
@@ -3412,7 +3412,7 @@
         -0.33,
         -0.43
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786563297000,
       "ema_uptrend": false,
       "name": "Fidelity Electric Vehicles and"
     },
@@ -3475,7 +3475,7 @@
         -0.13,
         0.77
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "iShares U.S. Broker-Dealers & S"
     },
@@ -3517,7 +3517,7 @@
         0.08,
         0.11
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "iShares Core U.S. Aggregate Bon"
     },
@@ -3559,7 +3559,7 @@
         -0.9,
         0.29
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "iShares MSCI Mexico ETF"
     },
@@ -3622,7 +3622,7 @@
         0.03,
         0.12
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "iShares iBoxx $ Investment Grad"
     },
@@ -3650,7 +3650,7 @@
     {
       "sym": "BTF",
       "price": 17.2178,
-      "d1": -0.28,
+      "d1": 0.79,
       "w1": -0.94,
       "m1": 3.16,
       "m3": -21.87,
@@ -3664,7 +3664,7 @@
         -0.42,
         -0.28
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "CoinShares Bitcoin and Ether ET"
     },
@@ -3685,7 +3685,7 @@
         -0.87,
         -1.07
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "Roundhill Magnificent Seven ETF"
     },
@@ -3706,7 +3706,7 @@
         0.16,
         -0.1
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "iShares 20+ Year Treasury Bond"
     },
@@ -3727,7 +3727,7 @@
         -0.29,
         -1.36
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "Invesco Water Resources ETF"
     },
@@ -3811,7 +3811,7 @@
         -2.3,
         -0.97
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "iShares MSCI China ETF"
     },
@@ -3839,7 +3839,7 @@
     {
       "sym": "IBUY",
       "price": 73.0,
-      "d1": -1.81,
+      "d1": -0.76,
       "w1": -1.95,
       "m1": 3.41,
       "m3": 12.83,
@@ -3853,7 +3853,7 @@
         -0.32,
         -1.81
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "Amplify Online Retail ETF"
     },
@@ -3874,7 +3874,7 @@
         -0.39,
         -0.17
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "State Street SPDR S&P Insurance"
     },
@@ -3902,7 +3902,7 @@
     {
       "sym": "FFTY",
       "price": 37.17,
-      "d1": 1.31,
+      "d1": 0.51,
       "w1": -2.29,
       "m1": -5.06,
       "m3": -11.5,
@@ -3916,14 +3916,14 @@
         0.05,
         1.31
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "CapForce IBD 50 ETF"
     },
     {
       "sym": "BOUT",
       "price": 45.7915,
-      "d1": -0.88,
+      "d1": 0.06,
       "w1": -2.3,
       "m1": -0.82,
       "m3": -1.76,
@@ -3937,7 +3937,7 @@
         -0.47,
         -0.88
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786556160000,
       "ema_uptrend": false,
       "name": "CapForce IBD Breakout Opportuni"
     },
@@ -3958,7 +3958,7 @@
         -2.27,
         -1.21
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "iShares China Large-Cap ETF"
     },
@@ -4007,7 +4007,7 @@
     {
       "sym": "BLOK",
       "price": 60.12,
-      "d1": 1.76,
+      "d1": 1.62,
       "w1": -3.27,
       "m1": -1.13,
       "m3": -7.62,
@@ -4021,7 +4021,7 @@
         -1.35,
         1.76
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "Amplify Blockchain Technology E"
     },
@@ -4042,7 +4042,7 @@
         -3.54,
         -1.96
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "KraneShares CSI China Internet"
     },
@@ -4070,7 +4070,7 @@
     {
       "sym": "WGMI",
       "price": 49.28,
-      "d1": 8.26,
+      "d1": 5.68,
       "w1": -6.58,
       "m1": -5.72,
       "m3": -15.72,
@@ -4084,7 +4084,7 @@
         -5.95,
         8.26
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "CoinShares Bitcoin Mining ETF"
     }
@@ -4107,7 +4107,7 @@
         1.72,
         2.16
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "iShares MSCI Taiwan ETF"
     },
@@ -4128,7 +4128,7 @@
         2.26,
         -0.83
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "iShares MSCI Singapore ETF"
     },
@@ -4149,7 +4149,7 @@
         2.53,
         5.16
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "iShares MSCI South Korea ETF"
     },
@@ -4191,14 +4191,14 @@
         -1.63,
         -0.38
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "iShares MSCI South Africa Index"
     },
     {
       "sym": "TUR",
       "price": 39.38,
-      "d1": 2.66,
+      "d1": 2.42,
       "w1": 1.89,
       "m1": 1.94,
       "m3": -7.06,
@@ -4212,7 +4212,7 @@
         -1.01,
         2.66
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "iShares MSCI Turkey ETF"
     },
@@ -4308,7 +4308,7 @@
       "m1": 4.92,
       "m3": 9.28,
       "m6": 7.0,
-      "hi52": -0.28,
+      "hi52": -0.29,
       "ytd": 12.25,
       "spark": [
         0.01,
@@ -4317,7 +4317,7 @@
         0.32,
         0.22
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "iShares MSCI Eurozone ETF"
     },
@@ -4338,7 +4338,7 @@
         -0.13,
         0.47
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564801000,
       "ema_uptrend": true,
       "name": "iShares MSCI ACWI ETF"
     },
@@ -4359,7 +4359,7 @@
         -1.07,
         0.43
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "iShares MSCI Thailand ETF"
     },
@@ -4485,7 +4485,7 @@
         -0.06,
         0.21
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564607000,
       "ema_uptrend": true,
       "name": "Global X MSCI Greece ETF"
     },
@@ -4506,7 +4506,7 @@
         -0.13,
         -0.38
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "iShares MSCI France Index Fund"
     },
@@ -4548,14 +4548,14 @@
         -0.9,
         0.29
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "iShares MSCI Mexico ETF"
     },
     {
       "sym": "KSA",
       "price": 37.81,
-      "d1": -0.11,
+      "d1": 0.08,
       "w1": -0.34,
       "m1": 1.89,
       "m3": -1.95,
@@ -4569,7 +4569,7 @@
         0.53,
         -0.11
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "iShares MSCI Saudi Arabia ETF"
     },
@@ -4674,7 +4674,7 @@
         -2.3,
         -0.97
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": true,
       "name": "iShares MSCI China ETF"
     },
@@ -4737,7 +4737,7 @@
         -0.89,
         -1.59
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "Global X MSCI Argentina ETF"
     },
@@ -4758,7 +4758,7 @@
         -3.44,
         -0.35
       ],
-      "updatedAt": 1786492800000,
+      "updatedAt": 1786564800000,
       "ema_uptrend": false,
       "name": "iShares MSCI Brazil ETF"
     }
@@ -4766,85 +4766,85 @@
   "crypto": [
     {
       "sym": "BTC-USD",
-      "price": 63362.0703,
-      "d1": -0.3,
-      "w1": -2.34,
-      "m1": -4.14,
-      "m3": 3.11,
-      "m6": -10.91,
-      "hi52": -49.79,
-      "ytd": -28.59,
+      "price": 63830.0,
+      "d1": 0.66,
+      "w1": -1.66,
+      "m1": -1.87,
+      "m3": 0.42,
+      "m6": -11.06,
+      "hi52": -49.42,
+      "ytd": -28.06,
       "spark": [
-        0.04,
         -0.09,
         -1.44,
         -0.56,
-        -0.3
+        -0.24,
+        0.67
       ],
-      "updatedAt": 1786587791478,
+      "updatedAt": 1786606871000,
       "ema_uptrend": false,
       "name": "Bitcoin USD"
     },
     {
       "sym": "ETH-USD",
-      "price": 1874.53,
-      "d1": -0.19,
-      "w1": -2.03,
-      "m1": -3.05,
-      "m3": 15.7,
-      "m6": -14.42,
-      "hi52": -62.16,
-      "ytd": -37.52,
+      "price": 1896.06,
+      "d1": 0.96,
+      "w1": -1.02,
+      "m1": 1.01,
+      "m3": 13.38,
+      "m6": -13.39,
+      "hi52": -61.72,
+      "ytd": -36.81,
       "spark": [
-        0.12,
         -0.36,
         -1.96,
         0.54,
-        -0.36
+        -0.17,
+        0.95
       ],
-      "updatedAt": 1786587741000,
+      "updatedAt": 1786606868000,
       "ema_uptrend": true,
       "name": "Ethereum USD"
     },
     {
       "sym": "SOL-USD",
-      "price": 75.54,
-      "d1": -0.86,
-      "w1": 2.58,
-      "m1": -3.04,
-      "m3": 19.6,
-      "m6": -8.53,
-      "hi52": -70.17,
-      "ytd": -40.41,
+      "price": 76.42,
+      "d1": 1.18,
+      "w1": 0.59,
+      "m1": 0.74,
+      "m3": 14.36,
+      "m6": -8.26,
+      "hi52": -69.82,
+      "ytd": -39.71,
       "spark": [
-        3.16,
         0.32,
         -0.35,
         0.33,
-        -0.86
+        -0.88,
+        1.18
       ],
-      "updatedAt": 1786587791482,
+      "updatedAt": 1786606875000,
       "ema_uptrend": true,
       "name": "Solana USD"
     },
     {
       "sym": "XRP-USD",
-      "price": 1.0029,
-      "d1": -0.14,
-      "w1": -1.8,
-      "m1": -12.15,
-      "m3": -8.6,
-      "m6": -25.29,
-      "hi52": -70.03,
-      "ytd": -46.6,
+      "price": 1.0133,
+      "d1": 0.89,
+      "w1": -2.44,
+      "m1": -8.45,
+      "m3": -11.24,
+      "m6": -24.61,
+      "hi52": -69.72,
+      "ytd": -46.04,
       "spark": [
-        1.7,
         -0.93,
         -1.69,
         1.02,
-        -1.86
+        -1.71,
+        0.89
       ],
-      "updatedAt": 1786587742000,
+      "updatedAt": 1786606850000,
       "ema_uptrend": false,
       "name": "XRP USD"
     }
@@ -13173,7 +13173,7 @@
   },
   "breadth": {
     "fear_greed": {
-      "score": 62.1,
+      "score": 62.0,
       "rating": "Greed"
     },
     "naaim": null,
