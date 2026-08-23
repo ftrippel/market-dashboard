@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-08-23T01:41:15Z",
+  "generated_at": "2026-08-23T06:48:49Z",
   "futures": [
     {
       "sym": "ES=F",
@@ -45,7 +45,7 @@
     },
     {
       "sym": "RTY=F",
-      "price": 3022.1,
+      "price": 3022.1001,
       "d1": 0.76,
       "w1": -1.72,
       "m1": 2.39,
@@ -60,7 +60,7 @@
         -1.34,
         0.76
       ],
-      "updatedAt": 1787345996000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "E-mini Russell 2000 Index Futur"
     },
@@ -155,7 +155,7 @@
     {
       "sym": "SI=F",
       "price": 69.53,
-      "d1": 2.09,
+      "d1": 2.21,
       "w1": 6.99,
       "m1": 20.3,
       "m3": -9.01,
@@ -169,7 +169,7 @@
         3.49,
         2.21
       ],
-      "updatedAt": 1787345995000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "Silver Sep 26"
     },
@@ -570,7 +570,7 @@
         -0.72,
         0.35
       ],
-      "updatedAt": 1787342400000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "Invesco QQQ Trust, Series 1"
     },
@@ -1059,7 +1059,7 @@
         -2.1,
         1.45
       ],
-      "updatedAt": 1787342400000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "Invesco S&P 500 Equal Weight He"
     },
@@ -1080,7 +1080,7 @@
         0.15,
         2.2
       ],
-      "updatedAt": 1787342400000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "Invesco S&P 500 Equal Weight Ma"
     },
@@ -1101,7 +1101,7 @@
         0.33,
         -0.18
       ],
-      "updatedAt": 1787342400000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "Invesco S&P 500 Equal Weight En"
     },
@@ -1122,7 +1122,7 @@
         -0.73,
         0.83
       ],
-      "updatedAt": 1787342386000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "Invesco S&P 500 Equal Weight Co"
     },
@@ -1143,7 +1143,7 @@
         0.38,
         -0.22
       ],
-      "updatedAt": 1787342400000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": false,
       "name": "Invesco S&P 500 Equal Weight Re"
     },
@@ -1164,17 +1164,17 @@
         -0.81,
         0.63
       ],
-      "updatedAt": 1787342400000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "Invesco S&P 500 Equal Weight ET"
     },
     {
       "sym": "RSPC",
-      "price": 37.2291,
-      "d1": 0.56,
-      "w1": -0.7,
+      "price": 37.23,
+      "d1": 0.57,
+      "w1": -0.69,
       "m1": 7.85,
-      "m3": -0.74,
+      "m3": -0.73,
       "m6": -2.83,
       "hi52": -9.49,
       "ytd": -5.6,
@@ -1183,9 +1183,9 @@
         0.16,
         0.59,
         -0.59,
-        0.56
+        0.57
       ],
-      "updatedAt": 1787341763000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "Invesco S&P 500 Equal Weight Co"
     },
@@ -1206,14 +1206,14 @@
         -0.68,
         1.17
       ],
-      "updatedAt": 1787342391000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "Invesco S&P 500 Equal Weight Fi"
     },
     {
       "sym": "RSPD",
       "price": 57.36,
-      "d1": 1.05,
+      "d1": 1.04,
       "w1": -1.05,
       "m1": 6.56,
       "m3": 7.42,
@@ -1227,7 +1227,7 @@
         -1.48,
         1.04
       ],
-      "updatedAt": 1787342391000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "Invesco S&P 500 Equal Weight Co"
     },
@@ -1248,7 +1248,7 @@
         -1.08,
         0.3
       ],
-      "updatedAt": 1787342390000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "Invesco S&P 500 Equal Weight In"
     },
@@ -1269,7 +1269,7 @@
         -0.27,
         0.58
       ],
-      "updatedAt": 1787342400000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "Invesco S&P 500 Equal Weight Te"
     },
@@ -1290,7 +1290,7 @@
         -0.41,
         -2.3
       ],
-      "updatedAt": 1787342400000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": false,
       "name": "Invesco S&P 500 Equal Weight Ut"
     }
@@ -1418,7 +1418,7 @@
         1.66,
         2.14
       ],
-      "updatedAt": 1787342400000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "Global X Silver Miners ETF"
     },
@@ -1502,7 +1502,7 @@
         2.75,
         1.72
       ],
-      "updatedAt": 1787342400000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "iShares Silver Trust"
     },
@@ -1544,7 +1544,7 @@
         0.67,
         0.95
       ],
-      "updatedAt": 1787342400000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "Amplify Junior Silver Miners ET"
     },
@@ -1733,7 +1733,7 @@
         -1.88,
         1.35
       ],
-      "updatedAt": 1787342400000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "VanEck Pharmaceutical ETF"
     },
@@ -1922,7 +1922,7 @@
         -0.39,
         6.69
       ],
-      "updatedAt": 1787342400000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "VanEck Rare Earth and Strategic"
     },
@@ -2467,7 +2467,7 @@
         0.01,
         0.03
       ],
-      "updatedAt": 1787342426000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "iShares 0-1 Year Treasury Bond"
     },
@@ -2824,7 +2824,7 @@
         -1.78,
         2.29
       ],
-      "updatedAt": 1787342398000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "VanEck Steel ETF"
     },
@@ -3307,7 +3307,7 @@
         -0.72,
         0.35
       ],
-      "updatedAt": 1787342400000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "Invesco QQQ Trust, Series 1"
     },
@@ -3328,7 +3328,7 @@
         -1.09,
         1.14
       ],
-      "updatedAt": 1787342400000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "First Trust Cloud Computing ETF"
     },
@@ -3643,7 +3643,7 @@
         -0.95,
         0.28
       ],
-      "updatedAt": 1787342400000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "ROBO Global Robotics and Automa"
     },
@@ -3853,7 +3853,7 @@
         -0.67,
         0.85
       ],
-      "updatedAt": 1787342400000,
+      "updatedAt": 1787270400000,
       "ema_uptrend": true,
       "name": "Defiance Quantum ETF"
     },
@@ -4745,85 +4745,85 @@
   "crypto": [
     {
       "sym": "BTC-USD",
-      "price": 77232.77,
-      "d1": 0.2,
-      "w1": 19.73,
-      "m1": 23.05,
-      "m3": 20.23,
-      "m6": 1.99,
-      "hi52": -38.8,
-      "ytd": -12.96,
+      "price": 76206.51,
+      "d1": -1.13,
+      "w1": 18.14,
+      "m1": 21.42,
+      "m3": 18.63,
+      "m6": 0.63,
+      "hi52": -39.61,
+      "ytd": -14.12,
       "spark": [
         0.27,
         7.09,
         5.44,
         7.26,
-        -1.41
+        -2.72
       ],
-      "updatedAt": 1787449273000,
+      "updatedAt": 1787467723000,
       "ema_uptrend": true,
       "name": "Bitcoin USD"
     },
     {
       "sym": "ETH-USD",
-      "price": 2425.65,
-      "d1": 0.1,
-      "w1": 26.85,
-      "m1": 31.58,
-      "m3": 39.46,
-      "m6": 3.17,
-      "hi52": -51.03,
-      "ytd": -19.16,
+      "price": 2390.88,
+      "d1": -1.34,
+      "w1": 25.03,
+      "m1": 29.7,
+      "m3": 37.46,
+      "m6": 1.69,
+      "hi52": -51.74,
+      "ytd": -20.31,
       "spark": [
         0.22,
         17.48,
         3.33,
         8.12,
-        -3.56
+        -4.95
       ],
-      "updatedAt": 1787449271000,
+      "updatedAt": 1787467726000,
       "ema_uptrend": true,
       "name": "Ethereum USD"
     },
     {
       "sym": "SOL-USD",
-      "price": 96.13,
-      "d1": 2.38,
-      "w1": 26.58,
-      "m1": 33.76,
-      "m3": 31.37,
-      "m6": 11.52,
-      "hi52": -62.04,
-      "ytd": -24.16,
+      "price": 92.42,
+      "d1": -1.57,
+      "w1": 21.69,
+      "m1": 28.6,
+      "m3": 26.3,
+      "m6": 7.21,
+      "hi52": -63.5,
+      "ytd": -27.09,
       "spark": [
         1.43,
         10.83,
         2.65,
         6.87,
-        2.64
+        -1.32
       ],
-      "updatedAt": 1787449274000,
+      "updatedAt": 1787467727000,
       "ema_uptrend": true,
       "name": "Solana USD"
     },
     {
       "sym": "XRP-USD",
-      "price": 1.4912,
-      "d1": 1.89,
-      "w1": 48.73,
-      "m1": 40.71,
-      "m3": 29.78,
-      "m6": 3.94,
-      "hi52": -53.16,
-      "ytd": -20.59,
+      "price": 1.452,
+      "d1": -0.78,
+      "w1": 44.82,
+      "m1": 37.01,
+      "m3": 26.37,
+      "m6": 1.21,
+      "hi52": -54.39,
+      "ytd": -22.68,
       "spark": [
         -0.13,
         10.29,
         14.85,
         14.61,
-        2.57
+        -0.12
       ],
-      "updatedAt": 1787449270000,
+      "updatedAt": 1787467725000,
       "ema_uptrend": true,
       "name": "XRP USD"
     }
